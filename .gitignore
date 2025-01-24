@@ -4,6 +4,7 @@
 # Xcode specific files
 *.xcuserstate
 xcuserdata/
+xcuserdatad/
 DerivedData/
 *.xcworkspace/
 !default.xcworkspace
