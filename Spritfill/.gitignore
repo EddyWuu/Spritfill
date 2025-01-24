@@ -1,0 +1,21 @@
+# macOS files
+.DS_Store
+
+# Xcode files
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace/
+!default.xcworkspace
+project.xcworkspace/
+*.xcodeproj/*.pbxproj
+*.xcodeproj/*.xcworkspace/
+*.xcodeproj/project.xcworkspace/
+IDEWorkspaceChecks.plist
+
+# Build products
+build/
+*.build/
+
+# CocoaPods
+Pods/
