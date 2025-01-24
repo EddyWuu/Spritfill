@@ -14,7 +14,7 @@ struct ContentView: View {
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world, this is Spritfill!")
-            Text("test, gitigfewahgfuaewhlfeafeawfagaewugawn")
+            Text("test, new git ignore changes, found folder it resdies in")
         }
         .padding()
     }
