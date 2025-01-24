@@ -1,7 +1,7 @@
-# macOS files
+# macOS system files
 .DS_Store
 
-# Xcode files
+# Xcode specific files
 *.xcuserstate
 xcuserdata/
 DerivedData/
@@ -9,7 +9,6 @@ DerivedData/
 !default.xcworkspace
 project.xcworkspace/
 *.xcodeproj/*.pbxproj
-*.xcodeproj/*.xcworkspace/
 *.xcodeproj/project.xcworkspace/
 IDEWorkspaceChecks.plist
 
@@ -17,5 +16,23 @@ IDEWorkspaceChecks.plist
 build/
 *.build/
 
-# CocoaPods
+# CocoaPods dependencies
 Pods/
+
+# Swift Package Manager files
+.swiftpm/
+Package.resolved
+
+# Carthage dependencies
+Carthage/Build
+
+# Fastlane specific files
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+
+# General logs
+*.log
+
+# Temporary files
+tmp/
