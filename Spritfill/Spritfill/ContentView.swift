@@ -8,15 +8,36 @@
 import SwiftUI
 
 struct ContentView: View {
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world, this is Spritfill!")
-            Text("test, new git ignore changes, found folder it resdies in")
+        
+        TabView {
+            
+            CanvasView()
+                .tabItem {
+                    Label("Canvas", systemImage: "square.and.arrow.up")
+                }
+            
+            GalleryView()
+                .tabItem {
+                    Label("Gallery", systemImage: "photo")
+                }
+            
+            RecreateView()
+                .tabItem {
+                    Label("Recreate", systemImage: "pencil")
+                }
+            
+            CommunityView()
+                .tabItem {
+                    Label("Community", systemImage: "bubble.left.and.bubble.right")
+                }
+            
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.circle")
+                }
         }
-        .padding()
     }
 }
 
