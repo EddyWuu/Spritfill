@@ -19,13 +19,51 @@ struct NewProjectSetUpView: View {
     let allPalettes = ColorPalettes.allCases
     let allCanvasSizes = CanvasSizes.allCases
     
+    @State private var navigateToProject = false
+    @StateObject private var projectViewModel = ProjectViewModel(
+        selectedCanvasSize: .smallSquare,
+        selectedPalette: .endesga32,
+        selectedTileSize: .small
+    )
     
     var body: some View {
     
-        NavigationStack {
+        VStack {
+            
+            HStack {
+                Button("Back") {
+                    isPresented = false
+                }
+                .cornerRadius(8)
+                
+                Spacer()
+                
+                Text("New Project Setup")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Button(action: {
+                    if let canvasSize = selectedCanvasSize,
+                       let palette = selectedPalette,
+                       let tileSize = selectedTileSize {
+                        
+                        projectViewModel.selectedCanvasSize = canvasSize
+                        projectViewModel.selectedPalette = palette
+                        projectViewModel.selectedTileSize = tileSize
+                        
+                        navigateToProject = true
+                    }
+                }) {
+                    Text("Create")
+                        .foregroundColor((selectedCanvasSize != nil && selectedPalette != nil && selectedTileSize != nil) ? .blue : .gray)
+                        .cornerRadius(8)
+                }
+                .disabled(selectedCanvasSize == nil || selectedPalette == nil || selectedTileSize == nil)
+            }
+            .padding()
             
             ScrollView {
-                
                 VStack(alignment: .leading, spacing: 20) {
                     
                     Text("Tile Size")
@@ -34,7 +72,7 @@ struct NewProjectSetUpView: View {
                     
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                         
-                        ForEach(allTileSizes, id: \ .self) { tile in
+                        ForEach(allTileSizes, id: \.self) { tile in
                             Button(action: {
                                 selectedTileSize = tile
                             }) {
@@ -58,7 +96,7 @@ struct NewProjectSetUpView: View {
                     
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
                         
-                        ForEach(allCanvasSizes, id: \ .self) { canvas in
+                        ForEach(allCanvasSizes, id: \.self) { canvas in
                             Button(action: {
                                 selectedCanvasSize = canvas
                             }) {
@@ -97,7 +135,7 @@ struct NewProjectSetUpView: View {
                     
                     VStack(spacing: 10) {
                         
-                        ForEach(allPalettes, id: \ .self) { palette in
+                        ForEach(allPalettes, id: \.self) { palette in
                             Button(action: {
                                 selectedPalette = palette
                             }) {
@@ -127,29 +165,11 @@ struct NewProjectSetUpView: View {
                     .padding(.horizontal)
                     
                     Spacer()
-                    
-                }
-                .toolbar {
-                    
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Back") {
-                            isPresented = false
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Create") {
-                            
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .principal) {
-                        Text("New Project")
-                            .font(.title2)
-                            .bold(true)
-                    }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $navigateToProject) {
+            ProjectCreateView(viewModel: projectViewModel, isPresented: $isPresented)
         }
     }
 }
