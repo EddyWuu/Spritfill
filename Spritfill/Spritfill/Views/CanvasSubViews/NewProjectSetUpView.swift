@@ -48,9 +48,9 @@ struct NewProjectSetUpView: View {
                        let palette = selectedPalette,
                        let tileSize = selectedTileSize {
                         
-                        projectViewModel.selectedCanvasSize = canvasSize
-                        projectViewModel.selectedPalette = palette
-                        projectViewModel.selectedTileSize = tileSize
+                        projectViewModel.projectSettings.selectedCanvasSize = canvasSize
+                        projectViewModel.projectSettings.selectedPalette = palette
+                        projectViewModel.projectSettings.selectedTileSize = tileSize
                         
                         navigateToProject = true
                     }

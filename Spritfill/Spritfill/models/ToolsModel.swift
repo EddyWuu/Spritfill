@@ -7,12 +7,17 @@
 
 import SwiftUI
 
+
+// MARK: - tools protocol
+
 protocol Tool {
     
     var name: String { get }
     var icon: String { get }
     func apply(to pixel: inout Color, with selectedColor: Color)
 }
+
+// MARK: - pencil tool
 
 struct PencilTool: Tool {
     
@@ -25,6 +30,8 @@ struct PencilTool: Tool {
     }
 }
 
+// MARK: - eraser tool
+
 struct EraserTool: Tool {
     
     let name = "Eraser"
@@ -34,6 +41,8 @@ struct EraserTool: Tool {
         pixel = Color.clear
     }
 }
+
+// MARK: tool manager
 
 class ToolManager: ObservableObject {
     

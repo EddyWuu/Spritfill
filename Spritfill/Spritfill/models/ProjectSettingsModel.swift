@@ -8,11 +8,27 @@
 import SwiftUI
 
 struct ProjectSettings: Identifiable {
+    
     let id = UUID()
-    var canvasSize: CanvasSizes
-    var tileSize: TileSizes
+    var selectedCanvasSize: CanvasSizes
+    var selectedTileSize: TileSizes
     var selectedPalette: ColorPalettes
+    var pixels: [[Color]]
+    
+    // MARK: initializer
+    
+    init(selectedCanvasSize: CanvasSizes, selectedTileSize: TileSizes, selectedPalette: ColorPalettes) {
+        self.selectedCanvasSize = selectedCanvasSize
+        self.selectedTileSize = selectedTileSize
+        self.selectedPalette = selectedPalette
+        
+        let dimensions = selectedCanvasSize.dimensions
+        // initialize pixels with clear color
+        self.pixels = Array(repeating: Array(repeating: Color.clear, count: dimensions.width), count: dimensions.height)
+    }
 }
+
+// MARK: - Color Palettes
 
 enum ColorPalettes: String, CaseIterable {
     
@@ -89,6 +105,8 @@ enum ColorPalettes: String, CaseIterable {
     }
 }
 
+// MARK: - Canvas Sizes
+
 enum CanvasSizes: CaseIterable {
     
     case smallSquare  // 16x16
@@ -134,13 +152,15 @@ enum CanvasSizes: CaseIterable {
     }
 }
 
+// MARK: - Tile Sizes
+
 enum TileSizes: CaseIterable {
     
     case small   // 8x8 per tile
     case medium  // 16x16 per tile
     case big     // 32x32 per tile
     
-    var size: CGFloat {
+    var size: Int {
         
         switch self {
         
@@ -156,3 +176,23 @@ enum TileSizes: CaseIterable {
     }
 }
 
+// MARK: helper extension for UIcolor from hex
+
+extension UIColor {
+    
+    convenience init(hex: String) {
+        
+        let scanner = Scanner(string: hex)
+        scanner.currentIndex = hex.startIndex
+        var hexNumber: UInt64 = 0
+        scanner.scanHexInt64(&hexNumber)
+        
+        self.init(
+            
+            red: CGFloat((hexNumber & 0xFF0000) >> 16) / 255,
+            green: CGFloat((hexNumber & 0x00FF00) >> 8) / 255,
+            blue: CGFloat(hexNumber & 0x0000FF) / 255,
+            alpha: 1.0
+        )
+    }
+}
