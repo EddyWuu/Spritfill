@@ -16,6 +16,8 @@ struct ProjectCreateView: View {
     @State private var zoomScale: CGFloat = 1.0  // track zoom level
     @State private var lastScale: CGFloat = 1.0  // track the last pinch scale
     
+    @State private var pinchCenter: CGPoint = .zero
+    
     var body: some View {
         
         VStack {
@@ -34,19 +36,30 @@ struct ProjectCreateView: View {
             
             Spacer()
             
-            ProjectCanvasView(viewModel: viewModel, zoomScale: $zoomScale)
-                .gesture(
-                    MagnificationGesture()
-                        .onChanged { scale in
-                            let newScale = lastScale * scale
-                            zoomScale = max(0.5, min(newScale, 5.0)) 
-                        }
-                        .onEnded { _ in
-                            lastScale = zoomScale
-                        }
-                )
-            
-            Text("Tile Size: \(CGFloat(viewModel.projectSettings.selectedTileSize.size))²")
+            GeometryReader { geometry in
+                
+                 ProjectCanvasView(viewModel: viewModel, zoomScale: $zoomScale)
+                     .scaleEffect(zoomScale, anchor: UnitPoint(
+                         x: pinchCenter.x / geometry.size.width,
+                         y: pinchCenter.y / geometry.size.height
+                     ))
+                     .gesture(
+                         MagnificationGesture()
+                             .onChanged { scale in
+                                 zoomScale = max(0.5, min(lastScale * scale, 5.0))
+                             }
+                             .onEnded { _ in
+                                 lastScale = zoomScale
+                             }
+                     )
+                     .simultaneousGesture(
+                         DragGesture()
+                             .onChanged { value in
+                                 pinchCenter = value.location
+                             }
+                     )
+             }
+             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding()
     }
