@@ -16,7 +16,9 @@ struct NewProjectSetUpView: View {
     @State private var selectedTileSize: TileSizes?
     
     let allTileSizes = TileSizes.allCases
+    let allPalettes = ColorPalettes.allCases
     let allCanvasSizes = CanvasSizes.allCases
+    
     
     var body: some View {
     
@@ -28,7 +30,7 @@ struct NewProjectSetUpView: View {
                     
                     Text("Tile Size")
                         .font(.headline)
-                        .padding(.leading, 10)
+                        .padding(.leading, 15)
                     
                     LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                         
@@ -44,7 +46,7 @@ struct NewProjectSetUpView: View {
                                     
                                     Text("\(tile.dimensions.width)²")
                                         .font(.subheadline)
-                                        .foregroundColor(.white)
+                                        .foregroundColor(.black)
                                 }
                             }
                         }
@@ -52,7 +54,7 @@ struct NewProjectSetUpView: View {
                     
                     Text("Canvas Size")
                         .font(.headline)
-                        .padding(.leading, 10)
+                        .padding(.leading, 15)
                     
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
                         
@@ -77,12 +79,47 @@ struct NewProjectSetUpView: View {
                                         
                                         Text("\(canvas.dimensions.width / 16)x\(canvas.dimensions.height / 16)")
                                             .font(.headline)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.black)
                                     }
                                     
                                     Text("\(canvas.dimensions.width)x\(canvas.dimensions.height)")
                                         .font(.caption)
                                         .foregroundColor(Color.gray.opacity(0.7))
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    
+                    Text("Color Palette")
+                        .font(.headline)
+                        .padding(.leading, 15)
+                    
+                    VStack(spacing: 10) {
+                        
+                        ForEach(allPalettes, id: \ .self) { palette in
+                            Button(action: {
+                                selectedPalette = palette
+                            }) {
+                                HStack {
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(selectedPalette == palette ? Color.blue : Color.gray.opacity(0.3))
+                                        .frame(height: 50)
+                                        .overlay(
+                                            HStack {
+                                                Text(palette.rawValue)
+                                                    .foregroundColor(.black)
+                                                    .font(.subheadline)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .padding(.leading, 10)
+                                                
+                                                Text("\(palette.colors.count) colors")
+                                                    .foregroundColor(.black)
+                                                    .font(.subheadline)
+                                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                                    .padding(.trailing, 10)
+                                            }
+                                        )
                                 }
                             }
                         }
