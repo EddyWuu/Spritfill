@@ -43,7 +43,7 @@ struct ProjectCreateView: View {
                         .font(.headline)
                 )
             
-            Text("Tile Size: \(viewModel.selectedTileSize.dimensions.width)²")
+            Text("Tile Size: \(viewModel.selectedTileSize.size)²")
             Text("Palette: \(viewModel.selectedPalette.rawValue)")
         }
         .padding()

@@ -136,22 +136,23 @@ enum CanvasSizes: CaseIterable {
 
 enum TileSizes: CaseIterable {
     
-    case small
-    case medium
-    case big
+    case small   // 8x8 per tile
+    case medium  // 16x16 per tile
+    case big     // 32x32 per tile
     
-    var dimensions: (width: Int, height: Int) {
+    var size: CGFloat {
         
         switch self {
-            
+        
         case .small:
-            return (1, 1)
-            
+            return 8
+        
         case .medium:
-            return (2, 2)
-            
+            return 16
+        
         case .big:
-            return (4, 4)
+            return 32
         }
     }
 }
+

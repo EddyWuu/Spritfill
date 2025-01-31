@@ -82,7 +82,7 @@ struct NewProjectSetUpView: View {
                                         .frame(width: 45, height: 45)
                                         .cornerRadius(2)
                                     
-                                    Text("\(tile.dimensions.width)²")
+                                    Text("\(Int(tile.size))²")
                                         .font(.subheadline)
                                         .foregroundColor(.black)
                                 }
