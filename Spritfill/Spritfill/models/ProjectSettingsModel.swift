@@ -16,11 +16,11 @@ struct ProjectSettings: Identifiable {
 
 enum ColorPalettes: String, CaseIterable {
     
-    case endesga64 = "Endesga 64"
-    case endesga32 = "Endesga 32"
-    case zughy32 = "Zughy 32"
-    case generic16 = "Generic 16"
-    case pico8 = "Pico-8"
+    case endesga64 = "Endesga 64"   // 64 colors
+    case endesga32 = "Endesga 32"   // 32 colors
+    case zughy32 = "Zughy 32"   // 32 colors
+    case generic16 = "Generic 16"   // 16 colors
+    case pico8 = "Pico-8"   // 16 colors
     
     var colors: [Color] {
         
