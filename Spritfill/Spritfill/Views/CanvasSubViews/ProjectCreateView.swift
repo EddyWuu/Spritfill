@@ -20,7 +20,7 @@ struct ProjectCreateView: View {
     
     var body: some View {
         
-        VStack {
+        VStack(spacing: 0) {
             
             HStack {
                 Button(action: {
@@ -30,37 +30,64 @@ struct ProjectCreateView: View {
                         .foregroundColor(.blue)
                         .padding(.horizontal)
                 }
+                
                 Spacer()
+                
             }
-            .padding(.top)
+            .padding()
             
-            Spacer()
+            Divider()
             
             GeometryReader { geometry in
                 
-                 ProjectCanvasView(viewModel: viewModel, zoomScale: $zoomScale)
-                     .scaleEffect(zoomScale, anchor: UnitPoint(
-                         x: pinchCenter.x / geometry.size.width,
-                         y: pinchCenter.y / geometry.size.height
-                     ))
-                     .gesture(
-                         MagnificationGesture()
-                             .onChanged { scale in
-                                 zoomScale = max(0.5, min(lastScale * scale, 5.0))
-                             }
-                             .onEnded { _ in
-                                 lastScale = zoomScale
-                             }
-                     )
-                     .simultaneousGesture(
-                         DragGesture()
-                             .onChanged { value in
-                                 pinchCenter = value.location
-                             }
-                     )
-             }
-             .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ZStack {
+                    
+                    ProjectCanvasView(viewModel: viewModel, zoomScale: $zoomScale)
+                        .frame(width: geometry.size.width, height: geometry.size.height * 0.7)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            MagnificationGesture()
+                                .onChanged { scale in
+                                    zoomScale = max(0.5, min(lastScale * scale, 5.0))
+                                }
+                                .onEnded { _ in
+                                    lastScale = zoomScale
+                                }
+                        )
+                }
+            }
+            
+            Divider()
+            
+            VStack {
+                HStack(spacing: 20) {
+                    Button(action: { viewModel.selectTool(.pencil) }) {
+                        Image(systemName: "pencil")
+                            .padding()
+                            .background(viewModel.selectedTool == .pencil ? Color.yellow : Color.clear)
+                            .clipShape(Circle())
+                    }
+                    
+                    Button(action: { viewModel.selectTool(.eraser) }) {
+                        Image(systemName: "eraser")
+                            .padding()
+                            .background(viewModel.selectedTool == .eraser ? Color.yellow : Color.clear)
+                            .clipShape(Circle())
+                    }
+
+                    Button(action: { viewModel.selectTool(.fill) }) {
+                        Image(systemName: "paintbrush.fill")
+                            .padding()
+                            .background(viewModel.selectedTool == .fill ? Color.yellow : Color.clear)
+                            .clipShape(Circle())
+                    }
+                }
+                .padding()
+            }
+            .frame(height: 100)
+            .background(Color(UIColor.systemGray6))
         }
-        .padding()
+
+        .edgesIgnoringSafeArea(.bottom)
     }
 }
