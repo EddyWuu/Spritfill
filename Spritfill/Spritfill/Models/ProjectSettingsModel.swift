@@ -171,6 +171,17 @@ enum TileSizes: CaseIterable {
     }
 }
 
+// MARK: - Canvas Route
+
+enum CanvasRoute: Hashable {
+    case newProject
+    case projectCreate(UUID)
+//    case existingProject(Project)
+    // need to create existing project struct
+}
+
+
+
 // MARK: helper extension for UIcolor from hex
 
 extension UIColor {
