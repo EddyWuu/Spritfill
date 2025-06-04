@@ -7,9 +7,8 @@
 
 import SwiftUI
 
-struct ProjectSettings: Identifiable {
+struct ProjectSettings {
     
-    let id = UUID()
     var selectedCanvasSize: CanvasSizes
     var selectedTileSize: TileSizes
     var selectedPalette: ColorPalettes

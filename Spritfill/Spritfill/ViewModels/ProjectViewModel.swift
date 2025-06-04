@@ -13,14 +13,18 @@ class ProjectViewModel: ObservableObject {
  
     @Published var projectSettings: ProjectSettings
     
+    let projectID: UUID
+    @Published var projectName: String
     @Published var pixels: [[Color]]
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
     
     // MARK: - initializer
     
-    init(selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: TileSizes) {
+    init(projectName: String, selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: TileSizes) {
         
+        self.projectID = UUID()
+        self.projectName = projectName
         self.projectSettings = ProjectSettings(
             selectedCanvasSize: selectedCanvasSize,
             selectedTileSize: selectedTileSize,

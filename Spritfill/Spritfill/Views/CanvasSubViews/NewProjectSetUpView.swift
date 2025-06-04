@@ -19,6 +19,8 @@ struct NewProjectSetUpView: View {
     let allPalettes = ColorPalettes.allCases
     let allCanvasSizes = CanvasSizes.allCases
     
+    @State private var projectName: String = ""
+    
     @State private var navigateToProject = false
     @State private var projectViewModel: ProjectViewModel?
     
@@ -37,6 +39,7 @@ struct NewProjectSetUpView: View {
                        let tileSize = selectedTileSize {
                         
                         let viewModel = ProjectViewModel(
+                            projectName: projectName.isEmpty ? "Untitled Project" : projectName,
                             selectedCanvasSize: canvasSize,
                             selectedPalette: palette,
                             selectedTileSize: tileSize
@@ -53,6 +56,15 @@ struct NewProjectSetUpView: View {
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    
+                    Text("Project Name")
+                        .font(.headline)
+                        .padding(.leading, 15)
+
+                    TextField("Enter project name", text: $projectName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+
                     
                     Text("Tile Size")
                         .font(.headline)
