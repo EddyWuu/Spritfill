@@ -6,51 +6,41 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		AD1C9A922DF215D900C2A098 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AD1C9A912DF215D900C2A098 /* GoogleService-Info.plist */; };
-		AD1C9A952DF217CE00C2A098 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = AD1C9A942DF217CE00C2A098 /* FirebaseAuth */; };
-		AD1C9A972DF217CE00C2A098 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AD1C9A962DF217CE00C2A098 /* FirebaseCore */; };
-		AD1C9A992DF217CE00C2A098 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = AD1C9A982DF217CE00C2A098 /* FirebaseDatabase */; };
-		AD1C9A9B2DF217CE00C2A098 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = AD1C9A9A2DF217CE00C2A098 /* FirebaseFirestore */; };
-		AD1C9A9D2DF217CE00C2A098 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = AD1C9A9C2DF217CE00C2A098 /* FirebaseStorage */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
-		AD3EF7E62D43385500178E85 /* PBXContainerItemProxy */ = {
+		AD3EF7B02D43362C00178E85 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = AD3EF7CD2D43385300178E85 /* Project object */;
+			containerPortal = AD3EF7972D43362A00178E85 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = AD3EF7D42D43385300178E85;
+			remoteGlobalIDString = AD3EF79E2D43362A00178E85;
 			remoteInfo = Spritfill;
 		};
-		AD3EF7F02D43385500178E85 /* PBXContainerItemProxy */ = {
+		AD3EF7BA2D43362C00178E85 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = AD3EF7CD2D43385300178E85 /* Project object */;
+			containerPortal = AD3EF7972D43362A00178E85 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = AD3EF7D42D43385300178E85;
+			remoteGlobalIDString = AD3EF79E2D43362A00178E85;
 			remoteInfo = Spritfill;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AD1C9A912DF215D900C2A098 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		AD3EF7D52D43385300178E85 /* Spritfill.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spritfill.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AD3EF7E52D43385500178E85 /* SpritfillTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		AD3EF7EF2D43385500178E85 /* SpritfillUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD3EF79F2D43362A00178E85 /* Spritfill.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spritfill.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD3EF7AF2D43362C00178E85 /* SpritfillTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		AD3EF7D72D43385300178E85 /* Spritfill */ = {
+		AD3EF7A12D43362A00178E85 /* Spritfill */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Spritfill;
 			sourceTree = "<group>";
 		};
-		AD3EF7E82D43385500178E85 /* SpritfillTests */ = {
+		AD3EF7B22D43362C00178E85 /* SpritfillTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = SpritfillTests;
 			sourceTree = "<group>";
 		};
-		AD3EF7F22D43385500178E85 /* SpritfillUITests */ = {
+		AD3EF7BC2D43362C00178E85 /* SpritfillUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = SpritfillUITests;
 			sourceTree = "<group>";
@@ -58,26 +48,21 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		AD3EF7D22D43385300178E85 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AD1C9A992DF217CE00C2A098 /* FirebaseDatabase in Frameworks */,
-				AD1C9A9B2DF217CE00C2A098 /* FirebaseFirestore in Frameworks */,
-				AD1C9A972DF217CE00C2A098 /* FirebaseCore in Frameworks */,
-				AD1C9A9D2DF217CE00C2A098 /* FirebaseStorage in Frameworks */,
-				AD1C9A952DF217CE00C2A098 /* FirebaseAuth in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AD3EF7E22D43385500178E85 /* Frameworks */ = {
+		AD3EF79C2D43362A00178E85 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD3EF7EC2D43385500178E85 /* Frameworks */ = {
+		AD3EF7AC2D43362C00178E85 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD3EF7B62D43362C00178E85 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -87,23 +72,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AD3EF7CC2D43385300178E85 = {
+		AD3EF7962D43362A00178E85 = {
 			isa = PBXGroup;
 			children = (
-				AD3EF7D72D43385300178E85 /* Spritfill */,
-				AD3EF7E82D43385500178E85 /* SpritfillTests */,
-				AD3EF7F22D43385500178E85 /* SpritfillUITests */,
-				AD3EF7D62D43385300178E85 /* Products */,
-				AD1C9A912DF215D900C2A098 /* GoogleService-Info.plist */,
+				AD3EF7A12D43362A00178E85 /* Spritfill */,
+				AD3EF7B22D43362C00178E85 /* SpritfillTests */,
+				AD3EF7BC2D43362C00178E85 /* SpritfillUITests */,
+				AD3EF7A02D43362A00178E85 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		AD3EF7D62D43385300178E85 /* Products */ = {
+		AD3EF7A02D43362A00178E85 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AD3EF7D52D43385300178E85 /* Spritfill.app */,
-				AD3EF7E52D43385500178E85 /* SpritfillTests.xctest */,
-				AD3EF7EF2D43385500178E85 /* SpritfillUITests.xctest */,
+				AD3EF79F2D43362A00178E85 /* Spritfill.app */,
+				AD3EF7AF2D43362C00178E85 /* SpritfillTests.xctest */,
+				AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -111,143 +95,134 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AD3EF7D42D43385300178E85 /* Spritfill */ = {
+		AD3EF79E2D43362A00178E85 /* Spritfill */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AD3EF7F92D43385500178E85 /* Build configuration list for PBXNativeTarget "Spritfill" */;
+			buildConfigurationList = AD3EF7C32D43362C00178E85 /* Build configuration list for PBXNativeTarget "Spritfill" */;
 			buildPhases = (
-				AD3EF7D12D43385300178E85 /* Sources */,
-				AD3EF7D22D43385300178E85 /* Frameworks */,
-				AD3EF7D32D43385300178E85 /* Resources */,
+				AD3EF79B2D43362A00178E85 /* Sources */,
+				AD3EF79C2D43362A00178E85 /* Frameworks */,
+				AD3EF79D2D43362A00178E85 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AD3EF7D72D43385300178E85 /* Spritfill */,
+				AD3EF7A12D43362A00178E85 /* Spritfill */,
 			);
 			name = Spritfill;
 			packageProductDependencies = (
-				AD1C9A942DF217CE00C2A098 /* FirebaseAuth */,
-				AD1C9A962DF217CE00C2A098 /* FirebaseCore */,
-				AD1C9A982DF217CE00C2A098 /* FirebaseDatabase */,
-				AD1C9A9A2DF217CE00C2A098 /* FirebaseFirestore */,
-				AD1C9A9C2DF217CE00C2A098 /* FirebaseStorage */,
 			);
 			productName = Spritfill;
-			productReference = AD3EF7D52D43385300178E85 /* Spritfill.app */;
+			productReference = AD3EF79F2D43362A00178E85 /* Spritfill.app */;
 			productType = "com.apple.product-type.application";
 		};
-		AD3EF7E42D43385500178E85 /* SpritfillTests */ = {
+		AD3EF7AE2D43362C00178E85 /* SpritfillTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AD3EF7FC2D43385500178E85 /* Build configuration list for PBXNativeTarget "SpritfillTests" */;
+			buildConfigurationList = AD3EF7C62D43362C00178E85 /* Build configuration list for PBXNativeTarget "SpritfillTests" */;
 			buildPhases = (
-				AD3EF7E12D43385500178E85 /* Sources */,
-				AD3EF7E22D43385500178E85 /* Frameworks */,
-				AD3EF7E32D43385500178E85 /* Resources */,
+				AD3EF7AB2D43362C00178E85 /* Sources */,
+				AD3EF7AC2D43362C00178E85 /* Frameworks */,
+				AD3EF7AD2D43362C00178E85 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				AD3EF7E72D43385500178E85 /* PBXTargetDependency */,
+				AD3EF7B12D43362C00178E85 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AD3EF7E82D43385500178E85 /* SpritfillTests */,
+				AD3EF7B22D43362C00178E85 /* SpritfillTests */,
 			);
 			name = SpritfillTests;
 			packageProductDependencies = (
 			);
 			productName = SpritfillTests;
-			productReference = AD3EF7E52D43385500178E85 /* SpritfillTests.xctest */;
+			productReference = AD3EF7AF2D43362C00178E85 /* SpritfillTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		AD3EF7EE2D43385500178E85 /* SpritfillUITests */ = {
+		AD3EF7B82D43362C00178E85 /* SpritfillUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AD3EF7FF2D43385500178E85 /* Build configuration list for PBXNativeTarget "SpritfillUITests" */;
+			buildConfigurationList = AD3EF7C92D43362C00178E85 /* Build configuration list for PBXNativeTarget "SpritfillUITests" */;
 			buildPhases = (
-				AD3EF7EB2D43385500178E85 /* Sources */,
-				AD3EF7EC2D43385500178E85 /* Frameworks */,
-				AD3EF7ED2D43385500178E85 /* Resources */,
+				AD3EF7B52D43362C00178E85 /* Sources */,
+				AD3EF7B62D43362C00178E85 /* Frameworks */,
+				AD3EF7B72D43362C00178E85 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				AD3EF7F12D43385500178E85 /* PBXTargetDependency */,
+				AD3EF7BB2D43362C00178E85 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AD3EF7F22D43385500178E85 /* SpritfillUITests */,
+				AD3EF7BC2D43362C00178E85 /* SpritfillUITests */,
 			);
 			name = SpritfillUITests;
 			packageProductDependencies = (
 			);
 			productName = SpritfillUITests;
-			productReference = AD3EF7EF2D43385500178E85 /* SpritfillUITests.xctest */;
+			productReference = AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		AD3EF7CD2D43385300178E85 /* Project object */ = {
+		AD3EF7972D43362A00178E85 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
-					AD3EF7D42D43385300178E85 = {
+					AD3EF79E2D43362A00178E85 = {
 						CreatedOnToolsVersion = 16.2;
 					};
-					AD3EF7E42D43385500178E85 = {
+					AD3EF7AE2D43362C00178E85 = {
 						CreatedOnToolsVersion = 16.2;
-						TestTargetID = AD3EF7D42D43385300178E85;
+						TestTargetID = AD3EF79E2D43362A00178E85;
 					};
-					AD3EF7EE2D43385500178E85 = {
+					AD3EF7B82D43362C00178E85 = {
 						CreatedOnToolsVersion = 16.2;
-						TestTargetID = AD3EF7D42D43385300178E85;
+						TestTargetID = AD3EF79E2D43362A00178E85;
 					};
 				};
 			};
-			buildConfigurationList = AD3EF7D02D43385300178E85 /* Build configuration list for PBXProject "Spritfill" */;
+			buildConfigurationList = AD3EF79A2D43362A00178E85 /* Build configuration list for PBXProject "Spritfill" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = AD3EF7CC2D43385300178E85;
+			mainGroup = AD3EF7962D43362A00178E85;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = AD3EF7D62D43385300178E85 /* Products */;
+			productRefGroup = AD3EF7A02D43362A00178E85 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AD3EF7D42D43385300178E85 /* Spritfill */,
-				AD3EF7E42D43385500178E85 /* SpritfillTests */,
-				AD3EF7EE2D43385500178E85 /* SpritfillUITests */,
+				AD3EF79E2D43362A00178E85 /* Spritfill */,
+				AD3EF7AE2D43362C00178E85 /* SpritfillTests */,
+				AD3EF7B82D43362C00178E85 /* SpritfillUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		AD3EF7D32D43385300178E85 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AD1C9A922DF215D900C2A098 /* GoogleService-Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AD3EF7E32D43385500178E85 /* Resources */ = {
+		AD3EF79D2D43362A00178E85 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD3EF7ED2D43385500178E85 /* Resources */ = {
+		AD3EF7AD2D43362C00178E85 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD3EF7B72D43362C00178E85 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -257,21 +232,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AD3EF7D12D43385300178E85 /* Sources */ = {
+		AD3EF79B2D43362A00178E85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD3EF7E12D43385500178E85 /* Sources */ = {
+		AD3EF7AB2D43362C00178E85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AD3EF7EB2D43385500178E85 /* Sources */ = {
+		AD3EF7B52D43362C00178E85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -281,20 +256,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		AD3EF7E72D43385500178E85 /* PBXTargetDependency */ = {
+		AD3EF7B12D43362C00178E85 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AD3EF7D42D43385300178E85 /* Spritfill */;
-			targetProxy = AD3EF7E62D43385500178E85 /* PBXContainerItemProxy */;
+			target = AD3EF79E2D43362A00178E85 /* Spritfill */;
+			targetProxy = AD3EF7B02D43362C00178E85 /* PBXContainerItemProxy */;
 		};
-		AD3EF7F12D43385500178E85 /* PBXTargetDependency */ = {
+		AD3EF7BB2D43362C00178E85 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = AD3EF7D42D43385300178E85 /* Spritfill */;
-			targetProxy = AD3EF7F02D43385500178E85 /* PBXContainerItemProxy */;
+			target = AD3EF79E2D43362A00178E85 /* Spritfill */;
+			targetProxy = AD3EF7BA2D43362C00178E85 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		AD3EF7F72D43385500178E85 /* Debug */ = {
+		AD3EF7C12D43362C00178E85 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -357,7 +332,7 @@
 			};
 			name = Debug;
 		};
-		AD3EF7F82D43385500178E85 /* Release */ = {
+		AD3EF7C22D43362C00178E85 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -413,7 +388,7 @@
 			};
 			name = Release;
 		};
-		AD3EF7FA2D43385500178E85 /* Debug */ = {
+		AD3EF7C42D43362C00178E85 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -442,7 +417,7 @@
 			};
 			name = Debug;
 		};
-		AD3EF7FB2D43385500178E85 /* Release */ = {
+		AD3EF7C52D43362C00178E85 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -471,7 +446,7 @@
 			};
 			name = Release;
 		};
-		AD3EF7FD2D43385500178E85 /* Debug */ = {
+		AD3EF7C72D43362C00178E85 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -490,7 +465,7 @@
 			};
 			name = Debug;
 		};
-		AD3EF7FE2D43385500178E85 /* Release */ = {
+		AD3EF7C82D43362C00178E85 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -509,7 +484,7 @@
 			};
 			name = Release;
 		};
-		AD3EF8002D43385500178E85 /* Debug */ = {
+		AD3EF7CA2D43362C00178E85 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -526,7 +501,7 @@
 			};
 			name = Debug;
 		};
-		AD3EF8012D43385500178E85 /* Release */ = {
+		AD3EF7CB2D43362C00178E85 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -546,82 +521,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AD3EF7D02D43385300178E85 /* Build configuration list for PBXProject "Spritfill" */ = {
+		AD3EF79A2D43362A00178E85 /* Build configuration list for PBXProject "Spritfill" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AD3EF7F72D43385500178E85 /* Debug */,
-				AD3EF7F82D43385500178E85 /* Release */,
+				AD3EF7C12D43362C00178E85 /* Debug */,
+				AD3EF7C22D43362C00178E85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AD3EF7F92D43385500178E85 /* Build configuration list for PBXNativeTarget "Spritfill" */ = {
+		AD3EF7C32D43362C00178E85 /* Build configuration list for PBXNativeTarget "Spritfill" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AD3EF7FA2D43385500178E85 /* Debug */,
-				AD3EF7FB2D43385500178E85 /* Release */,
+				AD3EF7C42D43362C00178E85 /* Debug */,
+				AD3EF7C52D43362C00178E85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AD3EF7FC2D43385500178E85 /* Build configuration list for PBXNativeTarget "SpritfillTests" */ = {
+		AD3EF7C62D43362C00178E85 /* Build configuration list for PBXNativeTarget "SpritfillTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AD3EF7FD2D43385500178E85 /* Debug */,
-				AD3EF7FE2D43385500178E85 /* Release */,
+				AD3EF7C72D43362C00178E85 /* Debug */,
+				AD3EF7C82D43362C00178E85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AD3EF7FF2D43385500178E85 /* Build configuration list for PBXNativeTarget "SpritfillUITests" */ = {
+		AD3EF7C92D43362C00178E85 /* Build configuration list for PBXNativeTarget "SpritfillUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AD3EF8002D43385500178E85 /* Debug */,
-				AD3EF8012D43385500178E85 /* Release */,
+				AD3EF7CA2D43362C00178E85 /* Debug */,
+				AD3EF7CB2D43362C00178E85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.14.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		AD1C9A942DF217CE00C2A098 /* FirebaseAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseAuth;
-		};
-		AD1C9A962DF217CE00C2A098 /* FirebaseCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseCore;
-		};
-		AD1C9A982DF217CE00C2A098 /* FirebaseDatabase */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseDatabase;
-		};
-		AD1C9A9A2DF217CE00C2A098 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		AD1C9A9C2DF217CE00C2A098 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AD1C9A932DF217CE00C2A098 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = AD3EF7CD2D43385300178E85 /* Project object */;
+	rootObject = AD3EF7972D43362A00178E85 /* Project object */;
 }
