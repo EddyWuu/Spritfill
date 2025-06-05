@@ -1,5 +1,5 @@
 //
-//  ProjectViewModel.swift
+//  CanvasViewModel.swift
 //  Spritfill
 //
 //  Created by Edmond Wu on 2025-01-30.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class ProjectViewModel: ObservableObject {
+class CanvasViewModel: ObservableObject {
     
     // MARK: - properties
  
@@ -16,10 +16,10 @@ class ProjectViewModel: ObservableObject {
     let projectID: UUID
     @Published var projectName: String
     @Published var pixels: [[Color]]
-    @Published var selectedTool: ToolType = .pencil
-    @Published var selectedColor: Color
     
-    // MARK: - initializer
+    @Published var toolsVM: ToolsViewModel
+    
+    // MARK: - Init: New Project
     
     init(projectName: String, selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: TileSizes) {
         
@@ -34,24 +34,37 @@ class ProjectViewModel: ObservableObject {
         let dimensions = selectedCanvasSize.dimensions
         self.pixels = Array(repeating: Array(repeating: Color.clear, count: dimensions.width), count: dimensions.height)
         
-        self.selectedColor = selectedPalette.colors[0]
+        self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0])
     }
     
-    enum ToolType {
-        case pencil, eraser, fill
+    // MARK: - Init: From Saved Project
+    
+    init(from data: ProjectData) {
+        self.projectID = data.id
+        self.projectName = data.name
+        self.projectSettings = data.settings
+        self.toolsVM = ToolsViewModel(defaultColor: data.settings.selectedPalette.colors[0])
+
+        // convert hex strings to Color
+        self.pixels = data.pixelGrid.map { row in
+            row.map { Color(hex: $0) }
+        }
     }
+
+    // MARK: - Convert to ProjectData
     
-    // MARK: - methods
-    
-    func selectTool(_ tool: ToolType) {
+    func toProjectData() -> ProjectData {
+        let hexGrid = pixels.map { row in
+            row.map { $0.toHex() ?? "#000000" } // fallback black if nil
+        }
         
-        selectedTool = tool
-    }
-    
-    
-    func selectColor(_ color: Color) {
-        
-        selectedColor = color
+        return ProjectData(
+            id: projectID,
+            name: projectName,
+            settings: projectSettings,
+            pixelGrid: hexGrid,
+            lastEdited: Date()
+        )
     }
     
     func updatePixel(row: Int, col: Int) {
@@ -59,7 +72,7 @@ class ProjectViewModel: ObservableObject {
         guard row >= 0, row < pixels.count,
               col >= 0, col < pixels[0].count else { return }
 
-        pixels[row][col] = selectedColor
+        pixels[row][col] = toolsVM.selectedColor
         objectWillChange.send()
     }
     

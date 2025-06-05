@@ -9,7 +9,7 @@
 //
 //struct ProjectCanvasView: View {
 //    
-//    @ObservedObject var viewModel: ProjectViewModel
+//    @ObservedObject var viewModel: CanvasViewModel
 //    @Binding var zoomScale: CGFloat
 //    
 //    var body: some View {

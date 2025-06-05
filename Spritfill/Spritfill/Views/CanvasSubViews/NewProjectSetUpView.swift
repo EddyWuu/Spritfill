@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NewProjectSetUpView: View {
     
-    let onProjectCreated: (ProjectViewModel) -> Void
+    let onProjectCreated: (CanvasViewModel) -> Void
 
     @State private var selectedCanvasSize: CanvasSizes?
     @State private var selectedPalette: ColorPalettes?
@@ -22,7 +22,7 @@ struct NewProjectSetUpView: View {
     @State private var projectName: String = ""
     
     @State private var navigateToProject = false
-    @State private var projectViewModel: ProjectViewModel?
+    @State private var canvasViewModel: CanvasViewModel?
     
     var body: some View {
             
@@ -38,7 +38,7 @@ struct NewProjectSetUpView: View {
                        let palette = selectedPalette,
                        let tileSize = selectedTileSize {
                         
-                        let viewModel = ProjectViewModel(
+                        let viewModel = CanvasViewModel(
                             projectName: projectName.isEmpty ? "Untitled Project" : projectName,
                             selectedCanvasSize: canvasSize,
                             selectedPalette: palette,
@@ -168,7 +168,7 @@ struct NewProjectSetUpView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToProject) {
-                if let viewModel = projectViewModel {
+                if let viewModel = canvasViewModel {
                     EmptyView()
                 }
             }

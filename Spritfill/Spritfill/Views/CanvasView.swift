@@ -12,7 +12,7 @@ struct CanvasView: View {
     // place holder project
     @State private var projects: [String] = ["Project 1", "Project 2", "Project 3", "Project 4"]
     @State private var path: [CanvasRoute] = []
-    @State private var projectViewModels: [UUID: ProjectViewModel] = [:]
+    @State private var canvasViewModels: [UUID: CanvasViewModel] = [:]
 
     let columns = [
         GridItem(.flexible()),
@@ -71,13 +71,13 @@ struct CanvasView: View {
                 case .newProject:
                     NewProjectSetUpView(onProjectCreated: { viewModel in
                         let id = UUID()
-                        projectViewModels[id] = viewModel
+                        canvasViewModels[id] = viewModel
                         path.removeLast()
                         path.append(.projectCreate(id))
                     })
 
                 case .projectCreate(let id):
-                    if let viewModel = projectViewModels[id] {
+                    if let viewModel = canvasViewModels[id] {
                         ProjectCreateView(viewModel: viewModel)
                     } else {
                         Text("Project not found.")

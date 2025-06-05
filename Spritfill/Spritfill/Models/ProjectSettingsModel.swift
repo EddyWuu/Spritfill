@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProjectSettings {
+struct ProjectSettings: Codable {
     
     var selectedCanvasSize: CanvasSizes
     var selectedTileSize: TileSizes
@@ -24,7 +24,7 @@ struct ProjectSettings {
 
 // MARK: - Color Palettes
 
-enum ColorPalettes: String, CaseIterable {
+enum ColorPalettes: String, CaseIterable, Codable {
     
     case endesga64 = "Endesga 64"   // 64 colors
     case endesga32 = "Endesga 32"   // 32 colors
@@ -101,7 +101,7 @@ enum ColorPalettes: String, CaseIterable {
 
 // MARK: - Canvas Sizes
 
-enum CanvasSizes: CaseIterable {
+enum CanvasSizes: CaseIterable, Codable {
     
     case smallSquare  // 16x16
     case mediumSquare // 32x32
@@ -148,7 +148,7 @@ enum CanvasSizes: CaseIterable {
 
 // MARK: - Tile Sizes
 
-enum TileSizes: CaseIterable {
+enum TileSizes: CaseIterable, Codable {
     
     case small   // 8x8 per tile
     case medium  // 16x16 per tile
@@ -201,3 +201,29 @@ extension UIColor {
         )
     }
 }
+
+extension Color {
+    func toHex() -> String? {
+        UIColor(self).toHex()
+    }
+}
+
+extension UIColor {
+    func toHex() -> String? {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return nil
+        }
+
+        let r = Int(red * 255)
+        let g = Int(green * 255)
+        let b = Int(blue * 255)
+
+        return String(format: "#%02X%02X%02X", r, g, b)
+    }
+}
+

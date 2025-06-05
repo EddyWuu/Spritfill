@@ -9,7 +9,7 @@ import SwiftUI
 
 //struct ProjectCreateView: View {
 //    
-//    @ObservedObject var viewModel: ProjectViewModel
+//    @ObservedObject var viewModel: CanvasViewModel
 //    @Environment(\.dismiss) private var dismiss
 //    @Binding var isPresented: Bool
 //    
@@ -93,7 +93,7 @@ import SwiftUI
 //}
 
 struct ProjectCreateView: View {
-    @ObservedObject var viewModel: ProjectViewModel
+    @ObservedObject var viewModel: CanvasViewModel
 
     var body: some View {
         Text("Editing project")
