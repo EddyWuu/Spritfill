@@ -13,7 +13,7 @@ struct ProjectData: Codable, Identifiable {
     let id: UUID
     var name: String
     var settings: ProjectSettings
-    var pixelGrid: [[String]] // store colors as hex strings
+    var pixelGrid: [String] // store colors as hex strings
     var lastEdited: Date
 }
 
@@ -49,7 +49,7 @@ extension ProjectData {
             let canvas = CanvasSizes(rawValue: canvasRaw),
             let tile = TileSizes(rawValue: tileRaw),
             let palette = ColorPalettes(rawValue: paletteRaw),
-            let pixelGrid = data["pixelGrid"] as? [[String]]
+            let pixelGrid = data["pixelGrid"] as? [String]
         else {
             return nil
         }

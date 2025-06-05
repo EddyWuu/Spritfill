@@ -15,7 +15,7 @@ class CanvasViewModel: ObservableObject {
     
     let projectID: UUID
     @Published var projectName: String
-    @Published var pixels: [[Color]]
+    @Published var pixels: [Color]
     
     @Published var toolsVM: ToolsViewModel
     
@@ -32,7 +32,7 @@ class CanvasViewModel: ObservableObject {
         )
         
         let dimensions = selectedCanvasSize.dimensions
-        self.pixels = Array(repeating: Array(repeating: Color.clear, count: dimensions.width), count: dimensions.height)
+        self.pixels = Array(repeating: Color.clear, count: dimensions.width * dimensions.height)
         
         self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0])
     }
@@ -44,56 +44,55 @@ class CanvasViewModel: ObservableObject {
         self.projectName = data.name
         self.projectSettings = data.settings
         self.toolsVM = ToolsViewModel(defaultColor: data.settings.selectedPalette.colors[0])
+        
+//        let width = data.settings.selectedCanvasSize.dimensions.width
+//        let height = data.settings.selectedCanvasSize.dimensions.height
 
-        // convert hex strings to Color
-        self.pixels = data.pixelGrid.map { row in
-            row.map { Color(hex: $0) }
-        }
+        // rebuild 2D array from 1D
+        self.pixels = data.pixelGrid.map { Color(hex: $0) }
     }
 
     // MARK: - Convert to ProjectData
     
     func toProjectData() -> ProjectData {
-        let hexGrid = pixels.map { row in
-            row.map { $0.toHex() ?? "#000000" } // fallback black if nil
-        }
         
+        let flatHexGrid = pixels.map { $0.toHex() ?? "#000000" }
+
         return ProjectData(
             id: projectID,
             name: projectName,
             settings: projectSettings,
-            pixelGrid: hexGrid,
+            pixelGrid: flatHexGrid,
             lastEdited: Date()
         )
     }
     
     func updatePixel(row: Int, col: Int) {
-        
-        guard row >= 0, row < pixels.count,
-              col >= 0, col < pixels[0].count else { return }
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let index = row * width + col
 
-        pixels[row][col] = toolsVM.selectedColor
+        guard index >= 0, index < pixels.count else { return }
+
+        pixels[index] = toolsVM.selectedColor
         objectWillChange.send()
-    }
-    
-    func clearCanvas() {
-        
-
     }
     
     func updatePixelAt(location: CGPoint, zoomScale: CGFloat) {
         
         let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
-        let canvasWidth = pixels[0].count
-        let canvasHeight = pixels.count
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
 
-        // convert location to pixel row/column
         let col = Int(location.x / tileSize)
         let row = Int(location.y / tileSize)
 
-        // check if within bounds
-        if row >= 0, row < canvasHeight, col >= 0, col < canvasWidth {
+        if row >= 0, row < height, col >= 0, col < width {
             updatePixel(row: row, col: col)
         }
+    }
+    
+    func clearCanvas() {
+        
+
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct CanvasView: View {
     
     // place holder project
-    @State private var projects: [String] = ["Project 1", "Project 2", "Project 3", "Project 4"]
+    @StateObject private var projectManager = ProjectManagerViewModel()
     @State private var path: [CanvasRoute] = []
     @State private var canvasViewModels: [UUID: CanvasViewModel] = [:]
 
@@ -46,22 +46,27 @@ struct CanvasView: View {
                     }
 
                     // existing projects
-                    ForEach(projects, id: \.self) { project in
-                        VStack {
-                            Image(systemName: "doc.text")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 40, height: 40)
-                                .padding()
-                            Text(project)
-                                .font(.caption)
+                    ForEach(projectManager.allProjects, id: \.id) { project in
+                        Button {
+                            path.append(.projectCreate(project.id))
+                        } label: {
+                            VStack {
+                                Image(systemName: "doc.text")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40)
+                                    .padding()
+                                Text(project.name)
+                                    .font(.caption)
+                            }
+                            .frame(height: 120)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                         }
-                        .frame(height: 120)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
                     }
+
                 }
                 .padding()
             }
@@ -70,8 +75,9 @@ struct CanvasView: View {
                 switch route {
                 case .newProject:
                     NewProjectSetUpView(onProjectCreated: { viewModel in
-                        let id = UUID()
+                        let id = viewModel.projectID
                         canvasViewModels[id] = viewModel
+                        projectManager.save(viewModel) // save to firebase
                         path.removeLast()
                         path.append(.projectCreate(id))
                     })
@@ -80,9 +86,19 @@ struct CanvasView: View {
                     if let viewModel = canvasViewModels[id] {
                         ProjectCreateView(viewModel: viewModel)
                     } else {
-                        Text("Project not found.")
+                        ProgressView()
+                            .onAppear {
+                                projectManager.loadProject(by: id) { loadedViewModel in
+                                    if let loadedViewModel = loadedViewModel {
+                                        canvasViewModels[id] = loadedViewModel
+                                    }
+                                }
+                            }
                     }
                 }
+            }
+            .onAppear {
+                projectManager.loadAllProjects()
             }
         }
     }

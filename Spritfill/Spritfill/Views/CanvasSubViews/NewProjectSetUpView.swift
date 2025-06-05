@@ -167,11 +167,6 @@ struct NewProjectSetUpView: View {
                     Spacer()
                 }
             }
-            .navigationDestination(isPresented: $navigateToProject) {
-                if let viewModel = canvasViewModel {
-                    EmptyView()
-                }
-            }
         }
     }
 }
