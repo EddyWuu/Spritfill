@@ -37,3 +37,4 @@ fastlane/screenshots
 
 # Temporary files
 tmp/
+GoogleService-Info.plist
