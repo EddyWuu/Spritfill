@@ -22,6 +22,35 @@ struct ProjectSettings: Codable {
     }
 }
 
+extension ProjectSettings {
+    
+    func toFirestoreDict() -> [String: String] {
+        return [
+            "selectedCanvasSize": selectedCanvasSize.rawValue,
+            "selectedTileSize": selectedTileSize.rawValue,
+            "selectedPalette": selectedPalette.rawValue
+        ]
+    }
+    
+    init?(from dict: [String: String]) {
+        guard
+            let canvasRaw = dict["selectedCanvasSize"],
+            let tileRaw = dict["selectedTileSize"],
+            let paletteRaw = dict["selectedPalette"],
+            let canvas = CanvasSizes(rawValue: canvasRaw),
+            let tile = TileSizes(rawValue: tileRaw),
+            let palette = ColorPalettes(rawValue: paletteRaw)
+        else {
+            return nil
+        }
+        
+        self.selectedCanvasSize = canvas
+        self.selectedTileSize = tile
+        self.selectedPalette = palette
+    }
+}
+
+
 // MARK: - Color Palettes
 
 enum ColorPalettes: String, CaseIterable, Codable {
@@ -101,7 +130,7 @@ enum ColorPalettes: String, CaseIterable, Codable {
 
 // MARK: - Canvas Sizes
 
-enum CanvasSizes: CaseIterable, Codable {
+enum CanvasSizes: String, CaseIterable, Codable {
     
     case smallSquare  // 16x16
     case mediumSquare // 32x32
@@ -148,7 +177,7 @@ enum CanvasSizes: CaseIterable, Codable {
 
 // MARK: - Tile Sizes
 
-enum TileSizes: CaseIterable, Codable {
+enum TileSizes: String, CaseIterable, Codable {
     
     case small   // 8x8 per tile
     case medium  // 16x16 per tile
