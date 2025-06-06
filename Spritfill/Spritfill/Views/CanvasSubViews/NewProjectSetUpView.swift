@@ -27,35 +27,9 @@ struct NewProjectSetUpView: View {
     var body: some View {
             
         VStack {
-                
-                Text("New Project Setup")
-                    .font(.headline)
-                
-                Spacer()
-                
-                Button(action: {
-                    if let canvasSize = selectedCanvasSize,
-                       let palette = selectedPalette,
-                       let tileSize = selectedTileSize {
-                        
-                        let viewModel = CanvasViewModel(
-                            projectName: projectName.isEmpty ? "Untitled Project" : projectName,
-                            selectedCanvasSize: canvasSize,
-                            selectedPalette: palette,
-                            selectedTileSize: tileSize
-                        )
-                        
-                        onProjectCreated(viewModel)
-                    }
-                }) {
-                    Text("Create")
-                        .foregroundColor((selectedCanvasSize != nil && selectedPalette != nil && selectedTileSize != nil) ? .blue : .gray)
-                        .cornerRadius(8)
-                }
-                .disabled(selectedCanvasSize == nil || selectedPalette == nil || selectedTileSize == nil)
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 15) {
                     
                     Text("Project Name")
                         .font(.headline)
@@ -168,5 +142,26 @@ struct NewProjectSetUpView: View {
                 }
             }
         }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Create") {
+                    if let canvasSize = selectedCanvasSize,
+                       let palette = selectedPalette,
+                       let tileSize = selectedTileSize {
+
+                        let viewModel = CanvasViewModel(
+                            projectName: projectName.isEmpty ? "Untitled Project" : projectName,
+                            selectedCanvasSize: canvasSize,
+                            selectedPalette: palette,
+                            selectedTileSize: tileSize
+                        )
+
+                        onProjectCreated(viewModel)
+                    }
+                }
+                .disabled(selectedCanvasSize == nil || selectedPalette == nil || selectedTileSize == nil)
+            }
+        }
+
     }
 }
