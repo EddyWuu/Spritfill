@@ -71,6 +71,7 @@ struct CanvasView: View {
                 .padding()
             }
             .navigationTitle("Canvas")
+            .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: CanvasRoute.self) { route in
                 switch route {
                 case .newProject:

@@ -14,7 +14,5 @@ struct ProjectCanvasView: View {
     var body: some View {
         
         Text("Edit here >")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.yellow.opacity(0.2))
     }
 }
