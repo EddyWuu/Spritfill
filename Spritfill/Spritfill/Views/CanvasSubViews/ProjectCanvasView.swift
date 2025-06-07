@@ -25,25 +25,28 @@ struct ProjectCanvasView: View {
             let canvasHeight = CGFloat(gridHeight) * tileSize
             let zoomScale = scale * gestureScale
 
-            Canvas { context, size in
-                for row in 0..<gridHeight {
-                    for col in 0..<gridWidth {
-                        let color = viewModel.pixels[row * gridWidth + col]
-                        let rect = CGRect(
-                            x: CGFloat(col) * tileSize,
-                            y: CGFloat(row) * tileSize,
-                            width: tileSize,
-                            height: tileSize
-                        )
+            ZStack {
+                Canvas { context, size in
+                    for row in 0..<gridHeight {
+                        for col in 0..<gridWidth {
+                            let color = viewModel.pixels[row * gridWidth + col]
+                            let rect = CGRect(
+                                x: CGFloat(col) * tileSize,
+                                y: CGFloat(row) * tileSize,
+                                width: tileSize,
+                                height: tileSize
+                            )
 
-                        context.fill(Path(rect), with: .color(color))
-                        context.stroke(Path(rect), with: .color(.gray.opacity(0.2)), lineWidth: 0.5)
+                            context.fill(Path(rect), with: .color(color))
+                            context.stroke(Path(rect), with: .color(.gray.opacity(0.2)), lineWidth: 0.5)
+                        }
                     }
                 }
+                .frame(width: canvasWidth, height: canvasHeight)
+                .scaleEffect((scale * gestureScale).clamped(to: 0.8...5.0))
+                .offset(canvasOffset)
             }
-            .frame(width: canvasWidth, height: canvasHeight)
-            .scaleEffect(zoomScale, anchor: .topLeading)
-            .offset(canvasOffset)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .gesture(
                 SimultaneousGesture(
                     DragGesture()
@@ -64,7 +67,7 @@ struct ProjectCanvasView: View {
                             state = value
                         }
                         .onEnded { value in
-                            scale = (scale * value).clamped(to: 1.0...5.0)
+                            scale = (scale * value).clamped(to: 0.8...5.0)
                         }
                 )
             )
@@ -81,6 +84,21 @@ struct ProjectCanvasView: View {
             height: offset.height.clamped(to: -maxY...0)
         )
     }
+    
+    private func centerOffset(geo: GeometryProxy, zoomScale: CGFloat) -> CGSize {
+        let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
+        let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
+        let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
+
+        let canvasWidth = CGFloat(gridWidth) * tileSize * zoomScale
+        let canvasHeight = CGFloat(gridHeight) * tileSize * zoomScale
+
+        let x = (geo.size.width - canvasWidth) / 2
+        let y = (geo.size.height - canvasHeight) / 2
+
+        return CGSize(width: x, height: y)
+    }
+
 }
 
 private extension Comparable {
