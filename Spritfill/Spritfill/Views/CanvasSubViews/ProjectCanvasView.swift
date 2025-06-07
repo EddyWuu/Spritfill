@@ -14,7 +14,7 @@ struct ProjectCanvasView: View {
     @State private var dragStart: CGSize = .zero
 
     @State private var scale: CGFloat = 1.0
-    @GestureState private var gestureScale: CGFloat = 1.0
+    @State private var gestureScale: CGFloat = 1.0
 
     var body: some View {
         GeometryReader { geo in
@@ -43,7 +43,7 @@ struct ProjectCanvasView: View {
                     }
                 }
                 .frame(width: canvasWidth, height: canvasHeight)
-                .scaleEffect((scale * gestureScale).clamped(to: 0.8...5.0))
+                .scaleEffect(zoomScale)
                 .offset(canvasOffset)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -56,53 +56,38 @@ struct ProjectCanvasView: View {
                                 height: dragStart.height + value.translation.height
                             )
 
-                            // Clamping offset to keep canvas inside screen
-                            canvasOffset = clampedOffset(for: proposed, geoSize: geo.size, canvasSize: CGSize(width: canvasWidth * zoomScale, height: canvasHeight * zoomScale))
+                            canvasOffset = viewModel.clampedOffset(
+                                for: proposed,
+                                geoSize: geo.size,
+                                canvasSize: CGSize(
+                                    width: canvasWidth * scale,
+                                    height: canvasHeight * scale
+                                )
+                            )
                         }
-                        .onEnded { value in
+                        .onEnded { _ in
                             dragStart = canvasOffset
                         },
+
                     MagnificationGesture()
-                        .updating($gestureScale) { value, state, _ in
-                            state = value
+                        .onChanged { value in
+                            gestureScale = value
                         }
                         .onEnded { value in
-                            scale = (scale * value).clamped(to: 0.8...5.0)
+                            let newScale = (scale * value).clamped(to: 0.8...5.0)
+                            let delta = newScale / scale
+
+                            // adjust offset to keep zoom centered visually
+                            canvasOffset = CGSize(
+                                width: canvasOffset.width * delta,
+                                height: canvasOffset.height * delta
+                            )
+
+                            scale = newScale
+                            gestureScale = 1.0
                         }
                 )
             )
         }
-    }
-
-    // Clamp to screen bounds
-    private func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
-        let maxX = max(0, (canvasSize.width - geoSize.width))
-        let maxY = max(0, (canvasSize.height - geoSize.height))
-
-        return CGSize(
-            width: offset.width.clamped(to: -maxX...0),
-            height: offset.height.clamped(to: -maxY...0)
-        )
-    }
-    
-    private func centerOffset(geo: GeometryProxy, zoomScale: CGFloat) -> CGSize {
-        let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
-        let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
-        let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
-
-        let canvasWidth = CGFloat(gridWidth) * tileSize * zoomScale
-        let canvasHeight = CGFloat(gridHeight) * tileSize * zoomScale
-
-        let x = (geo.size.width - canvasWidth) / 2
-        let y = (geo.size.height - canvasHeight) / 2
-
-        return CGSize(width: x, height: y)
-    }
-
-}
-
-private extension Comparable {
-    func clamped(to range: ClosedRange<Self>) -> Self {
-        min(max(self, range.lowerBound), range.upperBound)
     }
 }

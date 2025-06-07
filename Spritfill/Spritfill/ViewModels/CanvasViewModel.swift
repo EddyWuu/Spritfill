@@ -91,8 +91,25 @@ class CanvasViewModel: ObservableObject {
         }
     }
     
+    // Clamp to screen bounds
+    func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
+        let maxX = max(0, (canvasSize.width - geoSize.width) / 2)
+        let maxY = max(0, (canvasSize.height - geoSize.height) / 2)
+
+        return CGSize(
+            width: offset.width.clamped(to: -maxX...maxX),
+            height: offset.height.clamped(to: -maxY...maxY)
+        )
+    }
+    
     func clearCanvas() {
         
 
+    }
+}
+
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        min(max(self, range.lowerBound), range.upperBound)
     }
 }
