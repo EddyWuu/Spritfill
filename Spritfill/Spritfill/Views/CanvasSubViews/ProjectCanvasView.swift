@@ -16,6 +16,7 @@ struct ProjectCanvasView: View {
     @State private var gestureScale: CGFloat = 1.0
 
     var body: some View {
+        
         GeometryReader { geo in
             let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
             let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
@@ -45,14 +46,14 @@ struct ProjectCanvasView: View {
                     }
                 }
                 .frame(width: baseCanvasSize.width, height: baseCanvasSize.height)
-                .position(x: geo.size.width / 2, y: geo.size.height / 2) // 1️⃣ center base canvas
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
                 .offset(
                     x: canvasOffset.width / zoomScale,
                     y: canvasOffset.height / zoomScale
                 )
                 .scaleEffect(zoomScale)
             }
-            .contentShape(Rectangle()) // ensures taps work
+            .contentShape(Rectangle())
             .gesture(
                 SimultaneousGesture(
                     DragGesture()
