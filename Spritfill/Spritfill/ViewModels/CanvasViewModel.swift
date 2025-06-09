@@ -93,6 +93,7 @@ class CanvasViewModel: ObservableObject {
     
     // Clamp to screen bounds
     func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
+        
         let maxX = max(0, (canvasSize.width - geoSize.width) / 2)
         let maxY = max(0, (canvasSize.height - geoSize.height) / 2)
 
@@ -100,6 +101,38 @@ class CanvasViewModel: ObservableObject {
             width: offset.width.clamped(to: -maxX...maxX),
             height: offset.height.clamped(to: -maxY...maxY)
         )
+    }
+    
+    func applyTool(at point: CGPoint, zoomScale: CGFloat) {
+        
+        let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+
+        let col = Int(point.x / tileSize)
+        let row = Int(point.y / tileSize)
+        let index = row * width + col
+
+        guard row >= 0, row < height, col >= 0, col < width, index < pixels.count else { return }
+
+        toolsVM.applyTool(to: &pixels[index])
+        objectWillChange.send()
+    }
+    
+    func getGridCoordinates(from location: CGPoint, zoomScale: CGFloat) -> (row: Int, col: Int)? {
+        
+        let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+
+        let col = Int(location.x / tileSize)
+        let row = Int(location.y / tileSize)
+
+        if row >= 0, row < height, col >= 0, col < width {
+            return (row, col)
+        } else {
+            return nil
+        }
     }
     
     func clearCanvas() {

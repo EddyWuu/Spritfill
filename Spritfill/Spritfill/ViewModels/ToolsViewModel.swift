@@ -19,6 +19,18 @@ class ToolsViewModel: ObservableObject {
     init(defaultColor: Color) {
         self.selectedColor = defaultColor
     }
+    
+    func applyTool(to pixel: inout Color) {
+        switch selectedTool {
+        case .pencil:
+            pixel = selectedColor
+        case .eraser:
+            pixel = .clear
+        case .fill:
+            // not yet implemented
+            break
+        }
+    }
 
     func selectTool(_ tool: ToolType) {
         selectedTool = tool

@@ -12,7 +12,6 @@ struct ProjectCanvasView: View {
 
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
-
     @State private var scale: CGFloat = 1.0
     @State private var gestureScale: CGFloat = 1.0
 
@@ -21,9 +20,12 @@ struct ProjectCanvasView: View {
             let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
             let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
             let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
-            let canvasWidth = CGFloat(gridWidth) * tileSize
-            let canvasHeight = CGFloat(gridHeight) * tileSize
+            let baseCanvasSize = CGSize(width: CGFloat(gridWidth) * tileSize,
+                                        height: CGFloat(gridHeight) * tileSize)
+
             let zoomScale = scale * gestureScale
+            let scaledCanvasSize = CGSize(width: baseCanvasSize.width * zoomScale,
+                                          height: baseCanvasSize.height * zoomScale)
 
             ZStack {
                 Canvas { context, size in
@@ -42,11 +44,15 @@ struct ProjectCanvasView: View {
                         }
                     }
                 }
-                .frame(width: canvasWidth, height: canvasHeight)
+                .frame(width: baseCanvasSize.width, height: baseCanvasSize.height)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2) // 1️⃣ center base canvas
+                .offset(
+                    x: canvasOffset.width / zoomScale,
+                    y: canvasOffset.height / zoomScale
+                )
                 .scaleEffect(zoomScale)
-                .offset(canvasOffset)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle()) // ensures taps work
             .gesture(
                 SimultaneousGesture(
                     DragGesture()
@@ -59,16 +65,12 @@ struct ProjectCanvasView: View {
                             canvasOffset = viewModel.clampedOffset(
                                 for: proposed,
                                 geoSize: geo.size,
-                                canvasSize: CGSize(
-                                    width: canvasWidth * scale,
-                                    height: canvasHeight * scale
-                                )
+                                canvasSize: scaledCanvasSize
                             )
                         }
                         .onEnded { _ in
                             dragStart = canvasOffset
                         },
-
                     MagnificationGesture()
                         .onChanged { value in
                             gestureScale = value
@@ -77,7 +79,6 @@ struct ProjectCanvasView: View {
                             let newScale = (scale * value).clamped(to: 0.8...5.0)
                             let delta = newScale / scale
 
-                            // adjust offset to keep zoom centered visually
                             canvasOffset = CGSize(
                                 width: canvasOffset.width * delta,
                                 height: canvasOffset.height * delta
@@ -87,6 +88,26 @@ struct ProjectCanvasView: View {
                             gestureScale = 1.0
                         }
                 )
+            )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        let tapPoint = value.location
+
+                        let canvasCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+
+                        let canvasOrigin = CGPoint(
+                            x: canvasCenter.x + canvasOffset.width - scaledCanvasSize.width / 2,
+                            y: canvasCenter.y + canvasOffset.height - scaledCanvasSize.height / 2
+                        )
+
+                        let local = CGPoint(
+                          x: tapPoint.x - canvasOrigin.x,
+                          y: tapPoint.y - canvasOrigin.y
+                        )
+
+                        viewModel.applyTool(at: local, zoomScale: zoomScale)
+                    }
             )
         }
     }
