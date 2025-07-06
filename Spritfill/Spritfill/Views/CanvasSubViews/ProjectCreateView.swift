@@ -35,11 +35,11 @@ struct ProjectCreateView: View {
                             Image(systemName: "trash")
                         }
                         
-//                        Button(action: {
-//                            // Save
-//                        }) {
-//                            Image(systemName: "square.and.arrow.down")
-//                        }
+                        Button(action: {
+                            // Save
+                        }) {
+                            Image(systemName: "square.and.arrow.down")
+                        }
                         Button(action: {
                             // Share
                         }) {
@@ -63,13 +63,9 @@ struct ProjectCreateView: View {
                     .frame(height: geo.size.height * 0.54)
                     .clipped()
 
-                HStack {
-                    Spacer()
-                    Text("Tools go here").foregroundColor(.gray)
-                    Spacer()
-                }
-                .frame(height: geo.size.height * 0.38)
-                .background(Color.gray.opacity(0.2))
+                ToolsBarView(toolsVM: viewModel.toolsVM)
+                    .frame(height: geo.size.height * 0.38)
+                    .background(Color.gray.opacity(0.2))
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .background(Color.white)

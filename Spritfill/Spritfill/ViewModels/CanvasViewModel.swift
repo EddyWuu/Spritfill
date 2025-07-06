@@ -49,14 +49,22 @@ class CanvasViewModel: ObservableObject {
 //        let height = data.settings.selectedCanvasSize.dimensions.height
 
         // rebuild 2D array from 1D
-        self.pixels = data.pixelGrid.map { Color(hex: $0) }
+        self.pixels = data.pixelGrid.map { hex in
+            if hex == "clear" {
+                return Color.clear
+            } else {
+                return Color(hex: hex)
+            }
+        }
     }
 
     // MARK: - Convert to ProjectData
     
     func toProjectData() -> ProjectData {
         
-        let flatHexGrid = pixels.map { $0.toHex() ?? "#000000" }
+        let flatHexGrid = pixels.map {
+            $0.isClear ? "clear" : ($0.toHex() ?? "#000000")
+        }
 
         return ProjectData(
             id: projectID,

@@ -231,12 +231,6 @@ extension UIColor {
     }
 }
 
-extension Color {
-    func toHex() -> String? {
-        UIColor(self).toHex()
-    }
-}
-
 extension UIColor {
     func toHex() -> String? {
         var red: CGFloat = 0

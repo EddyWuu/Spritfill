@@ -40,4 +40,12 @@ extension Color {
 
         self.init(red: r, green: g, blue: b, opacity: a)
     }
+    
+    func toHex() -> String? {
+        UIColor(self).toHex()
+    }
+    
+    var isClear: Bool {
+        UIColor(self).cgColor.alpha < 0.01
+    }
 }
