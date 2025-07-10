@@ -18,6 +18,7 @@ struct ToolsBarView: View {
             
             ToolButton(tool: .pencil, toolsVM: toolsVM)
             ToolButton(tool: .eraser, toolsVM: toolsVM)
+            ToolButton(tool: .fill, toolsVM: toolsVM)
                 
             Spacer()
         }
