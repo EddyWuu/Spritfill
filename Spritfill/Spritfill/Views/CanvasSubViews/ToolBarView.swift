@@ -19,6 +19,12 @@ struct ToolsBarView: View {
             ToolButton(tool: .pencil, toolsVM: toolsVM)
             ToolButton(tool: .eraser, toolsVM: toolsVM)
             ToolButton(tool: .fill, toolsVM: toolsVM)
+            
+            Image(systemName: "paintpalette")
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.primary)
+
                 
             Spacer()
         }
