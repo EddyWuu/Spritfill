@@ -48,8 +48,6 @@ struct ProjectCanvasView: View {
                             if color != .clear {
                                 context.fill(Path(rect), with: .color(color))
                             }
-                            
-                            context.stroke(Path(rect), with: .color(.gray.opacity(0.2)), lineWidth: 0.5)
                         }
                     }
                 }
