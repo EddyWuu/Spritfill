@@ -15,6 +15,7 @@ struct ProjectData: Codable, Identifiable {
     var settings: ProjectSettings
     var pixelGrid: [String] // store colors as hex strings
     var lastEdited: Date
+//    var ownerID: String
 }
 
 extension ProjectData {
@@ -24,6 +25,7 @@ extension ProjectData {
             "id": id.uuidString,
             "name": name,
             "lastEdited": Timestamp(date: lastEdited),
+//            "ownerID": ownerID,
             "settings": [
                 "selectedCanvasSize": settings.selectedCanvasSize.rawValue,
                 "selectedTileSize": settings.selectedTileSize.rawValue,
@@ -54,6 +56,7 @@ extension ProjectData {
             return nil
         }
 
+//        let ownerID = data["ownerID"] as? String ?? ""
         self.id = id
         self.name = name
         self.lastEdited = lastEdited
