@@ -34,7 +34,7 @@ class CanvasViewModel: ObservableObject {
         let dimensions = selectedCanvasSize.dimensions
         self.pixels = Array(repeating: Color.clear, count: dimensions.width * dimensions.height)
         
-        self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0])
+        self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0], palette: selectedPalette)
     }
     
     // MARK: - Init: From Saved Project
@@ -43,7 +43,7 @@ class CanvasViewModel: ObservableObject {
         self.projectID = data.id
         self.projectName = data.name
         self.projectSettings = data.settings
-        self.toolsVM = ToolsViewModel(defaultColor: data.settings.selectedPalette.colors[0])
+        self.toolsVM = ToolsViewModel(defaultColor: data.settings.selectedPalette.colors[0], palette: data.settings.selectedPalette)
         
 //        let width = data.settings.selectedCanvasSize.dimensions.width
 //        let height = data.settings.selectedCanvasSize.dimensions.height

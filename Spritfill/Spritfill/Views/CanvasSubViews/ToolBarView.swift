@@ -10,6 +10,7 @@ import SwiftUI
 struct ToolsBarView: View {
     
     @ObservedObject var toolsVM: ToolsViewModel
+    @State private var showPalettePicker = false
 
     var body: some View {
         HStack(spacing: 20) {
@@ -19,11 +20,19 @@ struct ToolsBarView: View {
             ToolButton(tool: .pencil, toolsVM: toolsVM)
             ToolButton(tool: .eraser, toolsVM: toolsVM)
             ToolButton(tool: .fill, toolsVM: toolsVM)
-            
-            Image(systemName: "paintpalette")
-                .resizable()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.primary)
+
+            Button(action: {
+                showPalettePicker = true
+            }) {
+                Image(systemName: "paintpalette")
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .foregroundColor(toolsVM.selectedColor)
+            }
+            .sheet(isPresented: $showPalettePicker) {
+                PaletteSelectionView(toolsVM: toolsVM)
+            }
+
 
                 
             Spacer()

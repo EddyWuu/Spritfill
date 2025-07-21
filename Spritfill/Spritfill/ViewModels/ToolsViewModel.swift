@@ -15,9 +15,15 @@ class ToolsViewModel: ObservableObject {
 
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
+    private var palette: ColorPalettes
 
-    init(defaultColor: Color) {
+    init(defaultColor: Color, palette: ColorPalettes) {
         self.selectedColor = defaultColor
+        self.palette = palette
+    }
+    
+    var availableColors: [Color] {
+        palette.colors
     }
     
     func applyTool(to pixel: inout Color) {

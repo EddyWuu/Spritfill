@@ -20,19 +20,12 @@ extension Color {
         let r, g, b: Double
         let a: Double = 1.0
 
-        switch hexSanitized.count {
-            
-        case 6: // RGB (e.g. "FF5733")
+        if hexSanitized.count == 6 {
             r = Double((int >> 16) & 0xFF) / 255.0
             g = Double((int >> 8) & 0xFF) / 255.0
             b = Double(int & 0xFF) / 255.0
+        } else {
             
-        case 8: // ARGB (e.g. "FF5733AA")
-            r = Double((int >> 24) & 0xFF) / 255.0
-            g = Double((int >> 16) & 0xFF) / 255.0
-            b = Double((int >> 8) & 0xFF) / 255.0
-            
-        default:
             r = 1.0
             g = 1.0
             b = 1.0
