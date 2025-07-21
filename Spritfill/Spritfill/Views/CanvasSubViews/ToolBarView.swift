@@ -8,33 +8,19 @@
 import SwiftUI
 
 struct ToolsBarView: View {
-    
+
     @ObservedObject var toolsVM: ToolsViewModel
     @State private var showPalettePicker = false
 
     var body: some View {
         HStack(spacing: 20) {
-            
             Spacer()
-            
-            ToolButton(tool: .pencil, toolsVM: toolsVM)
-            ToolButton(tool: .eraser, toolsVM: toolsVM)
-            ToolButton(tool: .fill, toolsVM: toolsVM)
 
-            Button(action: {
-                showPalettePicker = true
-            }) {
-                Image(systemName: "paintpalette")
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .foregroundColor(toolsVM.selectedColor)
-            }
-            .sheet(isPresented: $showPalettePicker) {
-                PaletteSelectionView(toolsVM: toolsVM)
-            }
+            ToolButton(tool: .pencil)
+            ToolButton(tool: .eraser)
+            ToolButton(tool: .fill)
+            PaletteButton()
 
-
-                
             Spacer()
         }
         .padding()
@@ -42,7 +28,7 @@ struct ToolsBarView: View {
     }
 
     @ViewBuilder
-    private func ToolButton(tool: ToolsViewModel.ToolType, toolsVM: ToolsViewModel) -> some View {
+    private func ToolButton(tool: ToolsViewModel.ToolType) -> some View {
         Button(action: {
             toolsVM.selectTool(tool)
         }) {
@@ -51,6 +37,21 @@ struct ToolsBarView: View {
                 .padding()
                 .background(toolsVM.selectedTool == tool ? Color.blue.opacity(0.2) : Color.clear)
                 .clipShape(Circle())
+        }
+    }
+
+    @ViewBuilder
+    private func PaletteButton() -> some View {
+        Button(action: {
+            showPalettePicker = true
+        }) {
+            Image(systemName: "paintpalette")
+                .foregroundColor(toolsVM.selectedColor)
+                .padding()
+                .clipShape(Circle())
+        }
+        .sheet(isPresented: $showPalettePicker) {
+            PaletteSelectionView(toolsVM: toolsVM)
         }
     }
 
