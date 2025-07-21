@@ -40,7 +40,15 @@ struct ProjectCanvasView: View {
                                 height: tileSize
                             )
 
-                            context.fill(Path(rect), with: .color(color))
+                            // checkerboard background color
+                            let isLight = (row + col) % 2 == 0
+                            let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
+
+                            context.fill(Path(rect), with: .color(background))
+                            if color != .clear {
+                                context.fill(Path(rect), with: .color(color))
+                            }
+                            
                             context.stroke(Path(rect), with: .color(.gray.opacity(0.2)), lineWidth: 0.5)
                         }
                     }

@@ -12,6 +12,9 @@ struct ProjectCreateView: View {
     @ObservedObject var viewModel: CanvasViewModel
     @StateObject private var projectManager = ProjectManagerViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var showRenameAlert = false
+    @State private var newProjectName = ""
+
     
     @State private var showDeleteAlert = false
 
@@ -36,6 +39,13 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
+                            // Rename
+                            showRenameAlert = true
+                        }) {
+                            Image(systemName: "pencil")
+                        }
+                        
+                        Button(action: {
                             // Save
                         }) {
                             Image(systemName: "square.and.arrow.down")
@@ -55,6 +65,15 @@ struct ProjectCreateView: View {
                         let data = viewModel.toProjectData()
                         projectManager.delete(data)
                         dismiss()
+                    }
+                    Button("Cancel", role: .cancel) { }
+                }
+                .alert("Rename Project", isPresented: $showRenameAlert) {
+                    TextField("New name", text: $newProjectName)
+                    Button("Save") {
+                        if !newProjectName.trimmingCharacters(in: .whitespaces).isEmpty {
+                            viewModel.projectName = newProjectName
+                        }
                     }
                     Button("Cancel", role: .cancel) { }
                 }
