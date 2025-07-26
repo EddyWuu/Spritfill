@@ -9,9 +9,19 @@ import SwiftUI
 
 class ToolsViewModel: ObservableObject {
     
-    enum ToolType {
+    enum ToolType: CaseIterable {
+        
         case pencil, eraser, fill
+
+        var iconName: String {
+            switch self {
+            case .pencil: return "pencil"
+            case .eraser: return "eraser"
+            case .fill: return "paintbrush"
+            }
+        }
     }
+
 
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
@@ -24,6 +34,14 @@ class ToolsViewModel: ObservableObject {
     
     var availableColors: [Color] {
         palette.colors
+    }
+    
+    var availableTools: [ToolType] {
+        ToolType.allCases
+    }
+    
+    func isSelected(tool: ToolType) -> Bool {
+        return selectedTool == tool
     }
     
     func applyTool(to pixel: inout Color) {
