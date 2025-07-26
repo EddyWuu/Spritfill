@@ -16,6 +16,7 @@ class CanvasViewModel: ObservableObject {
     let projectID: UUID
     @Published var projectName: String
     @Published var pixels: [Color]
+    @Published var needsPanReset: Bool = false
     
     @Published var toolsVM: ToolsViewModel
     
@@ -147,6 +148,11 @@ class CanvasViewModel: ObservableObject {
             return nil
         }
     }
+
+    func didSwitchToPanTool() {
+        needsPanReset = true
+    }
+
     
     func clearCanvas() {
         

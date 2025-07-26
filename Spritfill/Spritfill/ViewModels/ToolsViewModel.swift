@@ -11,13 +11,14 @@ class ToolsViewModel: ObservableObject {
     
     enum ToolType: CaseIterable {
         
-        case pencil, eraser, fill
+        case pencil, eraser, fill, pan
 
         var iconName: String {
             switch self {
             case .pencil: return "pencil"
             case .eraser: return "eraser"
             case .fill: return "paintbrush"
+            case .pan: return "hand.draw"
             }
         }
     }
@@ -54,11 +55,17 @@ class ToolsViewModel: ObservableObject {
         case .fill:
             // not yet implemented
             break
+        case .pan:
+            // Do nothing in pan mode
+            break
         }
     }
 
     func selectTool(_ tool: ToolType) {
         selectedTool = tool
+        if tool == .pan {
+            canvasVM?.didSwitchToPanTool()
+        }
     }
 
     func selectColor(_ color: Color) {

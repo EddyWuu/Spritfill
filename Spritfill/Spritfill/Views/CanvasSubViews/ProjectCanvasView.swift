@@ -59,40 +59,46 @@ struct ProjectCanvasView: View {
             }
             .contentShape(Rectangle())
             .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        let proposed = CGSize(
-                            width: dragStart.width + value.translation.width,
-                            height: dragStart.height + value.translation.height
-                        )
+                viewModel.toolsVM.selectedTool == .pan ?
+                    DragGesture()
+                        .onChanged { value in
+                            // ✅ Pan reset only on first drag
+                            if viewModel.needsPanReset {
+                                dragStart = canvasOffset
+                                viewModel.needsPanReset = false
+                            }
 
-                        canvasOffset = viewModel.clampedOffset(
-                            for: proposed,
-                            geoSize: geo.size,
-                            canvasSize: scaledCanvasSize
-                        )
-                    }
-                    .onEnded { _ in
-                        dragStart = canvasOffset
-                    }
+                            let proposed = CGSize(
+                                width: dragStart.width + value.translation.width,
+                                height: dragStart.height + value.translation.height
+                            )
+
+                            canvasOffset = viewModel.clampedOffset(
+                                for: proposed,
+                                geoSize: geo.size,
+                                canvasSize: scaledCanvasSize
+                            )
+                        }
+                        .onEnded { _ in
+                            dragStart = canvasOffset
+                        }
+                    : nil
             )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onEnded { value in
+                        guard viewModel.toolsVM.selectedTool != .pan else { return }
+
                         let tapPoint = value.location
-
                         let canvasCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-
                         let canvasOrigin = CGPoint(
                             x: canvasCenter.x + canvasOffset.width - scaledCanvasSize.width / 2,
                             y: canvasCenter.y + canvasOffset.height - scaledCanvasSize.height / 2
                         )
-
                         let local = CGPoint(
-                          x: tapPoint.x - canvasOrigin.x,
-                          y: tapPoint.y - canvasOrigin.y
+                            x: tapPoint.x - canvasOrigin.x,
+                            y: tapPoint.y - canvasOrigin.y
                         )
-
                         viewModel.applyTool(at: local, zoomScale: zoomScale)
                     }
             )
