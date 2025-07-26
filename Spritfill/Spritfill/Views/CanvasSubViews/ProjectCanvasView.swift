@@ -12,8 +12,6 @@ struct ProjectCanvasView: View {
 
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
-    @State private var scale: CGFloat = 1.0
-    @State private var gestureScale: CGFloat = 1.0
 
     var body: some View {
         
@@ -24,7 +22,7 @@ struct ProjectCanvasView: View {
             let baseCanvasSize = CGSize(width: CGFloat(gridWidth) * tileSize,
                                         height: CGFloat(gridHeight) * tileSize)
 
-            let zoomScale = scale * gestureScale
+            let zoomScale = viewModel.zoomScale
             let scaledCanvasSize = CGSize(width: baseCanvasSize.width * zoomScale,
                                           height: baseCanvasSize.height * zoomScale)
 
@@ -61,9 +59,15 @@ struct ProjectCanvasView: View {
             }
             .contentShape(Rectangle())
             .gesture(
-                SimultaneousGesture(
+                viewModel.toolsVM.selectedTool == .pan ?
                     DragGesture()
                         .onChanged { value in
+                            // ✅ Pan reset only on first drag
+                            if viewModel.needsPanReset {
+                                dragStart = canvasOffset
+                                viewModel.needsPanReset = false
+                            }
+
                             let proposed = CGSize(
                                 width: dragStart.width + value.translation.width,
                                 height: dragStart.height + value.translation.height
@@ -77,42 +81,24 @@ struct ProjectCanvasView: View {
                         }
                         .onEnded { _ in
                             dragStart = canvasOffset
-                        },
-                    MagnificationGesture()
-                        .onChanged { value in
-                            gestureScale = value
                         }
-                        .onEnded { value in
-                            let newScale = (scale * value).clamped(to: 0.8...5.0)
-                            let delta = newScale / scale
-
-                            canvasOffset = CGSize(
-                                width: canvasOffset.width * delta,
-                                height: canvasOffset.height * delta
-                            )
-
-                            scale = newScale
-                            gestureScale = 1.0
-                        }
-                )
+                    : nil
             )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onEnded { value in
+                        guard viewModel.toolsVM.selectedTool != .pan else { return }
+
                         let tapPoint = value.location
-
                         let canvasCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-
                         let canvasOrigin = CGPoint(
                             x: canvasCenter.x + canvasOffset.width - scaledCanvasSize.width / 2,
                             y: canvasCenter.y + canvasOffset.height - scaledCanvasSize.height / 2
                         )
-
                         let local = CGPoint(
-                          x: tapPoint.x - canvasOrigin.x,
-                          y: tapPoint.y - canvasOrigin.y
+                            x: tapPoint.x - canvasOrigin.x,
+                            y: tapPoint.y - canvasOrigin.y
                         )
-
                         viewModel.applyTool(at: local, zoomScale: zoomScale)
                     }
             )

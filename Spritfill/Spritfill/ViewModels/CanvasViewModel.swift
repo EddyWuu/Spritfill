@@ -16,8 +16,11 @@ class CanvasViewModel: ObservableObject {
     let projectID: UUID
     @Published var projectName: String
     @Published var pixels: [Color]
+    @Published var needsPanReset: Bool = false
     
     @Published var toolsVM: ToolsViewModel
+    
+    @Published var zoomScale: CGFloat = 1.0
     
     // MARK: - Init: New Project
     
@@ -35,6 +38,7 @@ class CanvasViewModel: ObservableObject {
         self.pixels = Array(repeating: Color.clear, count: dimensions.width * dimensions.height)
         
         self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0], palette: selectedPalette)
+        self.toolsVM.canvasVM = self
     }
     
     // MARK: - Init: From Saved Project
@@ -47,7 +51,7 @@ class CanvasViewModel: ObservableObject {
         
 //        let width = data.settings.selectedCanvasSize.dimensions.width
 //        let height = data.settings.selectedCanvasSize.dimensions.height
-
+        
         // rebuild 2D array from 1D
         self.pixels = data.pixelGrid.map { hex in
             if hex == "clear" {
@@ -56,6 +60,8 @@ class CanvasViewModel: ObservableObject {
                 return Color(hex: hex)
             }
         }
+
+        self.toolsVM.canvasVM = self
     }
 
     // MARK: - Convert to ProjectData
@@ -142,6 +148,11 @@ class CanvasViewModel: ObservableObject {
             return nil
         }
     }
+
+    func didSwitchToPanTool() {
+        needsPanReset = true
+    }
+
     
     func clearCanvas() {
         

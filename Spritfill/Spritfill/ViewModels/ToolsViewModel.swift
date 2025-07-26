@@ -11,18 +11,20 @@ class ToolsViewModel: ObservableObject {
     
     enum ToolType: CaseIterable {
         
-        case pencil, eraser, fill
+        case pencil, eraser, fill, pan
 
         var iconName: String {
             switch self {
             case .pencil: return "pencil"
             case .eraser: return "eraser"
             case .fill: return "paintbrush"
+            case .pan: return "hand.draw"
             }
         }
     }
 
-
+    // need to allow toolsVM zoom slider to modify zoomScale in CanvasVM, weak to avoid RC
+    weak var canvasVM: CanvasViewModel?
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
     private var palette: ColorPalettes
@@ -53,11 +55,17 @@ class ToolsViewModel: ObservableObject {
         case .fill:
             // not yet implemented
             break
+        case .pan:
+            // Do nothing in pan mode
+            break
         }
     }
 
     func selectTool(_ tool: ToolType) {
         selectedTool = tool
+        if tool == .pan {
+            canvasVM?.didSwitchToPanTool()
+        }
     }
 
     func selectColor(_ color: Color) {
