@@ -12,8 +12,6 @@ struct ProjectCanvasView: View {
 
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
-    @State private var scale: CGFloat = 1.0
-    @State private var gestureScale: CGFloat = 1.0
 
     var body: some View {
         
@@ -24,7 +22,7 @@ struct ProjectCanvasView: View {
             let baseCanvasSize = CGSize(width: CGFloat(gridWidth) * tileSize,
                                         height: CGFloat(gridHeight) * tileSize)
 
-            let zoomScale = scale * gestureScale
+            let zoomScale = viewModel.zoomScale
             let scaledCanvasSize = CGSize(width: baseCanvasSize.width * zoomScale,
                                           height: baseCanvasSize.height * zoomScale)
 
@@ -61,40 +59,22 @@ struct ProjectCanvasView: View {
             }
             .contentShape(Rectangle())
             .gesture(
-                SimultaneousGesture(
-                    DragGesture()
-                        .onChanged { value in
-                            let proposed = CGSize(
-                                width: dragStart.width + value.translation.width,
-                                height: dragStart.height + value.translation.height
-                            )
+                DragGesture()
+                    .onChanged { value in
+                        let proposed = CGSize(
+                            width: dragStart.width + value.translation.width,
+                            height: dragStart.height + value.translation.height
+                        )
 
-                            canvasOffset = viewModel.clampedOffset(
-                                for: proposed,
-                                geoSize: geo.size,
-                                canvasSize: scaledCanvasSize
-                            )
-                        }
-                        .onEnded { _ in
-                            dragStart = canvasOffset
-                        },
-                    MagnificationGesture()
-                        .onChanged { value in
-                            gestureScale = value
-                        }
-                        .onEnded { value in
-                            let newScale = (scale * value).clamped(to: 0.8...5.0)
-                            let delta = newScale / scale
-
-                            canvasOffset = CGSize(
-                                width: canvasOffset.width * delta,
-                                height: canvasOffset.height * delta
-                            )
-
-                            scale = newScale
-                            gestureScale = 1.0
-                        }
-                )
+                        canvasOffset = viewModel.clampedOffset(
+                            for: proposed,
+                            geoSize: geo.size,
+                            canvasSize: scaledCanvasSize
+                        )
+                    }
+                    .onEnded { _ in
+                        dragStart = canvasOffset
+                    }
             )
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)

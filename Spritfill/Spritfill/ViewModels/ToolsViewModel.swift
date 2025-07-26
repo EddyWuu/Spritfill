@@ -22,7 +22,8 @@ class ToolsViewModel: ObservableObject {
         }
     }
 
-
+    // need to allow toolsVM zoom slider to modify zoomScale in CanvasVM, weak to avoid RC
+    weak var canvasVM: CanvasViewModel?
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
     private var palette: ColorPalettes
