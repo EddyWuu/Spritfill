@@ -14,6 +14,8 @@ struct ProjectCreateView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showRenameAlert = false
     @State private var newProjectName = ""
+    @State private var shareImage: UIImage?
+    @State private var isSharing = false
 
     
     @State private var showDeleteAlert = false
@@ -51,10 +53,25 @@ struct ProjectCreateView: View {
                             Image(systemName: "square.and.arrow.down")
                         }
                         Button(action: {
-                            // Share
+                            // share
+                            let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
+                            let dimensions = viewModel.projectSettings.selectedCanvasSize.dimensions
+                            let canvasSize = CGSize(width: CGFloat(dimensions.width) * tileSize,
+                                                    height: CGFloat(dimensions.height) * tileSize)
+
+                            let canvasView = ProjectCanvasExportView(viewModel: viewModel)
+                            let image = viewModel.renderCanvasImage(from: canvasView, size: canvasSize)
+                            self.shareImage = image
+                            self.isSharing = true
                         }) {
                             Image(systemName: "square.and.arrow.up")
                         }
+                        .sheet(isPresented: $isSharing) {
+                            if let image = shareImage {
+                                ShareSheet(activityItems: [image])
+                            }
+                        }
+
                     }
                 }
                 .padding()

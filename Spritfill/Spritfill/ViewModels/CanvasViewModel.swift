@@ -152,7 +152,13 @@ class CanvasViewModel: ObservableObject {
     func didSwitchToPanTool() {
         needsPanReset = true
     }
-
+    
+    @MainActor
+    func renderCanvasImage(from view: some View, size: CGSize) -> UIImage {
+        let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
+        renderer.scale = UIScreen.main.scale
+        return renderer.uiImage ?? UIImage()
+    }
     
     func clearCanvas() {
         
