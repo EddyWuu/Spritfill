@@ -26,10 +26,7 @@ struct ProjectCanvasExportView: View {
                         height: tileSize
                     )
 
-                    let isLight = (row + col) % 2 == 0
-                    let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
 
-                    context.fill(Path(rect), with: .color(background))
                     if color != .clear {
                         context.fill(Path(rect), with: .color(color))
                     }
@@ -37,5 +34,6 @@ struct ProjectCanvasExportView: View {
             }
         }
         .frame(width: CGFloat(gridWidth) * tileSize, height: CGFloat(gridHeight) * tileSize)
+        .background(Color.clear)
     }
 }
