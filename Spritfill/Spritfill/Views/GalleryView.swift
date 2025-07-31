@@ -15,6 +15,8 @@ struct DummyProject: Identifiable {
 
 struct GalleryView: View {
     
+    @ObservedObject private var projectManager = ProjectManagerViewModel()
+    
     let projects: [DummyProject] = [
         DummyProject(name: "Sunset Pixel", color: .orange),
         DummyProject(name: "Ocean Art", color: .blue),

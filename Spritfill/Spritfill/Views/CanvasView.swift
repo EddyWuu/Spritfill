@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CanvasView: View {
     
-    // place holder project
     @StateObject private var projectManager = ProjectManagerViewModel()
     @State private var path: [CanvasRoute] = []
     @State private var canvasViewModels: [UUID: CanvasViewModel] = [:]
