@@ -7,27 +7,11 @@
 
 import SwiftUI
 
-struct DummyProject: Identifiable {
-    let id = UUID()
-    let name: String
-    let color: Color
-}
-
 struct GalleryView: View {
     
-    @ObservedObject private var projectManager = ProjectManagerViewModel()
+    @StateObject private var projectManager = ProjectManagerViewModel()
     
-    let projects: [DummyProject] = [
-        DummyProject(name: "Sunset Pixel", color: .orange),
-        DummyProject(name: "Ocean Art", color: .blue),
-        DummyProject(name: "Forest Map", color: .green),
-        DummyProject(name: "Monochrome", color: .gray),
-        DummyProject(name: "Strawberry", color: .red),
-        DummyProject(name: "Violet Dream", color: .purple)
-    ]
-    
-    
-    let columns = [
+    private let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
@@ -35,12 +19,14 @@ struct GalleryView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(projects) { project in
+                ForEach(projectManager.allProjects, id: \.id) { project in
                     VStack {
+                        // placeholder visual, gonna replace with actual later
                         Rectangle()
-                            .fill(project.color)
+                            .fill(Color.gray.opacity(0.3))
                             .frame(height: 120)
                             .cornerRadius(12)
+                        
                         Text(project.name)
                             .font(.caption)
                             .lineLimit(1)
@@ -55,5 +41,8 @@ struct GalleryView: View {
             .padding()
         }
         .background(Color(.systemGroupedBackground))
+        .onAppear {
+            projectManager.loadAllProjects()
+        }
     }
 }
