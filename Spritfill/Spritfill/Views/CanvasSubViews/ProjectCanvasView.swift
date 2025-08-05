@@ -102,6 +102,29 @@ struct ProjectCanvasView: View {
                         viewModel.applyTool(at: local, zoomScale: zoomScale)
                     }
             )
+            .onAppear {
+                // update view model with the canvas view size
+                viewModel.updateViewSize(geo.size)
+            }
+            .onChange(of: geo.size) { newSize in
+                // update when size changes
+                viewModel.updateViewSize(newSize)
+            }
+            .onChange(of: viewModel.zoomScale) { newZoomScale in
+                // when zoom changes too much, reset pan
+                // help canvas from getting lost
+                let scaledCanvasSize = CGSize(
+                    width: baseCanvasSize.width * newZoomScale,
+                    height: baseCanvasSize.height * newZoomScale
+                )
+                
+                // clamp to make sure it stays visible
+                canvasOffset = viewModel.clampedOffset(
+                    for: canvasOffset,
+                    geoSize: geo.size,
+                    canvasSize: scaledCanvasSize
+                )
+            }
         }
     }
 }

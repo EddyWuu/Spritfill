@@ -16,16 +16,22 @@ struct ToolsBarView: View {
             VStack {
                 Text("Zoom")
                     .font(.caption)
-                    .padding(.bottom, 8)
-
+                    .padding(.bottom, 2)
+                
                 if let canvasVM = toolsVM.canvasVM {
+                    
+                    let minZoom = canvasVM.minimumZoomScale
+                    let maxZoom = canvasVM.maximumZoomScale
+                    
                     Slider(
                         value: Binding(
                             get: { canvasVM.zoomScale },
-                            set: { canvasVM.zoomScale = $0.clamped(to: 0.8...5.0) }
+                            set: { newValue in
+                                canvasVM.zoomScale = newValue.clamped(to: minZoom...maxZoom)
+                            }
                         ),
-                        in: 0.8...5.0,
-                        step: 0.1
+                        in: minZoom...maxZoom,
+                        step: minZoom < 0.5 ? 0.05 : 0.1  // finer steps for small zooms
                     )
                     .frame(width: 200)
                     .rotationEffect(.degrees(-90))
