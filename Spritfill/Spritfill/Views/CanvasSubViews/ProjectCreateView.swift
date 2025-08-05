@@ -16,7 +16,7 @@ struct ProjectCreateView: View {
     @State private var newProjectName = ""
     @State private var shareImage: UIImage?
     @State private var isSharing = false
-
+    @State private var showProjectDetails = false
     
     @State private var showDeleteAlert = false
 
@@ -38,6 +38,12 @@ struct ProjectCreateView: View {
                             showDeleteAlert = true
                         } label: {
                             Image(systemName: "trash")
+                        }
+                        
+                        Button(action: {
+                            showProjectDetails = true
+                        }) {
+                            Image(systemName: "info.circle")
                         }
                         
                         Button(action: {
@@ -93,6 +99,11 @@ struct ProjectCreateView: View {
                         }
                     }
                     Button("Cancel", role: .cancel) { }
+                }
+                .sheet(isPresented: $showProjectDetails) {
+                    ProjectDetailsPopupView(viewModel: viewModel)
+                        .presentationDetents([.height(280)])
+                        .presentationDragIndicator(.visible)
                 }
 
                 ProjectCanvasView(viewModel: viewModel)
