@@ -210,20 +210,6 @@ class CanvasViewModel: ObservableObject {
         objectWillChange.send()
     }
     
-    func updatePixelAt(location: CGPoint, zoomScale: CGFloat) {
-        
-        let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
-        let width = projectSettings.selectedCanvasSize.dimensions.width
-        let height = projectSettings.selectedCanvasSize.dimensions.height
-
-        let col = Int(location.x / tileSize)
-        let row = Int(location.y / tileSize)
-
-        if row >= 0, row < height, col >= 0, col < width {
-            updatePixel(row: row, col: col)
-        }
-    }
-    
     // Clamp to screen bounds
     func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
         
