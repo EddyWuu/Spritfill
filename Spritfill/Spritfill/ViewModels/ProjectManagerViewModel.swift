@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 class ProjectManagerViewModel: ObservableObject {
     
@@ -57,5 +58,14 @@ class ProjectManagerViewModel: ObservableObject {
                 completion(nil)
             }
         }
+    }
+    
+    @MainActor
+    func generateThumbnail(for project: ProjectData, size: CGSize) -> UIImage {
+        let canvasVM = CanvasViewModel(from: project)
+        let view = ProjectCanvasExportView(viewModel: canvasVM)
+        let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
+        renderer.scale = UIScreen.main.scale
+        return renderer.uiImage ?? UIImage()
     }
 }
