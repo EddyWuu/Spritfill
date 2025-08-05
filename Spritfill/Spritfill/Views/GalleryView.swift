@@ -21,9 +21,13 @@ struct GalleryView: View {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(projectManager.allProjects, id: \.id) { project in
                     VStack {
-                        // placeholder visual, gonna replace with actual later
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
+                        
+                        let thumbnailSize = CGSize(width: 150, height: 120)
+                        let image = projectManager.generateThumbnail(for: project, size: thumbnailSize)
+
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFit()
                             .frame(height: 120)
                             .cornerRadius(12)
                         
