@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProjectDetailsPopupView: View {
+    
     @ObservedObject var viewModel: CanvasViewModel
     @Environment(\.dismiss) private var dismiss
     
