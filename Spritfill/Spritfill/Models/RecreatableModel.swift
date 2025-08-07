@@ -12,4 +12,5 @@ struct RecreatableArtModel {
     let id: UUID
     let name: String
     let thumbnail: UIImage
+    let availableSizes: [CanvasSizes]
 }
