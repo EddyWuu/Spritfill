@@ -13,4 +13,5 @@ struct RecreatableArtModel {
     let name: String
     let thumbnail: UIImage
     let availableSizes: [CanvasSizes]
+    // may need owner
 }
