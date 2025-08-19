@@ -8,19 +8,33 @@
 import SwiftUI
 
 class RecreateViewModel: ObservableObject {
-    
     @Published var availableSprites: [RecreatableArtModel] = []
 
     init() {
-        loadSampleSprites()
+        loadDummySprites()
     }
 
-    func loadSampleSprites() {
-        
-//        availableSprites = [
-//            RecreatableSprite(id: UUID(), name: "Strawberry", thumbnail: UIImage(named: "strawberry")!),
-//            RecreatableSprite(id: UUID(), name: "Apple", thumbnail: UIImage(named: "apple")!)
-//        ]
+    func loadDummySprites() {
+        availableSprites = [
+            RecreatableArtModel(
+                id: UUID(),
+                name: "Strawberry",
+                thumbnail: UIImage(systemName: "leaf")!,
+                availableSizes: [.smallSquare, .mediumSquare]
+            ),
+            RecreatableArtModel(
+                id: UUID(),
+                name: "Mushroom",
+                thumbnail: UIImage(systemName: "capsule")!,
+                availableSizes: [.mediumSquare, .largeSquare]
+            ),
+            RecreatableArtModel(
+                id: UUID(),
+                name: "Duck",
+                thumbnail: UIImage(systemName: "tortoise")!,
+                availableSizes: [.mediumSquare, .wide, .tall]
+            )
+        ]
     }
 
     func startPhotoImport() {

@@ -11,43 +11,45 @@ struct RecreateView: View {
     
     @ObservedObject var recreateViewModel = RecreateViewModel()
 
+    let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
+
     var body: some View {
-        Text("in progress")
-//        NavigationView {
-//            ScrollView {
-//                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 16)], spacing: 16) {
-//                    ForEach(recreateVM.availableSprites, id: \.id) { sprite in
-//                        NavigationLink(destination: RecreateCanvasView(sprite: sprite)) {
-//                            VStack {
-//                                Image(uiImage: sprite.thumbnail)
-//                                    .resizable()
-//                                    .scaledToFit()
-//                                    .frame(height: 100)
-//                                    .cornerRadius(10)
-//
-//                                Text(sprite.name)
-//                                    .font(.caption)
-//                                    .lineLimit(1)
-//                            }
-//                            .padding(8)
-//                            .background(Color.white)
-//                            .cornerRadius(12)
-//                            .shadow(radius: 2)
-//                        }
-//                    }
-//                }
-//                .padding()
-//            }
-//            .navigationTitle("Recreate a Sprite")
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    Button {
-//                        recreateVM.startPhotoImport()
-//                    } label: {
-//                        Label("Import Photo", systemImage: "camera")
-//                    }
-//                }
-//            }
-//        }
+        NavigationView {
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(recreateViewModel.availableSprites, id: \.id) { sprite in
+                        NavigationLink(destination: RecreateCanvasView(sprite: sprite)) {
+                            VStack {
+                                Image(uiImage: sprite.thumbnail)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 100)
+                                    .cornerRadius(10)
+
+                                Text(sprite.name)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                            }
+                            .padding(8)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 2)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Recreate a Sprite")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        recreateViewModel.startPhotoImport()
+                    } label: {
+                        Label("Import Photo", systemImage: "camera")
+                    }
+                }
+            }
+        }
     }
 }
+

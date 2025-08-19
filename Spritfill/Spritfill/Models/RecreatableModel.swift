@@ -15,3 +15,10 @@ struct RecreatableArtModel {
     let availableSizes: [CanvasSizes]
     // may need owner
 }
+
+struct RecreateArtModel: Identifiable {
+    let id = UUID()
+    let name: String
+    let thumbnail: UIImage
+    let gridSize: CGSize // For example: 16x16, 32x32, etc.
+}
