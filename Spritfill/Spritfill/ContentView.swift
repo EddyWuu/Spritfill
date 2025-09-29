@@ -28,9 +28,9 @@ struct ContentView: View {
                     Label("Recreate", systemImage: "pencil")
                 }
             
-            CommunityView()
+            GenerateView()
                 .tabItem {
-                    Label("Community", systemImage: "bubble.left.and.bubble.right")
+                    Label("Generate", systemImage: "bubble.left.and.bubble.right")
                 }
             
             ProfileView()

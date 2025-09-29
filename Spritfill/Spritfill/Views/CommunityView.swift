@@ -1,5 +1,5 @@
 //
-//  CommunityView.swift
+//  GenerateView.swift
 //  Spritfill
 //
 //  Created by Edmond Wu on 2025-01-24.
@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct CommunityView: View {
+struct GenerateView: View {
     
     var body: some View {
-        Text("CommunityView")
+        Text("GenerateView, to use LLM's to generate art")
     }
 }
