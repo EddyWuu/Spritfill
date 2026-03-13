@@ -10,32 +10,32 @@ import SwiftUI
 struct ProjectCanvasView: View {
     @ObservedObject var viewModel: CanvasViewModel
 
+    // All offsets are in screen-space (points on screen)
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
 
     var body: some View {
         
         GeometryReader { geo in
-            let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
             let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
             let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
-            let baseCanvasSize = CGSize(width: CGFloat(gridWidth) * tileSize,
-                                        height: CGFloat(gridHeight) * tileSize)
 
             let zoomScale = viewModel.zoomScale
-            let scaledCanvasSize = CGSize(width: baseCanvasSize.width * zoomScale,
-                                          height: baseCanvasSize.height * zoomScale)
+            // Render at the full scaled size — no scaleEffect needed
+            let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
+                                          height: CGFloat(gridHeight) * zoomScale)
 
             ZStack {
                 Canvas { context, size in
+                    let cellSize = zoomScale
                     for row in 0..<gridHeight {
                         for col in 0..<gridWidth {
                             let color = viewModel.pixels[row * gridWidth + col]
                             let rect = CGRect(
-                                x: CGFloat(col) * tileSize,
-                                y: CGFloat(row) * tileSize,
-                                width: tileSize,
-                                height: tileSize
+                                x: CGFloat(col) * cellSize,
+                                y: CGFloat(row) * cellSize,
+                                width: cellSize,
+                                height: cellSize
                             )
 
                             // checkerboard background color
@@ -49,80 +49,81 @@ struct ProjectCanvasView: View {
                         }
                     }
                 }
-                .frame(width: baseCanvasSize.width, height: baseCanvasSize.height)
-                .position(x: geo.size.width / 2, y: geo.size.height / 2)
-                .offset(
-                    x: canvasOffset.width / zoomScale,
-                    y: canvasOffset.height / zoomScale
-                )
-                .scaleEffect(zoomScale)
+                .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
+                .offset(x: canvasOffset.width, y: canvasOffset.height)
             }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
             .contentShape(Rectangle())
             .gesture(
-                viewModel.toolsVM.selectedTool == .pan ?
-                    DragGesture()
-                        .onChanged { value in
-                            // ✅ Pan reset only on first drag
-                            if viewModel.needsPanReset {
-                                dragStart = canvasOffset
-                                viewModel.needsPanReset = false
-                            }
-
-                            let proposed = CGSize(
-                                width: dragStart.width + value.translation.width,
-                                height: dragStart.height + value.translation.height
-                            )
-
-                            canvasOffset = viewModel.clampedOffset(
-                                for: proposed,
-                                geoSize: geo.size,
-                                canvasSize: scaledCanvasSize
-                            )
-                        }
-                        .onEnded { _ in
-                            dragStart = canvasOffset
-                        }
-                    : nil
-            )
-            .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
-                    .onEnded { value in
-                        guard viewModel.toolsVM.selectedTool != .pan else { return }
+                    .onChanged { value in
+                        guard viewModel.toolsVM.selectedTool == .pan else { return }
+                        
+                        let proposed = CGSize(
+                            width: dragStart.width + value.translation.width,
+                            height: dragStart.height + value.translation.height
+                        )
 
-                        let tapPoint = value.location
-                        let canvasCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-                        let canvasOrigin = CGPoint(
-                            x: canvasCenter.x + canvasOffset.width - scaledCanvasSize.width / 2,
-                            y: canvasCenter.y + canvasOffset.height - scaledCanvasSize.height / 2
+                        canvasOffset = viewModel.clampedOffset(
+                            for: proposed,
+                            geoSize: geo.size,
+                            canvasSize: scaledCanvasSize
                         )
-                        let local = CGPoint(
-                            x: tapPoint.x - canvasOrigin.x,
-                            y: tapPoint.y - canvasOrigin.y
-                        )
-                        viewModel.applyTool(at: local, zoomScale: zoomScale)
+                    }
+                    .onEnded { value in
+                        if viewModel.toolsVM.selectedTool == .pan {
+                            dragStart = canvasOffset
+                        } else {
+                            // Tap-to-draw: use the tap location
+                            let tapPoint = value.location
+
+                            let canvasCenter = CGPoint(
+                                x: geo.size.width / 2 + canvasOffset.width,
+                                y: geo.size.height / 2 + canvasOffset.height
+                            )
+
+                            let canvasOrigin = CGPoint(
+                                x: canvasCenter.x - scaledCanvasSize.width / 2,
+                                y: canvasCenter.y - scaledCanvasSize.height / 2
+                            )
+
+                            let basePoint = CGPoint(
+                                x: (tapPoint.x - canvasOrigin.x) / zoomScale,
+                                y: (tapPoint.y - canvasOrigin.y) / zoomScale
+                            )
+
+                            viewModel.applyTool(at: basePoint)
+                        }
                     }
             )
             .onAppear {
-                // update view model with the canvas view size
                 viewModel.updateViewSize(geo.size)
             }
             .onChange(of: geo.size) {
-                // update when size changes
                 viewModel.updateViewSize(geo.size)
             }
-            .onChange(of: viewModel.zoomScale) {
-                // when zoom changes significantly, reset pan if needed, prevent canvas from getting lost
-                let scaledCanvasSize = CGSize(
-                    width: baseCanvasSize.width * viewModel.zoomScale,
-                    height: baseCanvasSize.height * viewModel.zoomScale
-                )
-                
-                // clamp the current offset to ensure canvas stays visible
-                canvasOffset = viewModel.clampedOffset(
-                    for: canvasOffset,
-                    geoSize: geo.size,
-                    canvasSize: scaledCanvasSize
-                )
+            .onChange(of: viewModel.zoomScale) { oldZoom, newZoom in
+                // When zoom changes, scale the offset so the canvas center stays stable
+                if oldZoom != 0 {
+                    let ratio = newZoom / oldZoom
+                    let scaled = CGSize(
+                        width: canvasOffset.width * ratio,
+                        height: canvasOffset.height * ratio
+                    )
+                    
+                    let newScaledCanvasSize = CGSize(
+                        width: CGFloat(gridWidth) * newZoom,
+                        height: CGFloat(gridHeight) * newZoom
+                    )
+                    
+                    canvasOffset = viewModel.clampedOffset(
+                        for: scaled,
+                        geoSize: geo.size,
+                        canvasSize: newScaledCanvasSize
+                    )
+                    dragStart = canvasOffset
+                }
             }
         }
     }

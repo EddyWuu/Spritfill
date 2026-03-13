@@ -63,9 +63,22 @@ class ProjectManagerViewModel: ObservableObject {
     @MainActor
     func generateThumbnail(for project: ProjectData, size: CGSize) -> UIImage {
         let canvasVM = CanvasViewModel(from: project)
-        let view = ProjectCanvasExportView(viewModel: canvasVM)
-        let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
+        
+        let gridWidth = CGFloat(project.settings.selectedCanvasSize.dimensions.width)
+        let gridHeight = CGFloat(project.settings.selectedCanvasSize.dimensions.height)
+        
+        // Calculate tile size so the full canvas fits within the thumbnail
+        let scaledTileSize = min(size.width / gridWidth, size.height / gridHeight)
+        
+        let renderWidth = gridWidth * scaledTileSize
+        let renderHeight = gridHeight * scaledTileSize
+        
+        let view = ProjectCanvasExportView(viewModel: canvasVM, overrideTileSize: scaledTileSize)
+            .frame(width: renderWidth, height: renderHeight)
+        
+        let renderer = ImageRenderer(content: view)
         renderer.scale = UIScreen.main.scale
         return renderer.uiImage ?? UIImage()
     }
 }
+

@@ -23,6 +23,8 @@ struct ProjectCreateView: View {
     var body: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
+                
+                // MARK: - Top nav bar
                 HStack {
                     Button(action: {
                         projectManager.save(viewModel)
@@ -33,7 +35,7 @@ struct ProjectCreateView: View {
 
                     Spacer()
 
-                    HStack {
+                    HStack(spacing: 16) {
                         Button(role: .destructive) {
                             showDeleteAlert = true
                         } label: {
@@ -47,7 +49,6 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            // Rename
                             showRenameAlert = true
                         }) {
                             Image(systemName: "pencil")
@@ -58,15 +59,14 @@ struct ProjectCreateView: View {
                         }) {
                             Image(systemName: "square.and.arrow.down")
                         }
+                        
                         Button(action: {
-                            // share
+                            let dims = viewModel.projectSettings.selectedCanvasSize.dimensions
                             let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
-                            let dimensions = viewModel.projectSettings.selectedCanvasSize.dimensions
-                            let canvasSize = CGSize(width: CGFloat(dimensions.width) * tileSize,
-                                                    height: CGFloat(dimensions.height) * tileSize)
-
+                            let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
+                                                    height: CGFloat(dims.height) * tileSize)
                             let canvasView = ProjectCanvasExportView(viewModel: viewModel)
-                            let image = viewModel.renderCanvasImage(from: canvasView, size: canvasSize)
+                            let image = viewModel.renderCanvasImage(from: canvasView, size: exportSize)
                             self.shareImage = image
                             self.isSharing = true
                         }) {
@@ -77,12 +77,11 @@ struct ProjectCreateView: View {
                                 ShareSheet(activityItems: [image])
                             }
                         }
-
                     }
                 }
-                .padding()
-                .frame(height: geo.size.height * 0.08)
-                .background(Color.gray.opacity(0.3))
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                .background(Color(.systemBackground))
                 .alert("Delete this project?", isPresented: $showDeleteAlert) {
                     Button("Delete", role: .destructive) {
                         let data = viewModel.toProjectData()
@@ -105,17 +104,30 @@ struct ProjectCreateView: View {
                         .presentationDetents([.height(280)])
                         .presentationDragIndicator(.visible)
                 }
-
+                
+                // MARK: - Canvas
                 ProjectCanvasView(viewModel: viewModel)
-                    .frame(height: geo.size.height * 0.54)
+                    .frame(height: geo.size.height * 0.48)
                     .clipped()
-
+                
+                // MARK: - Zoom slider
+                ZoomSliderView(canvasVM: viewModel)
+                    .background(Color(.secondarySystemBackground))
+                
+                Divider()
+                
+                // MARK: - Tool buttons
                 ToolsBarView(toolsVM: viewModel.toolsVM)
-                    .frame(height: geo.size.height * 0.38)
-                    .background(Color.gray.opacity(0.2))
+                    .background(Color(.secondarySystemBackground))
+                
+                Divider()
+                
+                // MARK: - Inline color palette
+                ColorPaletteView(toolsVM: viewModel.toolsVM)
+                    .frame(maxHeight: .infinity)
+                    .background(Color(.secondarySystemBackground))
             }
             .frame(width: geo.size.width, height: geo.size.height)
-            .background(Color.white)
         }
         .navigationBarHidden(true)
         .edgesIgnoringSafeArea(.bottom)

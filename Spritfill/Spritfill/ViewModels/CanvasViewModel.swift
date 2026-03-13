@@ -16,16 +16,11 @@ class CanvasViewModel: ObservableObject {
     let projectID: UUID
     @Published var projectName: String
     @Published var pixels: [Color]
-    @Published var needsPanReset: Bool = false
     
     @Published var toolsVM: ToolsViewModel
     
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
-    
-    private var _cachedMinZoom: CGFloat?
-    private var _cachedMaxZoom: CGFloat?
-    private var _zoomBoundsLocked: Bool = false
     
     // MARK: - Init: New Project
     
@@ -68,118 +63,58 @@ class CanvasViewModel: ObservableObject {
 
     // MARK: - Zoom calculations
     
-    var canvasSize: CGSize {
-        let tileSize = CGFloat(projectSettings.selectedTileSize.size)
+    /// Base canvas size is 1pt per pixel — tile size is only used for export
+    var baseCanvasSize: CGSize {
         let gridWidth = projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = projectSettings.selectedCanvasSize.dimensions.height
-        return CGSize(width: CGFloat(gridWidth) * tileSize,
-                     height: CGFloat(gridHeight) * tileSize)
+        return CGSize(width: CGFloat(gridWidth), height: CGFloat(gridHeight))
+    }
+    
+    /// Scale that fits the entire canvas in the view with ~90% padding
+    var fitScale: CGFloat {
+        guard viewSize != .zero else { return 1.0 }
+        let canvas = baseCanvasSize
+        let paddingFactor: CGFloat = 0.9
+        let scaleW = (viewSize.width * paddingFactor) / canvas.width
+        let scaleH = (viewSize.height * paddingFactor) / canvas.height
+        return min(scaleW, scaleH)
     }
     
     var minimumZoomScale: CGFloat {
-        // Return cached value if bounds are locked (after initial setup)
-        if _zoomBoundsLocked, let cached = _cachedMinZoom {
-            return cached
-        }
-        
-        guard viewSize != .zero else { return 0.5 }
-        
-        let canvas = canvasSize
-        
-        // Calculate the scale needed to fit the ENTIRE canvas in the view with some padding
-        let paddingFactor: CGFloat = 0.9 // Use 90% of available space
-        let scaleToFitWidth = (viewSize.width * paddingFactor) / canvas.width
-        let scaleToFitHeight = (viewSize.height * paddingFactor) / canvas.height
-        
-        // The fit scale is the SMALLER of the two - this ensures the entire canvas fits
-        let fitScale = min(scaleToFitWidth, scaleToFitHeight)
-        
-        // Set reasonable absolute minimums based on canvas size to prevent tiny canvases
-        let canvasPixelArea = canvas.width * canvas.height
-        let absoluteMinimum: CGFloat
-        
-        if canvasPixelArea <= 16384 { // Small canvases (≤128x128 pixels)
-            absoluteMinimum = 0.5
-        } else if canvasPixelArea <= 65536 { // Medium canvases (≤256x256 pixels)
-            absoluteMinimum = 0.3
-        } else if canvasPixelArea <= 262144 { // Large canvases (≤512x512 pixels)
-            absoluteMinimum = 0.2
-        } else { // Very large canvases
-            absoluteMinimum = 0.1
-        }
-        
-        // ALWAYS allow zooming out enough to see the full canvas
-        // But don't go below our absolute minimum
-        let result = min(fitScale, absoluteMinimum)
-        
-        // Cache the result
-        _cachedMinZoom = result
-        return result
+        return fitScale
     }
     
     var maximumZoomScale: CGFloat {
-        // Return cached value if bounds are locked
-        if _zoomBoundsLocked, let cached = _cachedMaxZoom {
-            return cached
+        let gridArea = baseCanvasSize.width * baseCanvasSize.height
+        let multiplier: CGFloat
+        if gridArea <= 256 {         // 16×16
+            multiplier = 6.0
+        } else if gridArea <= 1024 { // 32×32
+            multiplier = 5.0
+        } else if gridArea <= 4096 { // 64×64
+            multiplier = 4.0
+        } else {                     // 128×128+
+            multiplier = 3.0
         }
-        
-        let canvas = canvasSize
-        let canvasPixelArea = canvas.width * canvas.height
-        
-        // Base max zoom on actual rendered canvas size, not just grid dimensions
-        let result: CGFloat
-        if canvasPixelArea <= 16384 { // Small rendered canvases (e.g., 16x16 with 8px tiles = 128x128 pixels)
-            result = 8.0
-        } else if canvasPixelArea <= 65536 { // Medium canvases (e.g., 32x32 with 8px tiles = 256x256 pixels)
-            result = 6.0
-        } else if canvasPixelArea <= 262144 { // Large canvases (e.g., 64x64 with 16px tiles = 1024x1024 pixels)
-            result = 4.0
-        } else if canvasPixelArea <= 1048576 { // Very large canvases
-            result = 3.0
-        } else { // Huge canvases (128x128 with 32px tiles = 4096x4096 pixels)
-            result = 2.0
-        }
-        
-        // Cache the result
-        _cachedMaxZoom = result
-        return result
+        let result = fitScale * multiplier
+        // Safety: max must always exceed min
+        return max(result, minimumZoomScale + 1.0)
     }
     
     func updateViewSize(_ size: CGSize) {
         let oldViewSize = viewSize
         viewSize = size
         
-        // Only recalculate zoom for significant size changes or first time setup
         let isFirstTime = oldViewSize == .zero
         let significantChange = abs(oldViewSize.width - size.width) > 20 ||
                                abs(oldViewSize.height - size.height) > 20
         
         guard isFirstTime || significantChange else { return }
         
-        // Clear cached zoom bounds only for significant changes (not first time)
-        if significantChange && !isFirstTime {
-            _cachedMinZoom = nil
-            _cachedMaxZoom = nil
-            _zoomBoundsLocked = false
-        }
-        
-        let newMinZoom = minimumZoomScale
-        let newMaxZoom = maximumZoomScale
-        
         if isFirstTime {
-            // For first time, start with fit scale or 1.0, whichever is larger
-            zoomScale = max(newMinZoom, 1.0)
-            // Lock the zoom bounds after initial setup with a small delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self._zoomBoundsLocked = true
-            }
+            zoomScale = fitScale
         } else {
-            // For size changes, only adjust if current zoom is outside valid range
-            if zoomScale < newMinZoom {
-                zoomScale = newMinZoom
-            } else if zoomScale > newMaxZoom {
-                zoomScale = newMaxZoom
-            }
+            zoomScale = zoomScale.clamped(to: minimumZoomScale...maximumZoomScale)
         }
     }
 
@@ -222,14 +157,12 @@ class CanvasViewModel: ObservableObject {
         )
     }
     
-    func applyTool(at point: CGPoint, zoomScale: CGFloat) {
-        
-        let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
+    func applyTool(at point: CGPoint) {
         let width = projectSettings.selectedCanvasSize.dimensions.width
         let height = projectSettings.selectedCanvasSize.dimensions.height
 
-        let col = Int(point.x / tileSize)
-        let row = Int(point.y / tileSize)
+        let col = Int(point.x)
+        let row = Int(point.y)
         let index = row * width + col
 
         guard row >= 0, row < height, col >= 0, col < width, index < pixels.count else { return }
@@ -238,14 +171,12 @@ class CanvasViewModel: ObservableObject {
         objectWillChange.send()
     }
     
-    func getGridCoordinates(from location: CGPoint, zoomScale: CGFloat) -> (row: Int, col: Int)? {
-        
-        let tileSize = CGFloat(projectSettings.selectedTileSize.size) * zoomScale
+    func getGridCoordinates(from location: CGPoint) -> (row: Int, col: Int)? {
         let width = projectSettings.selectedCanvasSize.dimensions.width
         let height = projectSettings.selectedCanvasSize.dimensions.height
 
-        let col = Int(location.x / tileSize)
-        let row = Int(location.y / tileSize)
+        let col = Int(location.x)
+        let row = Int(location.y)
 
         if row >= 0, row < height, col >= 0, col < width {
             return (row, col)
@@ -254,11 +185,6 @@ class CanvasViewModel: ObservableObject {
         }
     }
 
-    func didSwitchToPanTool() {
-        // Only set the pan reset flag, don't trigger any other updates
-        needsPanReset = true
-    }
-    
     @MainActor
     func renderCanvasImage(from view: some View, size: CGSize) -> UIImage {
         let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))

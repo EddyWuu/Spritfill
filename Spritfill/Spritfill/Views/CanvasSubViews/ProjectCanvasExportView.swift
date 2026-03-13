@@ -9,9 +9,10 @@ import SwiftUI
 
 struct ProjectCanvasExportView: View {
     let viewModel: CanvasViewModel
+    var overrideTileSize: CGFloat? = nil
 
     var body: some View {
-        let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
+        let tileSize = overrideTileSize ?? CGFloat(viewModel.projectSettings.selectedTileSize.size)
         let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
 

@@ -63,9 +63,6 @@ class ToolsViewModel: ObservableObject {
 
     func selectTool(_ tool: ToolType) {
         selectedTool = tool
-        if tool == .pan {
-            canvasVM?.didSwitchToPanTool()
-        }
     }
 
     func selectColor(_ color: Color) {
