@@ -13,50 +13,33 @@ class ProjectManagerViewModel: ObservableObject {
     
     // all saved projects
     @Published var allProjects: [ProjectData] = []
-    private let service = FirestoreService()
+    private let storage = LocalStorageService.shared
 
     
     // load all projects from storage
     func loadAllProjects() {
-        service.fetchAllProjects { [weak self] projects in
-            DispatchQueue.main.async {
-                self?.allProjects = projects
-            }
-        }
+        allProjects = storage.fetchAllProjects()
     }
 
     // save a single project to storage
     func save(_ canvas: CanvasViewModel) {
         let project = canvas.toProjectData()
-        service.saveProject(project) { error in
-            if let error = error {
-                print("Error saving project: \(error.localizedDescription)")
-            }
-        }
+        storage.saveProject(project)
     }
 
     // delete a project by ID
     func delete(_ project: ProjectData) {
-        service.deleteProject(project) { [weak self] error in
-            if let error = error {
-                print("Error deleting project: \(error.localizedDescription)")
-            } else {
-                DispatchQueue.main.async {
-                    self?.allProjects.removeAll { $0.id == project.id }
-                }
-            }
-        }
+        storage.deleteProject(project)
+        allProjects.removeAll { $0.id == project.id }
     }
 
     // load a single project into CanvasViewModel
     func loadProject(by id: UUID, completion: @escaping (CanvasViewModel?) -> Void) {
-        service.fetchProject(by: id) { projectData in
-            if let projectData = projectData {
-                let viewModel = CanvasViewModel(from: projectData)
-                completion(viewModel)
-            } else {
-                completion(nil)
-            }
+        if let projectData = storage.fetchProject(by: id) {
+            let viewModel = CanvasViewModel(from: projectData)
+            completion(viewModel)
+        } else {
+            completion(nil)
         }
     }
     

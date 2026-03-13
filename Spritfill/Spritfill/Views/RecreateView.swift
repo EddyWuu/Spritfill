@@ -9,45 +9,55 @@ import SwiftUI
 
 struct RecreateView: View {
     
-    @ObservedObject var recreateViewModel = RecreateViewModel()
+    @StateObject var recreateViewModel = RecreateViewModel()
 
     let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(recreateViewModel.availableSprites, id: \.id) { sprite in
-                        NavigationLink(destination: RecreateCanvasView(sprite: sprite)) {
-                            VStack {
-                                Image(uiImage: sprite.thumbnail)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 100)
-                                    .cornerRadius(10)
+            Group {
+                if recreateViewModel.availableSprites.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "paintbrush")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("No projects to recreate")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Text("Create and save a sprite in Canvas first!")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                } else {
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(recreateViewModel.availableSprites) { sprite in
+                                NavigationLink(destination: RecreateCanvasView(sprite: sprite)) {
+                                    VStack {
+                                        Image(uiImage: sprite.thumbnail)
+                                            .resizable()
+                                            .interpolation(.none)
+                                            .scaledToFit()
+                                            .frame(height: 100)
+                                            .cornerRadius(10)
 
-                                Text(sprite.name)
-                                    .font(.caption)
-                                    .lineLimit(1)
+                                        Text(sprite.name)
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                    }
+                                    .padding(8)
+                                    .background(Color.white)
+                                    .cornerRadius(12)
+                                    .shadow(radius: 2)
+                                }
                             }
-                            .padding(8)
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 2)
                         }
+                        .padding()
                     }
                 }
-                .padding()
             }
-            .navigationTitle("Recreate a Sprite")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        recreateViewModel.startPhotoImport()
-                    } label: {
-                        Label("Import Photo", systemImage: "camera")
-                    }
-                }
+            .onAppear {
+                recreateViewModel.loadSprites()
             }
         }
     }

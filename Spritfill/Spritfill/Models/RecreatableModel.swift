@@ -7,18 +7,14 @@
 
 import UIKit
 
-struct RecreatableArtModel {
+struct RecreatableArtModel: Identifiable {
     
     let id: UUID
     let name: String
     let thumbnail: UIImage
-    let availableSizes: [CanvasSizes]
-    // may need owner
-}
-
-struct RecreateArtModel: Identifiable {
-    let id = UUID()
-    let name: String
-    let thumbnail: UIImage
-    let gridSize: CGSize // For example: 16x16, 32x32, etc.
+    let canvasSize: CanvasSizes
+    let palette: ColorPalettes
+    let tileSize: TileSizes
+    let pixelGrid: [String]           // original hex colors
+    let colorNumberMap: [String: Int]  // hex -> number label for paint-by-numbers
 }

@@ -18,6 +18,9 @@ struct ProjectCreateView: View {
     @State private var isSharing = false
     @State private var showProjectDetails = false
     
+    @State private var showSavedAlert = false
+    @State private var savedAlertMessage = ""
+    
     @State private var showDeleteAlert = false
 
     var body: some View {
@@ -55,7 +58,16 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            // Save
+                            let dims = viewModel.projectSettings.selectedCanvasSize.dimensions
+                            let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
+                            let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
+                                                    height: CGFloat(dims.height) * tileSize)
+                            let canvasView = ProjectCanvasExportView(viewModel: viewModel)
+                            let image = viewModel.renderCanvasImage(from: canvasView, size: exportSize)
+                            
+                            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+                            savedAlertMessage = "Image saved to Photos!"
+                            showSavedAlert = true
                         }) {
                             Image(systemName: "square.and.arrow.down")
                         }
@@ -103,6 +115,11 @@ struct ProjectCreateView: View {
                     ProjectDetailsPopupView(viewModel: viewModel)
                         .presentationDetents([.height(280)])
                         .presentationDragIndicator(.visible)
+                }
+                .alert("Saved", isPresented: $showSavedAlert) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(savedAlertMessage)
                 }
                 
                 // MARK: - Canvas

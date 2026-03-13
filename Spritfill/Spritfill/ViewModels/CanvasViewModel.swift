@@ -167,8 +167,105 @@ class CanvasViewModel: ObservableObject {
 
         guard row >= 0, row < height, col >= 0, col < width, index < pixels.count else { return }
 
-        toolsVM.applyTool(to: &pixels[index])
+        if toolsVM.selectedTool == .fill {
+            floodFill(at: index, with: toolsVM.selectedColor)
+        } else {
+            toolsVM.applyTool(to: &pixels[index])
+        }
         objectWillChange.send()
+    }
+    
+    /// Apply tool at a grid index (used for drag drawing to avoid duplicate coordinate math)
+    func applyToolAtIndex(_ index: Int) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        guard index >= 0, index < pixels.count else { return }
+        
+        let row = index / width
+        let col = index % width
+        guard row >= 0, row < height, col >= 0, col < width else { return }
+        
+        if toolsVM.selectedTool == .fill {
+            floodFill(at: index, with: toolsVM.selectedColor)
+        } else {
+            toolsVM.applyTool(to: &pixels[index])
+        }
+        objectWillChange.send()
+    }
+    
+    /// Convert a screen-space point to a grid index, given the geo size, canvas offset, and zoom scale
+    func gridIndex(from screenPoint: CGPoint, geoSize: CGSize, canvasOffset: CGSize, zoomScale: CGFloat) -> Int? {
+        let gridWidth = projectSettings.selectedCanvasSize.dimensions.width
+        let gridHeight = projectSettings.selectedCanvasSize.dimensions.height
+        
+        let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
+                                       height: CGFloat(gridHeight) * zoomScale)
+        
+        let canvasCenter = CGPoint(
+            x: geoSize.width / 2 + canvasOffset.width,
+            y: geoSize.height / 2 + canvasOffset.height
+        )
+        let canvasOrigin = CGPoint(
+            x: canvasCenter.x - scaledCanvasSize.width / 2,
+            y: canvasCenter.y - scaledCanvasSize.height / 2
+        )
+        
+        let col = Int((screenPoint.x - canvasOrigin.x) / zoomScale)
+        let row = Int((screenPoint.y - canvasOrigin.y) / zoomScale)
+        
+        guard row >= 0, row < gridHeight, col >= 0, col < gridWidth else { return nil }
+        return row * gridWidth + col
+    }
+    
+    // MARK: - Flood Fill (BFS)
+    
+    private func floodFill(at startIndex: Int, with newColor: Color) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        let totalPixels = width * height
+        
+        guard startIndex >= 0, startIndex < totalPixels else { return }
+        
+        let targetColor = pixels[startIndex]
+        
+        // Don't fill if the color is the same
+        if colorsMatch(targetColor, newColor) { return }
+        
+        var queue: [Int] = [startIndex]
+        var visited = Set<Int>()
+        visited.insert(startIndex)
+        
+        while !queue.isEmpty {
+            let current = queue.removeFirst()
+            pixels[current] = newColor
+            
+            let row = current / width
+            let col = current % width
+            
+            // Check 4 neighbors
+            let neighbors = [
+                (row - 1, col), // up
+                (row + 1, col), // down
+                (row, col - 1), // left
+                (row, col + 1)  // right
+            ]
+            
+            for (r, c) in neighbors {
+                guard r >= 0, r < height, c >= 0, c < width else { continue }
+                let neighborIndex = r * width + c
+                guard !visited.contains(neighborIndex) else { continue }
+                guard colorsMatch(pixels[neighborIndex], targetColor) else { continue }
+                
+                visited.insert(neighborIndex)
+                queue.append(neighborIndex)
+            }
+        }
+    }
+    
+    private func colorsMatch(_ a: Color, _ b: Color) -> Bool {
+        if a.isClear && b.isClear { return true }
+        if a.isClear || b.isClear { return false }
+        return a.toHex() == b.toHex()
     }
     
     func getGridCoordinates(from location: CGPoint) -> (row: Int, col: Int)? {

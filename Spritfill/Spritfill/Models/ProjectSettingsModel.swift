@@ -23,31 +23,7 @@ struct ProjectSettings: Codable {
 }
 
 extension ProjectSettings {
-    
-    func toFirestoreDict() -> [String: String] {
-        return [
-            "selectedCanvasSize": selectedCanvasSize.rawValue,
-            "selectedTileSize": selectedTileSize.rawValue,
-            "selectedPalette": selectedPalette.rawValue
-        ]
-    }
-    
-    init?(from dict: [String: String]) {
-        guard
-            let canvasRaw = dict["selectedCanvasSize"],
-            let tileRaw = dict["selectedTileSize"],
-            let paletteRaw = dict["selectedPalette"],
-            let canvas = CanvasSizes(rawValue: canvasRaw),
-            let tile = TileSizes(rawValue: tileRaw),
-            let palette = ColorPalettes(rawValue: paletteRaw)
-        else {
-            return nil
-        }
-        
-        self.selectedCanvasSize = canvas
-        self.selectedTileSize = tile
-        self.selectedPalette = palette
-    }
+    // Codable conformance handles serialization
 }
 
 

@@ -50,13 +50,19 @@ struct CanvasView: View {
                             path.append(.projectCreate(project.id))
                         } label: {
                             VStack {
-                                Image(systemName: "doc.text")
+                                let thumbnailSize = CGSize(width: 120, height: 90)
+                                let image = projectManager.generateThumbnail(for: project, size: thumbnailSize)
+                                
+                                Image(uiImage: image)
                                     .resizable()
+                                    .interpolation(.none)
                                     .scaledToFit()
-                                    .frame(width: 40, height: 40)
-                                    .padding()
+                                    .frame(width: 100, height: 80)
+                                    .padding(.top, 8)
+                                
                                 Text(project.name)
                                     .font(.caption)
+                                    .lineLimit(1)
                             }
                             .frame(height: 120)
                             .frame(maxWidth: .infinity)

@@ -1,28 +1,24 @@
 //
-//  ProjectCanvasView.swift
+//  RecreateProjectCanvasView.swift
 //  Spritfill
 //
-//  Created by Edmond Wu on 2025-01-31.
+//  Created by Edmond Wu on 2026-03-13.
 //
 
 import SwiftUI
 
-struct ProjectCanvasView: View {
-    @ObservedObject var viewModel: CanvasViewModel
+struct RecreateProjectCanvasView: View {
+    @ObservedObject var viewModel: RecreateCanvasViewModel
 
-    // All offsets are in screen-space (points on screen)
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var dragVisitedIndices: Set<Int> = []
 
     var body: some View {
-        
         GeometryReader { geo in
-            let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
-            let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
-
+            let gridWidth = viewModel.gridWidth
+            let gridHeight = viewModel.gridHeight
             let zoomScale = viewModel.zoomScale
-            // Render at the full scaled size — no scaleEffect needed
             let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
                                           height: CGFloat(gridHeight) * zoomScale)
 
@@ -31,7 +27,7 @@ struct ProjectCanvasView: View {
                     let cellSize = zoomScale
                     for row in 0..<gridHeight {
                         for col in 0..<gridWidth {
-                            let color = viewModel.pixels[row * gridWidth + col]
+                            let index = row * gridWidth + col
                             let rect = CGRect(
                                 x: CGFloat(col) * cellSize,
                                 y: CGFloat(row) * cellSize,
@@ -39,13 +35,37 @@ struct ProjectCanvasView: View {
                                 height: cellSize
                             )
 
-                            // checkerboard background color
-                            let isLight = (row + col) % 2 == 0
-                            let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
+                            let targetHex = viewModel.sprite.pixelGrid[index]
+                            let userColor = index < viewModel.userPixels.count ? viewModel.userPixels[index] : Color.clear
 
-                            context.fill(Path(rect), with: .color(background))
-                            if color != .clear {
-                                context.fill(Path(rect), with: .color(color))
+                            // Checkerboard background
+                            let isLight = (row + col) % 2 == 0
+                            let bg = isLight ? Color.gray.opacity(0.1) : Color.gray.opacity(0.2)
+                            context.fill(Path(rect), with: .color(bg))
+
+                            if !userColor.isClear {
+                                // User has painted this cell
+                                context.fill(Path(rect), with: .color(userColor))
+                            } else if targetHex != "clear" {
+                                // Show reference at lighter opacity
+                                context.fill(Path(rect), with: .color(Color(hex: targetHex).opacity(0.15)))
+
+                                // Draw the number
+                                if let number = viewModel.sprite.colorNumberMap[targetHex] {
+                                    let fontSize = max(cellSize * 0.4, 6)
+                                    let text = Text("\(number)")
+                                        .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                        .foregroundColor(.gray.opacity(0.7))
+
+                                    let resolved = context.resolve(text)
+                                    context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
+                                }
+                            }
+
+                            // Grid lines when zoomed in enough
+                            if cellSize > 8 {
+                                let borderRect = rect.insetBy(dx: 0.5, dy: 0.5)
+                                context.stroke(Path(borderRect), with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
                             }
                         }
                     }
@@ -59,7 +79,7 @@ struct ProjectCanvasView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        if viewModel.toolsVM.selectedTool == .pan {
+                        if viewModel.selectedTool == .pan {
                             let proposed = CGSize(
                                 width: dragStart.width + value.translation.width,
                                 height: dragStart.height + value.translation.height
@@ -70,11 +90,10 @@ struct ProjectCanvasView: View {
                                 canvasSize: scaledCanvasSize
                             )
                         } else {
-                            // Draw on drag for pencil/eraser/fill
+                            // Draw on drag for paint/eraser
                             if let index = viewModel.gridIndex(from: value.location,
                                                                 geoSize: geo.size,
-                                                                canvasOffset: canvasOffset,
-                                                                zoomScale: zoomScale) {
+                                                                canvasOffset: canvasOffset) {
                                 if !dragVisitedIndices.contains(index) {
                                     dragVisitedIndices.insert(index)
                                     viewModel.applyToolAtIndex(index)
@@ -83,15 +102,13 @@ struct ProjectCanvasView: View {
                         }
                     }
                     .onEnded { value in
-                        if viewModel.toolsVM.selectedTool == .pan {
+                        if viewModel.selectedTool == .pan {
                             dragStart = canvasOffset
                         } else {
-                            // Also handle tap (single point, no drag distance)
                             if dragVisitedIndices.isEmpty {
                                 if let index = viewModel.gridIndex(from: value.location,
                                                                     geoSize: geo.size,
-                                                                    canvasOffset: canvasOffset,
-                                                                    zoomScale: zoomScale) {
+                                                                    canvasOffset: canvasOffset) {
                                     viewModel.applyToolAtIndex(index)
                                 }
                             }
@@ -106,19 +123,16 @@ struct ProjectCanvasView: View {
                 viewModel.updateViewSize(geo.size)
             }
             .onChange(of: viewModel.zoomScale) { oldZoom, newZoom in
-                // When zoom changes, scale the offset so the canvas center stays stable
                 if oldZoom != 0 {
                     let ratio = newZoom / oldZoom
                     let scaled = CGSize(
                         width: canvasOffset.width * ratio,
                         height: canvasOffset.height * ratio
                     )
-                    
                     let newScaledCanvasSize = CGSize(
                         width: CGFloat(gridWidth) * newZoom,
                         height: CGFloat(gridHeight) * newZoom
                     )
-                    
                     canvasOffset = viewModel.clampedOffset(
                         for: scaled,
                         geoSize: geo.size,
