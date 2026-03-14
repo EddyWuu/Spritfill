@@ -35,23 +35,38 @@ struct RecreateProjectCanvasView: View {
                                 height: cellSize
                             )
 
-                            let targetHex = viewModel.sprite.pixelGrid[index]
+                            let targetHex = viewModel.referenceGrid[index]
                             let userColor = index < viewModel.userPixels.count ? viewModel.userPixels[index] : Color.clear
+                            let userHex = index < viewModel.userPixelHexes.count ? viewModel.userPixelHexes[index] : "clear"
 
                             // Checkerboard background
                             let isLight = (row + col) % 2 == 0
                             let bg = isLight ? Color.gray.opacity(0.1) : Color.gray.opacity(0.2)
                             context.fill(Path(rect), with: .color(bg))
 
-                            if !userColor.isClear {
+                            if userHex != "clear" {
                                 // User has painted this cell
                                 context.fill(Path(rect), with: .color(userColor))
+                                
+                                // If wrong color, show the number on top so user knows
+                                if targetHex != "clear" {
+                                    if userHex.lowercased() != targetHex.lowercased() {
+                                        if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
+                                            let fontSize = max(cellSize * 0.4, 6)
+                                            let text = Text("\(number)")
+                                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                                .foregroundColor(.white)
+                                            let resolved = context.resolve(text)
+                                            context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
+                                        }
+                                    }
+                                }
                             } else if targetHex != "clear" {
                                 // Show reference at lighter opacity
                                 context.fill(Path(rect), with: .color(Color(hex: targetHex).opacity(0.15)))
 
                                 // Draw the number
-                                if let number = viewModel.sprite.colorNumberMap[targetHex] {
+                                if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
                                     let fontSize = max(cellSize * 0.4, 6)
                                     let text = Text("\(number)")
                                         .font(.system(size: fontSize, weight: .bold, design: .rounded))
@@ -113,6 +128,8 @@ struct RecreateProjectCanvasView: View {
                                 }
                             }
                             dragVisitedIndices.removeAll()
+                            // Auto-save after each paint/erase action
+                            viewModel.saveProgress()
                         }
                     }
             )

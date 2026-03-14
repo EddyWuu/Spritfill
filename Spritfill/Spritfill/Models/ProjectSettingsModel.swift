@@ -22,10 +22,6 @@ struct ProjectSettings: Codable {
     }
 }
 
-extension ProjectSettings {
-    // Codable conformance handles serialization
-}
-
 
 // MARK: - Color Palettes
 
@@ -180,8 +176,6 @@ enum TileSizes: String, CaseIterable, Codable {
 enum CanvasRoute: Hashable {
     case newProject
     case projectCreate(UUID)
-//    case existingProject(Project)
-    // need to create existing project struct
 }
 
 

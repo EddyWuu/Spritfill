@@ -16,7 +16,7 @@ struct RecreateColorPaletteView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(viewModel.numberedColors, id: \.hex) { entry in
-                    let isSelected = viewModel.selectedColor.toHex()?.lowercased() == entry.hex.lowercased()
+                    let isSelected = viewModel.selectedColorHex.lowercased() == entry.hex.lowercased()
 
                     VStack(spacing: 2) {
                         Circle()
@@ -38,7 +38,7 @@ struct RecreateColorPaletteView: View {
                             .foregroundColor(.primary)
                     }
                     .onTapGesture {
-                        viewModel.selectColor(entry.color)
+                        viewModel.selectColor(entry.color, hex: entry.hex)
                     }
                 }
             }

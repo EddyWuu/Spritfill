@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import SwiftUI
 
 class ProjectManagerViewModel: ObservableObject {
@@ -45,19 +44,21 @@ class ProjectManagerViewModel: ObservableObject {
     
     @MainActor
     func generateThumbnail(for project: ProjectData, size: CGSize) -> UIImage {
-        let canvasVM = CanvasViewModel(from: project)
-        
         let gridWidth = CGFloat(project.settings.selectedCanvasSize.dimensions.width)
         let gridHeight = CGFloat(project.settings.selectedCanvasSize.dimensions.height)
         
-        // Calculate tile size so the full canvas fits within the thumbnail
         let scaledTileSize = min(size.width / gridWidth, size.height / gridHeight)
-        
         let renderWidth = gridWidth * scaledTileSize
         let renderHeight = gridHeight * scaledTileSize
         
-        let view = ProjectCanvasExportView(viewModel: canvasVM, overrideTileSize: scaledTileSize)
-            .frame(width: renderWidth, height: renderHeight)
+        // Use lightweight PixelGridThumbnailView — no CanvasViewModel needed
+        let view = PixelGridThumbnailView(
+            pixelGrid: project.pixelGrid,
+            gridWidth: Int(gridWidth),
+            gridHeight: Int(gridHeight),
+            tileSize: scaledTileSize
+        )
+        .frame(width: renderWidth, height: renderHeight)
         
         let renderer = ImageRenderer(content: view)
         renderer.scale = UIScreen.main.scale

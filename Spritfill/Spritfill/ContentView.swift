@@ -28,14 +28,9 @@ struct ContentView: View {
                     Label("Recreate", systemImage: "pencil")
                 }
             
-            GenerateView()
+            DownloadsView()
                 .tabItem {
-                    Label("Generate", systemImage: "bubble.left.and.bubble.right")
-                }
-            
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.circle")
+                    Label("Downloads", systemImage: "arrow.down.circle")
                 }
         }
     }

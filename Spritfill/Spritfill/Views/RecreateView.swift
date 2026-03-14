@@ -9,57 +9,79 @@ import SwiftUI
 
 struct RecreateView: View {
     
-    @StateObject var recreateViewModel = RecreateViewModel()
-
-    let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
+    @StateObject private var recreateViewModel = RecreateViewModel()
+    @State private var selectedTab: RecreateTab = .browse
+    @State private var spriteToConfirm: RecreatableArtModel? = nil
+    @State private var showConfirmAlert = false
+    @State private var activeSession: RecreateSession? = nil
+    @State private var navigateToCanvas = false
+    
+    enum RecreateTab: String, CaseIterable {
+        case browse = "Browse"
+        case inProgress = "In Progress"
+        case finished = "Finished"
+    }
 
     var body: some View {
-        NavigationView {
-            Group {
-                if recreateViewModel.availableSprites.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "paintbrush")
-                            .font(.largeTitle)
-                            .foregroundColor(.secondary)
-                        Text("No projects to recreate")
-                            .font(.headline)
-                            .foregroundColor(.secondary)
-                        Text("Create and save a sprite in Canvas first!")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+        NavigationStack {
+            VStack(spacing: 0) {
+                
+                // MARK: - Tab picker
+                Picker("", selection: $selectedTab) {
+                    ForEach(RecreateTab.allCases, id: \.self) { tab in
+                        Text(tab.rawValue).tag(tab)
                     }
-                } else {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 16) {
-                            ForEach(recreateViewModel.availableSprites) { sprite in
-                                NavigationLink(destination: RecreateCanvasView(sprite: sprite)) {
-                                    VStack {
-                                        Image(uiImage: sprite.thumbnail)
-                                            .resizable()
-                                            .interpolation(.none)
-                                            .scaledToFit()
-                                            .frame(height: 100)
-                                            .cornerRadius(10)
-
-                                        Text(sprite.name)
-                                            .font(.caption)
-                                            .lineLimit(1)
-                                    }
-                                    .padding(8)
-                                    .background(Color.white)
-                                    .cornerRadius(12)
-                                    .shadow(radius: 2)
-                                }
-                            }
-                        }
-                        .padding()
-                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+                
+                // MARK: - Tab content
+                switch selectedTab {
+                case .browse:
+                    RecreateBrowseView(
+                        viewModel: recreateViewModel,
+                        spriteToConfirm: $spriteToConfirm,
+                        showConfirmAlert: $showConfirmAlert
+                    )
+                case .inProgress:
+                    RecreateInProgressView(
+                        viewModel: recreateViewModel,
+                        activeSession: $activeSession,
+                        navigateToCanvas: $navigateToCanvas
+                    )
+                case .finished:
+                    RecreateFinishedView(viewModel: recreateViewModel)
+                }
+            }
+            .navigationDestination(isPresented: $navigateToCanvas) {
+                if let session = activeSession {
+                    RecreateCanvasView(session: session)
                 }
             }
             .onAppear {
-                recreateViewModel.loadSprites()
+                recreateViewModel.loadAll()
+            }
+            .onChange(of: navigateToCanvas) { _, isActive in
+                if !isActive {
+                    // Reload when returning from canvas
+                    recreateViewModel.loadAll()
+                }
+            }
+            .alert("Start Recreating?", isPresented: $showConfirmAlert) {
+                Button("Start") {
+                    if let sprite = spriteToConfirm {
+                        activeSession = recreateViewModel.getOrCreateSession(for: sprite)
+                        recreateViewModel.loadAll()
+                        navigateToCanvas = true
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    spriteToConfirm = nil
+                }
+            } message: {
+                Text("Would you like to start recreating \(spriteToConfirm?.name ?? "this sprite")?")
             }
         }
     }
 }
-

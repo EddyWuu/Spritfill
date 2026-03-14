@@ -23,10 +23,10 @@ class ToolsViewModel: ObservableObject {
         }
     }
 
-    // need to allow toolsVM zoom slider to modify zoomScale in CanvasVM, weak to avoid RC
     weak var canvasVM: CanvasViewModel?
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
+    @Published var selectedColorIndex: Int = 0
     private var palette: ColorPalettes
 
     init(defaultColor: Color, palette: ColorPalettes) {
@@ -53,10 +53,8 @@ class ToolsViewModel: ObservableObject {
         case .eraser:
             pixel = .clear
         case .fill:
-            // not yet implemented
             break
         case .pan:
-            // Do nothing in pan mode
             break
         }
     }
@@ -65,7 +63,8 @@ class ToolsViewModel: ObservableObject {
         selectedTool = tool
     }
 
-    func selectColor(_ color: Color) {
+    func selectColor(_ color: Color, at index: Int = -1) {
         selectedColor = color
+        selectedColorIndex = index
     }
 }

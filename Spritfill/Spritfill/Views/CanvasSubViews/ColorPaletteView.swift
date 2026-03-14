@@ -17,7 +17,7 @@ struct ColorPaletteView: View {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(0..<toolsVM.availableColors.count, id: \.self) { index in
                     let color = toolsVM.availableColors[index]
-                    let isSelected = color.toHex() == toolsVM.selectedColor.toHex()
+                    let isSelected = index == toolsVM.selectedColorIndex
 
                     Circle()
                         .fill(color)
@@ -33,7 +33,7 @@ struct ColorPaletteView: View {
                         )
                         .shadow(color: isSelected ? .black.opacity(0.3) : .clear, radius: 2)
                         .onTapGesture {
-                            toolsVM.selectColor(color)
+                            toolsVM.selectColor(color, at: index)
                         }
                 }
             }

@@ -9,45 +9,87 @@ import SwiftUI
 
 struct GalleryView: View {
     
-    @StateObject private var projectManager = ProjectManagerViewModel()
-    
-    private let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
+    @StateObject private var galleryViewModel = GalleryViewModel()
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(projectManager.allProjects, id: \.id) { project in
-                    VStack {
-                        
-                        let thumbnailSize = CGSize(width: 150, height: 120)
-                        let image = projectManager.generateThumbnail(for: project, size: thumbnailSize)
-
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 120)
-                            .cornerRadius(12)
-                        
-                        Text(project.name)
-                            .font(.caption)
-                            .lineLimit(1)
-                            .padding(.top, 4)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        ZStack(alignment: .top) {
+            if galleryViewModel.boardItems.isEmpty {
+                // Empty state
+                VStack(spacing: 16) {
+                    Spacer()
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 50))
+                        .foregroundColor(.secondary)
+                    Text("Your Gallery is Empty")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.secondary)
+                    Text("Create some pixel art in the Canvas tab\nand it will appear here!")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGroupedBackground))
+            } else {
+                // Photo board
+                GalleryBoardView(viewModel: galleryViewModel)
+                    .edgesIgnoringSafeArea(.bottom)
             }
-            .padding()
+            
+            // Floating toolbar
+            toolbar
         }
-        .background(Color(.systemGroupedBackground))
         .onAppear {
-            projectManager.loadAllProjects()
+            galleryViewModel.loadGallery()
+        }
+        .sheet(isPresented: $galleryViewModel.showStorage) {
+            GalleryStorageView(viewModel: galleryViewModel)
+                .presentationDetents([.medium, .large])
         }
     }
+    
+    // MARK: - Floating toolbar
+    
+    private var toolbar: some View {
+        HStack(spacing: 16) {
+            Text("Gallery")
+                .font(.headline)
+            
+            Spacer()
+            
+            // Storage button (archived items)
+            if galleryViewModel.isEditMode {
+                Button(action: {
+                    galleryViewModel.showStorage = true
+                }) {
+                    Image(systemName: "archivebox")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(.primary)
+                        .padding(8)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                }
+            }
+            
+            // Edit / Done button
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    galleryViewModel.isEditMode.toggle()
+                }
+            }) {
+                Text(galleryViewModel.isEditMode ? "Done" : "Edit")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(galleryViewModel.isEditMode ? .blue : .primary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(16)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
+    }
 }
-

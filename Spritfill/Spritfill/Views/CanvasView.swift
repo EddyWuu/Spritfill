@@ -83,7 +83,7 @@ struct CanvasView: View {
                     NewProjectSetUpView(onProjectCreated: { viewModel in
                         let id = viewModel.projectID
                         canvasViewModels[id] = viewModel
-                        projectManager.save(viewModel) // save to firebase
+                        projectManager.save(viewModel)
                         path.removeLast()
                         path.append(.projectCreate(id))
                     })

@@ -13,15 +13,7 @@ struct RecreateToolBarView: View {
     var body: some View {
         HStack(spacing: 16) {
             ForEach(RecreateCanvasViewModel.RecreateTool.allCases, id: \.self) { tool in
-                Button(action: {
-                    viewModel.selectTool(tool)
-                }) {
-                    Image(systemName: tool.iconName)
-                        .foregroundColor(viewModel.isSelected(tool: tool) ? .blue : .primary)
-                        .padding()
-                        .background(viewModel.isSelected(tool: tool) ? Color.blue.opacity(0.2) : Color.clear)
-                        .clipShape(Circle())
-                }
+                RecreateToolButtonView(tool: tool, viewModel: viewModel)
             }
             
             Spacer()
