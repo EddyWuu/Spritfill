@@ -14,45 +14,84 @@ struct DownloadsView: View {
     
     let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
     
+    // Organize sprites by groups
+    private var groupedSprites: [(name: String, sprites: [PremadeSpriteData])] {
+        var groups: [(name: String, sprites: [PremadeSpriteData])] = []
+        var ungrouped: [PremadeSpriteData] = []
+        var seen: Set<String> = []
+        
+        for sprite in PremadeSprites.all {
+            if let group = sprite.group {
+                if !seen.contains(group) {
+                    seen.insert(group)
+                    let members = PremadeSprites.all
+                        .filter { $0.group == group }
+                        .sorted { $0.groupOrder < $1.groupOrder }
+                    groups.append((name: group, sprites: members))
+                }
+            } else {
+                ungrouped.append(sprite)
+            }
+        }
+        
+        if !ungrouped.isEmpty {
+            groups.append((name: "Individual Sprites", sprites: ungrouped))
+        }
+        
+        return groups
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(PremadeSprites.all) { sprite in
-                        VStack(spacing: 6) {
-                            // Render the sprite thumbnail
-                            spritePreview(sprite: sprite)
-                                .frame(width: 100, height: 100)
-                                .cornerRadius(10)
-                            
-                            Text(sprite.name)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .lineLimit(1)
-                            
-                            // Download button
-                            Button(action: {
-                                exportSprite(sprite)
-                            }) {
-                                Label("PNG", systemImage: "arrow.down.circle.fill")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 4)
-                                    .background(Color.blue)
-                                    .cornerRadius(8)
-                            }
-                        }
-                        .padding(8)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(12)
-                        .shadow(radius: 2)
+                ForEach(groupedSprites, id: \.name) { section in
+                    
+                    // Section header
+                    HStack {
+                        Text(section.name)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Spacer()
                     }
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 4)
+                    
+                    LazyVGrid(columns: columns, spacing: 16) {
+                        ForEach(section.sprites) { sprite in
+                            VStack(spacing: 6) {
+                                spritePreview(sprite: sprite)
+                                    .frame(width: 100, height: 100)
+                                    .cornerRadius(10)
+                                
+                                Text(sprite.name)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .lineLimit(1)
+                                
+                                Button(action: {
+                                    exportSprite(sprite)
+                                }) {
+                                    Label("PNG", systemImage: "arrow.down.circle.fill")
+                                        .font(.caption2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue)
+                                        .cornerRadius(8)
+                                }
+                            }
+                            .padding(8)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(12)
+                            .shadow(radius: 2)
+                        }
+                    }
+                    .padding(.horizontal)
                 }
-                .padding()
             }
-            .navigationTitle("Downloads")
+            .navigationTitle("Community Sprites")
             .alert("Saved!", isPresented: $showSavedAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
