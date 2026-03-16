@@ -191,22 +191,22 @@ extension PremadeSprites {
         let k = "#391f21"  // pommel dark
         
         let grid: [String] = [
-            c, c, c, c, c, c, c, c, c, c, c, c, c, c, w, c,
-            c, c, c, c, c, c, c, c, c, c, c, c, c, w, b, c,
-            c, c, c, c, c, c, c, c, c, c, c, c, w, b, d, c,
-            c, c, c, c, c, c, c, c, c, c, c, w, b, d, c, c,
-            c, c, c, c, c, c, c, c, c, c, w, b, d, c, c, c,
-            c, c, c, c, c, c, c, c, c, w, b, d, c, c, c, c,
-            c, c, c, c, c, c, c, c, w, b, d, c, c, c, c, c,
-            c, c, c, c, c, c, c, w, b, d, c, c, c, c, c, c,
-            c, c, c, c, c, c, w, b, d, c, c, c, c, c, c, c,
-            c, c, c, c, c, g, g, d, c, c, c, c, c, c, c, c,
-            c, c, c, c, g, g, g, g, c, c, c, c, c, c, c, c,
-            c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, c,
-            c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, c,
-            c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, c,
-            c, c, c, c, c, k, k, c, c, c, c, c, c, c, c, c,
-            c, c, c, c, k, k, k, k, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c, // row 0 - tip
+            c, c, c, c, c, c, w, b, w, c, c, c, c, c, c, c, // row 1
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 2
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 3
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 4
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 5
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 6
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 7
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 8
+            c, c, c, g, g, g, g, g, g, g, g, g, c, c, c, c, // row 9 - crossguard
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 10
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 11
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 12
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 13
+            c, c, c, c, c, k, g, g, k, c, c, c, c, c, c, c, // row 14 - pommel
+            c, c, c, c, c, c, k, k, c, c, c, c, c, c, c, c, // row 15
         ]
         
         return PremadeSpriteData(id: "sword", name: "Sword", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)

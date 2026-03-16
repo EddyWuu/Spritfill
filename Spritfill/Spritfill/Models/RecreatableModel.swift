@@ -5,25 +5,29 @@
 //  Created by Edmond Wu on 2025-08-06.
 //
 
-import UIKit
+import SwiftUI
 
 /// A sprite available for recreating (shown in the Browse tab)
 struct RecreatableArtModel: Identifiable {
     
-    let id: String                     // premade ID or user project UUID string
+    let id: String
     let name: String
-    let thumbnail: UIImage
     let sourceType: RecreateSource
     let canvasSize: CanvasSizes
     let palette: ColorPalettes
-    let pixelGrid: [String]           // original hex colors
-    let colorNumberMap: [String: Int]  // hex -> number label for paint-by-numbers
+    let pixelGrid: [String]
+    let colorNumberMap: [String: Int]
+    
+    var gridWidth: Int { canvasSize.dimensions.width }
+    var gridHeight: Int { canvasSize.dimensions.height }
 }
 
 /// A recreate session shown in the In Progress tab
 struct RecreateSessionItem: Identifiable {
-    let id: UUID                      // session ID
+    let id: UUID
     let session: RecreateSession
-    let thumbnail: UIImage            // rendered from user's current progress
-    let progressText: String          // e.g. "42/128"
+    let progressText: String
+    
+    var gridWidth: Int { session.canvasSize.dimensions.width }
+    var gridHeight: Int { session.canvasSize.dimensions.height }
 }

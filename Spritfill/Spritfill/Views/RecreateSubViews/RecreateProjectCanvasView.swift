@@ -106,6 +106,7 @@ struct RecreateProjectCanvasView: View {
                             )
                         } else {
                             // Draw on drag for paint/eraser
+                            viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: value.location,
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset) {
@@ -121,12 +122,14 @@ struct RecreateProjectCanvasView: View {
                             dragStart = canvasOffset
                         } else {
                             if dragVisitedIndices.isEmpty {
+                                viewModel.beginAction()
                                 if let index = viewModel.gridIndex(from: value.location,
                                                                     geoSize: geo.size,
                                                                     canvasOffset: canvasOffset) {
                                     viewModel.applyToolAtIndex(index)
                                 }
                             }
+                            viewModel.endAction()
                             dragVisitedIndices.removeAll()
                             // Auto-save after each paint/erase action
                             viewModel.saveProgress()

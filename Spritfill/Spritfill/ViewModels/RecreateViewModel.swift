@@ -25,7 +25,6 @@ class RecreateViewModel: ObservableObject {
     
     // MARK: - Load everything
     
-    @MainActor
     func loadAll() {
         loadBrowseSprites()
         loadSessions()
@@ -33,52 +32,34 @@ class RecreateViewModel: ObservableObject {
     
     // MARK: - Browse tab: premade + user sprites
     
-    @MainActor
     private func loadBrowseSprites() {
         var sprites: [RecreatableArtModel] = []
         
-        // 1. Premade sprites
         for premade in PremadeSprites.all {
-            let colorNumberMap = buildColorNumberMap(from: premade.pixelGrid)
-            let thumbnail = generateThumbnailFromGrid(
-                pixelGrid: premade.pixelGrid,
-                width: premade.canvasSize.dimensions.width,
-                height: premade.canvasSize.dimensions.height
-            )
             sprites.append(RecreatableArtModel(
                 id: premade.id,
                 name: premade.name,
-                thumbnail: thumbnail,
                 sourceType: .premade,
                 canvasSize: premade.canvasSize,
                 palette: premade.palette,
                 pixelGrid: premade.pixelGrid,
-                colorNumberMap: colorNumberMap
+                colorNumberMap: buildColorNumberMap(from: premade.pixelGrid)
             ))
         }
         
-        // 2. User-made sprites (from saved canvas projects)
         let projects = projectStorage.fetchAllProjects()
         for project in projects {
             let hasContent = project.pixelGrid.contains(where: { $0 != "clear" })
             guard hasContent else { continue }
             
-            let colorNumberMap = buildColorNumberMap(from: project.pixelGrid)
-            let thumbnail = generateThumbnailFromGrid(
-                pixelGrid: project.pixelGrid,
-                width: project.settings.selectedCanvasSize.dimensions.width,
-                height: project.settings.selectedCanvasSize.dimensions.height
-            )
-            let sourceID = project.id.uuidString
             sprites.append(RecreatableArtModel(
-                id: sourceID,
+                id: project.id.uuidString,
                 name: project.name,
-                thumbnail: thumbnail,
                 sourceType: .userMade,
                 canvasSize: project.settings.selectedCanvasSize,
                 palette: project.settings.selectedPalette,
                 pixelGrid: project.pixelGrid,
-                colorNumberMap: colorNumberMap
+                colorNumberMap: buildColorNumberMap(from: project.pixelGrid)
             ))
         }
         
@@ -87,7 +68,6 @@ class RecreateViewModel: ObservableObject {
     
     // MARK: - Load sessions (in progress + finished)
     
-    @MainActor
     private func loadSessions() {
         let sessions = sessionStorage.fetchAllSessions()
         
@@ -95,16 +75,9 @@ class RecreateViewModel: ObservableObject {
         var finished: [RecreateSessionItem] = []
         
         for session in sessions {
-            let thumbnail = generateThumbnailFromGrid(
-                pixelGrid: session.isComplete ? session.referenceGrid : session.userPixels,
-                width: session.canvasSize.dimensions.width,
-                height: session.canvasSize.dimensions.height
-            )
-            
             let item = RecreateSessionItem(
                 id: session.id,
                 session: session,
-                thumbnail: thumbnail,
                 progressText: "\(session.completionCount)/\(session.totalColoredPixels)"
             )
             
@@ -206,55 +179,5 @@ class RecreateViewModel: ObservableObject {
             }
         }
         return map
-    }
-    
-    @MainActor
-    private func generateThumbnailFromGrid(pixelGrid: [String], width: Int, height: Int) -> UIImage {
-        let thumbSize: CGFloat = 120
-        let tileSize = min(thumbSize / CGFloat(width), thumbSize / CGFloat(height))
-        let renderW = CGFloat(width) * tileSize
-        let renderH = CGFloat(height) * tileSize
-        
-        let view = PixelGridThumbnailView(
-            pixelGrid: pixelGrid,
-            gridWidth: width,
-            gridHeight: height,
-            tileSize: tileSize
-        )
-        .frame(width: renderW, height: renderH)
-        
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
-        return renderer.uiImage ?? UIImage(systemName: "square.grid.3x3")!
-    }
-}
-
-// MARK: - Simple thumbnail renderer for any pixel grid
-
-struct PixelGridThumbnailView: View {
-    let pixelGrid: [String]
-    let gridWidth: Int
-    let gridHeight: Int
-    let tileSize: CGFloat
-    
-    var body: some View {
-        Canvas { context, size in
-            for row in 0..<gridHeight {
-                for col in 0..<gridWidth {
-                    let index = row * gridWidth + col
-                    guard index < pixelGrid.count else { continue }
-                    let hex = pixelGrid[index]
-                    guard hex != "clear" else { continue }
-                    
-                    let rect = CGRect(
-                        x: CGFloat(col) * tileSize,
-                        y: CGFloat(row) * tileSize,
-                        width: tileSize,
-                        height: tileSize
-                    )
-                    context.fill(Path(rect), with: .color(Color(hex: hex)))
-                }
-            }
-        }
     }
 }

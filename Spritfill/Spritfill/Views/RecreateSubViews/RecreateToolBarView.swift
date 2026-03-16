@@ -18,6 +18,14 @@ struct RecreateToolBarView: View {
             
             Spacer()
             
+            // Undo button
+            Button(action: { viewModel.undo() }) {
+                Image(systemName: "arrow.uturn.backward")
+                    .font(.title3)
+                    .foregroundColor(viewModel.canUndo ? .primary : .gray.opacity(0.4))
+            }
+            .disabled(!viewModel.canUndo)
+            
             // Show currently selected color swatch
             Circle()
                 .fill(viewModel.selectedColor)

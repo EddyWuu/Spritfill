@@ -165,6 +165,7 @@ class GalleryViewModel: ObservableObject {
         
         let renderer = ImageRenderer(content: view)
         renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
         if let image = renderer.uiImage {
             thumbnailCache[project.id] = image
         }

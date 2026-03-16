@@ -11,13 +11,14 @@ class ToolsViewModel: ObservableObject {
     
     enum ToolType: CaseIterable {
         
-        case pencil, eraser, fill, pan
+        case pencil, eraser, fill, shift, pan
 
         var iconName: String {
             switch self {
             case .pencil: return "pencil"
             case .eraser: return "eraser"
             case .fill: return "paintbrush"
+            case .shift: return "arrow.up.and.down.and.arrow.left.and.right"
             case .pan: return "hand.draw"
             }
         }
@@ -53,6 +54,8 @@ class ToolsViewModel: ObservableObject {
         case .eraser:
             pixel = .clear
         case .fill:
+            break
+        case .shift:
             break
         case .pan:
             break

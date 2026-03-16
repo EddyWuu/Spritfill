@@ -59,7 +59,8 @@ struct ProjectCanvasView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        if viewModel.toolsVM.selectedTool == .pan {
+                        let tool = viewModel.toolsVM.selectedTool
+                        if tool == .pan {
                             let proposed = CGSize(
                                 width: dragStart.width + value.translation.width,
                                 height: dragStart.height + value.translation.height
@@ -69,8 +70,9 @@ struct ProjectCanvasView: View {
                                 geoSize: geo.size,
                                 canvasSize: scaledCanvasSize
                             )
-                        } else {
+                        } else if tool != .shift {
                             // Draw on drag for pencil/eraser/fill
+                            viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: value.location,
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset,
@@ -83,11 +85,13 @@ struct ProjectCanvasView: View {
                         }
                     }
                     .onEnded { value in
-                        if viewModel.toolsVM.selectedTool == .pan {
+                        let tool = viewModel.toolsVM.selectedTool
+                        if tool == .pan {
                             dragStart = canvasOffset
-                        } else {
+                        } else if tool != .shift {
                             // Also handle tap (single point, no drag distance)
                             if dragVisitedIndices.isEmpty {
+                                viewModel.beginAction()
                                 if let index = viewModel.gridIndex(from: value.location,
                                                                     geoSize: geo.size,
                                                                     canvasOffset: canvasOffset,
@@ -95,6 +99,7 @@ struct ProjectCanvasView: View {
                                     viewModel.applyToolAtIndex(index)
                                 }
                             }
+                            viewModel.endAction()
                             dragVisitedIndices.removeAll()
                         }
                     }

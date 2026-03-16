@@ -82,6 +82,7 @@ struct RecreateCanvasView: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .edgesIgnoringSafeArea(.bottom)
         .onDisappear {
             viewModel.saveProgress()

@@ -9,14 +9,23 @@ import SwiftUI
 
 struct ToolsBarView: View {
     @ObservedObject var toolsVM: ToolsViewModel
+    @ObservedObject var canvasVM: CanvasViewModel
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 8) {
             ForEach(toolsVM.availableTools, id: \.self) { tool in
                 ToolButtonView(tool: tool, toolsVM: toolsVM)
             }
             
             Spacer()
+            
+            // Undo button
+            Button(action: { canvasVM.undo() }) {
+                Image(systemName: "arrow.uturn.backward")
+                    .font(.title3)
+                    .foregroundColor(canvasVM.canUndo ? .primary : .gray.opacity(0.4))
+            }
+            .disabled(!canvasVM.canUndo)
             
             // Show currently selected color swatch
             Circle()

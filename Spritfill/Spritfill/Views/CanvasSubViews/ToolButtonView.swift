@@ -18,8 +18,9 @@ struct ToolButtonView: View {
             toolsVM.selectTool(tool)
         }) {
             Image(systemName: tool.iconName)
+                .font(.body)
                 .foregroundColor(toolsVM.isSelected(tool: tool) ? .blue : .primary)
-                .padding()
+                .padding(10)
                 .background(toolsVM.isSelected(tool: tool) ? Color.blue.opacity(0.2) : Color.clear)
                 .clipShape(Circle())
         }

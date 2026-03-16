@@ -54,12 +54,14 @@ struct RecreateInProgressView: View {
                         navigateToCanvas = true
                     }) {
                         VStack(spacing: 4) {
-                            Image(uiImage: item.thumbnail)
-                                .resizable()
-                                .interpolation(.none)
-                                .scaledToFit()
-                                .frame(height: 100)
-                                .cornerRadius(10)
+                            PixelGridThumbnailView(
+                                pixelGrid: item.session.userPixels,
+                                gridWidth: item.gridWidth,
+                                gridHeight: item.gridHeight,
+                                tileSize: max(1, 100 / CGFloat(max(item.gridWidth, item.gridHeight)))
+                            )
+                            .frame(width: 100, height: 100)
+                            .cornerRadius(10)
                             
                             Text(item.session.spriteName)
                                 .font(.caption)

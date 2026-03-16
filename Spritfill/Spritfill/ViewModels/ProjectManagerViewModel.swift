@@ -62,6 +62,7 @@ class ProjectManagerViewModel: ObservableObject {
         
         let renderer = ImageRenderer(content: view)
         renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
         return renderer.uiImage ?? UIImage()
     }
 }

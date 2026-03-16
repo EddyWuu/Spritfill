@@ -22,6 +22,42 @@ class CanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
+    // MARK: - Undo history
+    
+    private var undoHistory: [[Color]] = []
+    private let maxUndoSteps = 50
+    @Published var canUndo: Bool = false
+    
+    /// Save current pixel state before an action
+    private func saveSnapshot() {
+        undoHistory.append(pixels)
+        if undoHistory.count > maxUndoSteps {
+            undoHistory.removeFirst()
+        }
+        canUndo = true
+    }
+    
+    /// Undo the last action — restores the previous pixel state
+    func undo() {
+        guard let previous = undoHistory.popLast() else { return }
+        pixels = previous
+        canUndo = !undoHistory.isEmpty
+    }
+    
+    /// Call once at the start of a drawing gesture to capture the "before" state
+    private var actionInProgress = false
+    
+    func beginAction() {
+        if !actionInProgress {
+            saveSnapshot()
+            actionInProgress = true
+        }
+    }
+    
+    func endAction() {
+        actionInProgress = false
+    }
+    
     // MARK: - Init: New Project
     
     init(projectName: String, selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: TileSizes) {
@@ -217,6 +253,48 @@ class CanvasViewModel: ObservableObject {
         return row * gridWidth + col
     }
     
+    // MARK: - Shift
+    
+    enum ShiftDirection {
+        case up, down, left, right
+    }
+    
+    func shiftPixels(_ direction: ShiftDirection) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        
+        saveSnapshot()
+        
+        var newPixels = Array(repeating: Color.clear, count: width * height)
+        
+        for row in 0..<height {
+            for col in 0..<width {
+                let sourceRow: Int
+                let sourceCol: Int
+                
+                switch direction {
+                case .up:
+                    sourceRow = (row + 1) % height
+                    sourceCol = col
+                case .down:
+                    sourceRow = (row - 1 + height) % height
+                    sourceCol = col
+                case .left:
+                    sourceRow = row
+                    sourceCol = (col + 1) % width
+                case .right:
+                    sourceRow = row
+                    sourceCol = (col - 1 + width) % width
+                }
+                
+                newPixels[row * width + col] = pixels[sourceRow * width + sourceCol]
+            }
+        }
+        
+        pixels = newPixels
+        objectWillChange.send()
+    }
+    
     // MARK: - Flood Fill (BFS)
     
     private func floodFill(at startIndex: Int, with newColor: Color) {
@@ -292,6 +370,7 @@ class CanvasViewModel: ObservableObject {
     func renderCanvasImage(from view: some View, size: CGSize) -> UIImage {
         let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
         renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
         return renderer.uiImage ?? UIImage()
     }
 }

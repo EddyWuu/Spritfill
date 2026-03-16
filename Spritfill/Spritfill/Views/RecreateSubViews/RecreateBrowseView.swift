@@ -86,12 +86,14 @@ struct RecreateBrowseView: View {
                     }
                 } label: {
                     VStack(spacing: 4) {
-                        Image(uiImage: sprite.thumbnail)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(height: 100)
-                            .cornerRadius(10)
+                        PixelGridThumbnailView(
+                            pixelGrid: sprite.pixelGrid,
+                            gridWidth: sprite.gridWidth,
+                            gridHeight: sprite.gridHeight,
+                            tileSize: max(1, 100 / CGFloat(max(sprite.gridWidth, sprite.gridHeight)))
+                        )
+                        .frame(width: 100, height: 100)
+                        .cornerRadius(10)
                         
                         Text(sprite.name)
                             .font(.caption)
@@ -147,12 +149,15 @@ struct RecreateBrowseView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 12)
                 
-                Image(uiImage: sprite.thumbnail)
-                    .resizable()
-                    .interpolation(.none)
-                    .scaledToFit()
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                PixelGridThumbnailView(
+                    pixelGrid: sprite.pixelGrid,
+                    gridWidth: sprite.gridWidth,
+                    gridHeight: sprite.gridHeight,
+                    tileSize: max(1, 250 / CGFloat(max(sprite.gridWidth, sprite.gridHeight)))
+                )
+                .frame(width: 250, height: 250)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
             .frame(maxWidth: 300, maxHeight: 350)
             .background(Color(.systemBackground))

@@ -38,6 +38,40 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
+    // MARK: - Undo history
+    
+    private struct UndoSnapshot {
+        let pixels: [Color]
+        let hexes: [String]
+    }
+    
+    private var undoHistory: [UndoSnapshot] = []
+    private let maxUndoSteps = 50
+    @Published var canUndo: Bool = false
+    private var actionInProgress = false
+    
+    func beginAction() {
+        if !actionInProgress {
+            undoHistory.append(UndoSnapshot(pixels: userPixels, hexes: userPixelHexes))
+            if undoHistory.count > maxUndoSteps {
+                undoHistory.removeFirst()
+            }
+            canUndo = true
+            actionInProgress = true
+        }
+    }
+    
+    func endAction() {
+        actionInProgress = false
+    }
+    
+    func undo() {
+        guard let snapshot = undoHistory.popLast() else { return }
+        userPixels = snapshot.pixels
+        userPixelHexes = snapshot.hexes
+        canUndo = !undoHistory.isEmpty
+    }
+    
     // MARK: - Computed properties
     
     var gridWidth: Int { session.canvasSize.dimensions.width }
