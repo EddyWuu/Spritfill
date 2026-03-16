@@ -12,7 +12,6 @@ import Foundation
 extension PremadeSprites {
     
     // MARK: - Heart (16x16)
-    // A classic pixel art heart using reds/pinks from Endesga 64
     
     static let heart: PremadeSpriteData = {
         let c = "clear"
@@ -22,37 +21,21 @@ extension PremadeSprites {
         let w = "#ffffff"  // white highlight
         
         let grid: [String] = [
-            // row 0
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
-            // row 1
             c, c, c, d, d, c, c, c, c, c, d, d, c, c, c, c,
-            // row 2
             c, c, d, r, r, d, c, c, c, d, r, r, d, c, c, c,
-            // row 3
             c, d, r, l, r, r, d, c, d, r, r, r, r, d, c, c,
-            // row 4
             c, d, r, w, l, r, r, d, r, r, r, r, r, d, c, c,
-            // row 5
             c, d, r, l, r, r, r, r, r, r, r, r, r, d, c, c,
-            // row 6
             c, d, r, r, r, r, r, r, r, r, r, r, r, d, c, c,
-            // row 7
             c, c, d, r, r, r, r, r, r, r, r, r, d, c, c, c,
-            // row 8
             c, c, c, d, r, r, r, r, r, r, r, d, c, c, c, c,
-            // row 9
             c, c, c, c, d, r, r, r, r, r, d, c, c, c, c, c,
-            // row 10
             c, c, c, c, c, d, r, r, r, d, c, c, c, c, c, c,
-            // row 11
             c, c, c, c, c, c, d, r, d, c, c, c, c, c, c, c,
-            // row 12
             c, c, c, c, c, c, c, d, c, c, c, c, c, c, c, c,
-            // row 13
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
-            // row 14
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
-            // row 15
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
@@ -66,9 +49,8 @@ extension PremadeSprites {
     }()
     
     // MARK: - Duck (16x16)
-    // A cute pixel duck using yellows/oranges from Endesga 64
     
-    static let duck: PremadeSpriteData = {
+    static let duck6: PremadeSpriteData = {
         let c = "clear"
         let o = "#0e071b"  // outline (near black)
         let y = "#ffeb57"  // yellow body
@@ -78,43 +60,27 @@ extension PremadeSprites {
         let b = "#e07438"  // beak/feet orange
         
         let grid: [String] = [
-            // row 0
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
-            // row 1
             c, c, c, c, c, c, o, o, o, c, c, c, c, c, c, c,
-            // row 2
             c, c, c, c, c, o, y, y, y, o, c, c, c, c, c, c,
-            // row 3
             c, c, c, c, c, o, y, y, y, y, o, c, c, c, c, c,
-            // row 4
             c, c, c, c, o, y, y, w, e, y, o, c, c, c, c, c,
-            // row 5
             c, c, c, c, o, y, y, y, y, y, o, o, o, c, c, c,
-            // row 6
             c, c, c, c, o, y, y, y, y, o, b, b, o, c, c, c,
-            // row 7
             c, c, c, o, o, y, y, y, y, o, b, o, c, c, c, c,
-            // row 8
             c, c, o, y, y, y, y, y, y, y, o, c, c, c, c, c,
-            // row 9
             c, c, o, y, d, y, y, y, y, y, o, c, c, c, c, c,
-            // row 10
             c, c, o, y, y, y, y, y, y, y, o, c, c, c, c, c,
-            // row 11
             c, c, c, o, y, y, y, y, y, o, c, c, c, c, c, c,
-            // row 12
             c, c, c, c, o, o, o, o, o, c, c, c, c, c, c, c,
-            // row 13
             c, c, c, c, o, b, o, o, b, o, c, c, c, c, c, c,
-            // row 14
             c, c, c, o, b, b, o, o, b, b, o, c, c, c, c, c,
-            // row 15
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
         return PremadeSpriteData(
-            id: "duck",
-            name: "Duck",
+            id: "duck6",
+            name: "Duck 6",
             canvasSize: .smallSquare,
             palette: .endesga64,
             pixelGrid: grid
@@ -122,7 +88,6 @@ extension PremadeSprites {
     }()
     
     // MARK: - Pixel Man (16x16)
-    // A simple 2D game character using Endesga 64 colors
     
     static let pixelMan: PremadeSpriteData = {
         let c = "clear"
@@ -136,37 +101,21 @@ extension PremadeSprites {
         let b = "#391f21"  // boots/shoes
         
         let grid: [String] = [
-            // row 0
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
-            // row 1
             c, c, c, c, c, o, o, o, o, o, o, c, c, c, c, c,
-            // row 2
             c, c, c, c, o, h, h, h, h, h, h, o, c, c, c, c,
-            // row 3
             c, c, c, c, o, h, h, h, h, h, h, o, c, c, c, c,
-            // row 4
             c, c, c, c, o, s, s, s, s, s, s, o, c, c, c, c,
-            // row 5
             c, c, c, c, o, s, e, k, s, e, k, o, c, c, c, c,
-            // row 6
             c, c, c, c, o, s, s, s, s, s, s, o, c, c, c, c,
-            // row 7
             c, c, c, c, c, o, s, s, s, s, o, c, c, c, c, c,
-            // row 8
             c, c, c, c, o, t, t, t, t, t, t, o, c, c, c, c,
-            // row 9
             c, c, c, o, s, o, t, t, t, t, o, s, o, c, c, c,
-            // row 10
             c, c, c, o, s, o, t, t, t, t, o, s, o, c, c, c,
-            // row 11
             c, c, c, c, c, o, t, t, t, t, o, c, c, c, c, c,
-            // row 12
             c, c, c, c, c, o, p, p, p, p, o, c, c, c, c, c,
-            // row 13
             c, c, c, c, c, o, p, o, o, p, o, c, c, c, c, c,
-            // row 14
             c, c, c, c, o, b, b, o, o, b, b, o, c, c, c, c,
-            // row 15
             c, c, c, c, o, o, o, c, c, o, o, o, c, c, c, c,
         ]
         
@@ -191,22 +140,22 @@ extension PremadeSprites {
         let k = "#391f21"  // pommel dark
         
         let grid: [String] = [
-            c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c, // row 0 - tip
-            c, c, c, c, c, c, w, b, w, c, c, c, c, c, c, c, // row 1
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 2
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 3
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 4
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 5
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 6
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 7
-            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c, // row 8
-            c, c, c, g, g, g, g, g, g, g, g, g, c, c, c, c, // row 9 - crossguard
-            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 10
-            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 11
-            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 12
-            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c, // row 13
-            c, c, c, c, c, k, g, g, k, c, c, c, c, c, c, c, // row 14 - pommel
-            c, c, c, c, c, c, k, k, c, c, c, c, c, c, c, c, // row 15
+            c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, b, w, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, b, b, d, c, c, c, c, c, c, c,
+            c, c, c, g, g, g, g, g, g, g, g, g, c, c, c, c,
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, h, h, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, k, g, g, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, k, k, c, c, c, c, c, c, c, c,
         ]
         
         return PremadeSpriteData(id: "sword", name: "Sword", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
@@ -1061,5 +1010,131 @@ extension PremadeSprites {
         ]
         
         return PremadeSpriteData(id: "lantern", name: "Lantern", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Community Sprites (16x16)
+    
+    static let duck1: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ffeb53"
+        let d = "#ffa214"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, a, a, a, c, c, c, c, c, c, c,
+            c, c, c, c, a, b, b, b, b, a, c, c, c, c, c, c,
+            c, c, c, a, b, b, b, b, b, b, a, c, c, c, c, c,
+            c, c, a, a, d, b, a, b, b, b, a, c, c, c, c, c,
+            c, a, d, d, d, b, b, b, b, b, a, c, c, c, c, c,
+            c, c, a, d, d, d, b, b, b, a, a, a, c, a, c, c,
+            c, c, c, a, a, b, b, b, a, b, b, b, a, b, a, c,
+            c, c, c, a, b, b, b, b, b, b, b, b, a, b, a, c,
+            c, c, a, b, b, b, b, a, b, b, b, a, b, b, a, c,
+            c, c, a, b, b, b, b, b, a, a, a, b, b, b, a, c,
+            c, c, a, b, b, b, b, b, b, b, b, b, b, b, a, c,
+            c, c, c, a, b, b, b, b, b, b, b, b, b, a, c, c,
+            c, c, c, c, a, b, b, b, b, b, b, b, a, c, c, c,
+            c, c, c, c, c, a, a, a, a, a, a, a, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "duck1", name: "Duck 1", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let duck4: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ffffff"
+        let d = "#92a1b9"
+        let e = "#c7cfdd"
+        let f = "#bf6e48"
+        let g = "#e69c67"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, a, a, a, a, c, c, c, c, c, c,
+            c, c, c, c, a, b, b, b, b, b, a, c, c, c, c, c,
+            c, c, a, a, d, a, a, a, a, d, a, a, c, c, c, c,
+            c, c, a, d, a, a, e, a, d, a, a, a, c, c, c, c,
+            c, c, a, a, a, a, e, a, a, a, b, a, c, c, c, c,
+            c, c, a, f, f, g, f, b, b, b, b, a, c, c, c, c,
+            c, c, c, a, b, b, b, b, b, b, e, b, a, c, c, c,
+            c, c, a, d, b, b, b, b, b, e, b, b, b, a, c, c,
+            c, c, a, e, b, b, b, b, b, e, b, b, b, a, c, c,
+            c, c, a, e, e, b, b, b, b, e, e, b, b, a, a, c,
+            c, c, a, e, e, e, e, e, e, e, e, e, e, e, a, c,
+            c, c, c, a, a, e, e, e, e, e, e, a, a, a, c, c,
+            c, c, c, c, c, a, f, a, a, a, f, a, c, c, c, c,
+            c, c, c, c, c, a, f, a, c, a, f, a, c, c, c, c,
+            c, c, c, c, c, a, a, a, c, a, a, a, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "duck4", name: "Duck 4", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let fire: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ff0040"
+        let d = "#ff5000"
+        let e = "#ed7114"
+        let f = "#ffa214"
+        let g = "#ffc820"
+        let h = "#ffeb53"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, a, c, c, c, c, c, c, c, c, c,
+            c, c, a, c, c, a, b, a, c, c, c, c, c, c, c, c,
+            c, a, b, a, c, c, a, b, a, c, c, c, a, c, c, c,
+            a, b, b, a, c, c, a, b, b, a, c, c, a, c, c, c,
+            a, b, b, a, c, c, a, b, b, a, c, a, b, a, c, c,
+            c, a, b, d, a, a, b, d, d, b, a, b, b, a, c, a,
+            c, c, a, d, b, a, b, d, d, a, b, d, a, c, c, a,
+            c, c, a, b, d, a, d, d, a, b, d, d, a, c, a, b,
+            c, c, a, b, d, b, d, e, d, d, d, d, b, a, b, b,
+            c, a, b, d, d, d, e, e, d, d, e, e, d, b, a, d,
+            a, b, d, d, e, e, f, f, e, e, e, e, d, b, a, d,
+            b, d, d, e, e, f, g, g, f, f, f, f, e, d, d, d,
+            d, e, e, e, f, f, h, h, h, h, f, f, f, e, e, e,
+        ]
+
+        return PremadeSpriteData(id: "fire", name: "Fire", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let rainbow: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#ea2f39"
+        let b = "#ffa214"
+        let d = "#ffeb54"
+        let e = "#309848"
+        let f = "#0af1ff"
+        let g = "#0098dc"
+        let h = "#7a09fa"
+        let i = "#ffffff"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, a, a, a, a, a, c, c, c, c, c,
+            c, c, c, a, a, b, b, b, b, b, b, a, a, c, c, c,
+            c, c, a, b, b, d, d, e, e, d, d, b, b, a, c, c,
+            c, a, b, b, d, e, e, f, f, e, e, d, b, b, a, c,
+            c, a, b, d, e, f, f, g, g, f, f, e, d, b, a, c,
+            a, b, b, d, e, f, g, h, h, g, f, e, d, b, a, c,
+            a, b, d, e, f, g, h, i, i, h, g, f, e, d, b, a,
+            a, b, d, e, f, g, h, i, i, h, g, f, e, d, b, a,
+            a, b, d, e, f, g, h, i, i, h, g, f, e, d, b, a,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "rainbow", name: "Rainbow", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
     }()
 }

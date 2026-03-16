@@ -11,7 +11,7 @@ import Foundation
 
 extension PremadeSprites {
 
-    // MARK: - Mountain Range 
+    // MARK: - Mountain Range
     
     static let mountainRange: PremadeSpriteData = {
         let c = "clear"
@@ -220,7 +220,7 @@ extension PremadeSprites {
         let gl = "#5ac54f"
         let e = "#8a4836"
         let ed = "#5d2c28"
-        let y = "#edab50"   
+        let y = "#edab50"
         let fl = "#e07438"
         
         let grid: [String] = [
@@ -331,5 +331,253 @@ extension PremadeSprites {
         ]
         
         return PremadeSpriteData(id: "ocean", name: "Ocean", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 4)
+    }()
+    
+    // MARK: - Community Sprites (32x32)
+    
+    static let duck2: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#edab50"
+        let d = "#ffeb53"
+        let e = "#f68187"
+        let f = "#c85083"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, d, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, d, d, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, d, d, d, d, d, d, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, d, d, d, d, d, d, d, d, d, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, d, d, d, b, d, d, d, d, d, d, a, c, c, c, c, a, a, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, a, b, d, d, d, d, b, d, d, d, d, d, d, a, c, c, a, d, d, d, a, c, c, c, c, c, c, c,
+            c, c, c, c, a, b, b, d, d, d, d, b, b, b, d, d, d, d, a, a, b, d, d, d, d, a, c, c, c, c, c, c,
+            c, c, c, a, a, a, b, b, d, d, d, d, d, d, d, d, d, d, b, b, d, d, a, a, d, a, a, a, c, c, c, c,
+            c, c, a, e, e, f, f, b, b, b, b, d, d, d, d, d, d, d, d, d, d, d, d, d, d, f, e, e, a, c, c, c,
+            c, c, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "duck2", name: "Duck 2", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let duck3: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#1e6e50"
+        let b = "#57c54f"
+        let d = "#114949"
+        let e = "#111111"
+        let f = "#309848"
+        let g = "#e07137"
+        let h = "#ffa214"
+        let i = "#ffc822"
+        let j = "#ffeb54"
+        let k = "#edab50"
+        let l = "#ffffff"
+        let m = "#c7cfdd"
+        let n = "#838383"
+        let p = "#8a4536"
+        let q = "#bf6e47"
+        let r = "#b4b4b4"
+        let t = "#92a1b9"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, a, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, a, b, b, b, b, d, e, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, e, b, b, b, b, b, b, a, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, e, b, b, b, b, b, b, f, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, g, g, g, h, i, i, f, b, e, f, f, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, g, j, j, i, i, k, g, f, e, f, f, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, g, i, i, h, g, g, g, f, b, b, f, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, e, e, e, e, f, f, f, f, f, a, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, e, f, f, f, f, e, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, e, l, l, l, m, e, c, c, c, n, n, n, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, p, n, q, q, q, n, e, e, e, r, m, m, e, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, p, q, q, q, q, q, q, t, m, m, m, m, m, e, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, q, c, q, q, q, q, m, m, m, m, m, m, m, e, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, q, q, q, q, q, t, m, m, m, m, m, m, m, e, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, q, q, q, q, m, m, m, m, m, m, m, m, n, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, e, n, q, q, q, t, m, m, m, m, m, m, m, e, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, e, p, p, p, p, r, r, r, r, r, r, r, e, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, e, p, p, p, r, r, r, r, r, r, e, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, e, e, e, e, e, e, k, e, e, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, e, g, e, e, k, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, e, g, g, e, k, k, e, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, e, e, e, e, e, e, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "duck3", name: "Duck 3", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let duck5: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ffeb55"
+        let d = "#f68187"
+        let e = "#c7cfdd"
+        let f = "#0067aa"
+        let g = "#ea303a"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, a, a, a, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, a, b, b, b, b, b, b, b, a, a, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, a, a, b, b, a, a, a, a, b, b, a, a, b, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, a, a, b, a, d, d, d, d, a, b, a, a, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, b, b, a, a, a, a, a, a, a, a, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, b, b, a, d, d, d, d, d, d, a, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, b, b, b, b, b, b, a, a, a, a, a, a, b, b, b, b, b, a, a, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, b, a, c, c, c, c, c,
+            c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, b, b, a, c, c, c, c,
+            c, c, c, c, a, b, b, b, a, b, b, b, b, b, b, a, a, a, b, b, b, b, b, b, a, b, b, a, c, c, c, c,
+            c, c, c, c, a, b, b, a, b, b, b, a, a, a, a, e, e, a, b, b, b, b, b, b, a, a, b, a, c, c, c, c,
+            c, c, c, c, a, b, b, a, a, a, a, e, e, e, e, e, e, a, b, b, b, b, b, b, a, c, a, a, c, c, c, c,
+            c, c, c, c, a, b, b, a, f, f, e, e, e, e, e, e, a, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, a, a, b, a, a, a, e, e, e, e, a, a, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, a, b, b, b, a, a, a, a, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, a, a, b, b, b, b, b, b, b, b, b, b, b, b, a, g, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, g, g, a, b, b, b, b, b, b, b, b, b, a, a, g, g, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, a, g, g, a, a, a, a, a, a, a, a, a, g, g, g, a, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, a, a, a, a, c, c, c, c, c, c, c, a, a, a, a, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "duck5", name: "Duck 5", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let ducks1: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ffffff"
+        let d = "#c7cfdd"
+        let e = "#1c111c"
+        let f = "#ffc822"
+        let g = "#ffa214"
+        let h = "#ed7314"
+        let i = "#fdd2ed"
+        let j = "#ffeb54"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, a, a, a, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, a, a, b, b, b, b, d, d, d, d, a, a, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, d, d, d, a, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, d, d, d, d, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, d, d, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, b, b, b, b, b, b, e, e, b, b, b, b, b, d, d, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, f, f, g, b, b, b, b, b, b, b, b, b, b, d, d, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, f, g, h, g, b, b, b, b, i, i, b, b, b, b, d, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, g, g, g, g, g, g, b, b, b, b, b, b, b, b, d, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, h, h, h, h, g, g, g, b, b, b, b, b, b, d, a, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, a, d, b, b, b, b, b, b, b, b, b, d, b, b, a, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, b, b, d, d, d, d, d, d, d, d, d, b, b, b, b, b, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, a, a, c, c, c, c, c, c,
+            c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, a, a, a, a, c, c,
+            c, c, c, c, a, b, b, b, b, b, b, b, b, d, b, b, b, b, b, b, b, b, b, b, b, d, b, b, b, a, c, c,
+            c, c, c, a, d, b, b, b, b, b, b, b, b, d, b, b, b, b, b, b, b, b, b, b, b, d, b, b, d, a, c, c,
+            c, c, c, a, d, b, b, b, b, b, b, b, b, b, d, b, b, b, b, b, b, b, b, b, d, b, b, d, a, c, c, c,
+            c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, d, b, b, b, b, b, b, b, d, b, b, d, a, c, c, c, c,
+            c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, d, d, d, d, d, d, d, b, b, d, a, c, c, c, c, c,
+            c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, a, c, c, c, c, c,
+            c, c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, a, c, c, c, c, c,
+            c, c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, a, c, c, c, c, c, c,
+            c, c, c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, a, c, c, c, c, c, c, c,
+            c, c, c, c, c, a, d, b, b, b, b, b, b, b, b, b, b, b, b, b, b, d, d, a, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, d, d, d, d, d, d, d, d, d, d, d, d, d, d, a, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, a, h, h, h, h, a, a, a, a, h, h, h, h, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, a, g, g, g, g, a, c, c, a, g, g, g, g, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, a, j, f, f, f, f, a, c, a, f, j, f, f, f, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, j, f, f, f, f, f, a, a, f, j, f, f, f, f, f, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "ducks1", name: "Ducks 1", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+
+    static let pokemonBall: PremadeSpriteData = {
+        let c = "clear"
+        let a = "#111111"
+        let b = "#ff0040"
+        let d = "#c7cfdd"
+        let e = "#ffffff"
+
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, a, a, b, b, b, b, a, a, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, b, b, b, b, b, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, a, b, b, b, b, b, a, a, b, b, b, b, b, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, a, b, b, b, b, a, d, d, a, b, b, b, b, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, a, a, a, a, a, a, d, d, a, a, a, a, a, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, a, e, e, e, e, e, a, a, e, e, e, e, e, a, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, e, e, e, e, e, e, e, e, e, e, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, a, e, e, e, e, e, e, e, e, e, e, a, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, a, e, e, e, e, e, e, e, e, a, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, a, a, e, e, e, e, a, a, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, a, a, a, a, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+
+        return PremadeSpriteData(id: "pokemonBall", name: "Pokémon Ball", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
 }

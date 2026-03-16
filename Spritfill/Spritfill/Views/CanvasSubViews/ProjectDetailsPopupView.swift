@@ -11,12 +11,14 @@ struct ProjectDetailsPopupView: View {
     
     @ObservedObject var viewModel: CanvasViewModel
     @Environment(\.dismiss) private var dismiss
+    @State private var jsonShareItem: IdentifiableURL? = nil
     
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
                 VStack(spacing: 16) {
                     
+                    // ...existing code...
                     HStack {
                         Image(systemName: "doc.text")
                             .foregroundColor(.blue)
@@ -75,6 +77,14 @@ struct ProjectDetailsPopupView: View {
                 }
                 .padding(.horizontal)
                 
+                // Export project as JSON for adding to community sprites
+                Button(action: exportProjectJSON) {
+                    Label("Export Project Data", systemImage: "square.and.arrow.up.on.square")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
+                
                 Spacer()
             }
             .padding(.top)
@@ -87,6 +97,24 @@ struct ProjectDetailsPopupView: View {
                     }
                 }
             }
+            .sheet(item: $jsonShareItem) { item in
+                ShareSheet(activityItems: [item.url])
+            }
         }
+    }
+    
+    private func exportProjectJSON() {
+        let projectData = viewModel.toProjectData()
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        
+        guard let data = try? encoder.encode(projectData) else { return }
+        
+        let fileName = "\(viewModel.projectName.replacingOccurrences(of: " ", with: "_")).json"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        
+        try? data.write(to: tempURL)
+        jsonShareItem = IdentifiableURL(url: tempURL)
     }
 }
