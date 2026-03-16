@@ -13,44 +13,23 @@ struct RecreateBrowseView: View {
     @Binding var spriteToConfirm: RecreatableArtModel?
     @Binding var showConfirmAlert: Bool
     
+    @State private var previewSprite: RecreatableArtModel? = nil
+    @State private var showPreview = false
+    
     private let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
     
-    // Group the premade browse sprites by their group field
-    private var groupedCommunity: [(name: String, sprites: [RecreatableArtModel])] {
-        let premade = viewModel.browseSprites.filter { $0.sourceType == .premade }
-        var groups: [(name: String, sprites: [RecreatableArtModel])] = []
-        var ungrouped: [RecreatableArtModel] = []
-        var seen: Set<String> = []
-        
-        // Build group info from PremadeSprites lookup
-        for sprite in premade {
-            if let premadeData = PremadeSprites.all.first(where: { $0.id == sprite.id }),
-               let group = premadeData.group {
-                if !seen.contains(group) {
-                    seen.insert(group)
-                    let members = premade.filter { s in
-                        PremadeSprites.all.first(where: { $0.id == s.id })?.group == group
-                    }
-                    groups.append((name: group, sprites: members))
-                }
-            } else {
-                ungrouped.append(sprite)
-            }
-        }
-        
-        if !ungrouped.isEmpty {
-            groups.append((name: "Individual Sprites", sprites: ungrouped))
-        }
-        
-        return groups
-    }
-    
     var body: some View {
-        Group {
-            if viewModel.browseSprites.isEmpty {
-                emptyState
-            } else {
-                spriteList
+        ZStack {
+            Group {
+                if viewModel.browseSprites.isEmpty {
+                    emptyState
+                } else {
+                    spriteList
+                }
+            }
+            
+            if showPreview, let sprite = previewSprite {
+                spritePreviewOverlay(sprite)
             }
         }
     }
@@ -73,18 +52,14 @@ struct RecreateBrowseView: View {
     
     private var spriteList: some View {
         ScrollView {
-            let userMade = viewModel.browseSprites.filter { $0.sourceType == .userMade }
-            
-            // Community sprite groups
-            ForEach(groupedCommunity, id: \.name) { section in
+            ForEach(viewModel.groupedCommunitySprites, id: \.name) { section in
                 sectionHeader(section.name)
                 spriteGrid(section.sprites)
             }
             
-            // User-made sprites
-            if !userMade.isEmpty {
+            if !viewModel.userMadeSprites.isEmpty {
                 sectionHeader("Your Sprites")
-                spriteGrid(userMade)
+                spriteGrid(viewModel.userMadeSprites)
             }
         }
     }
@@ -104,10 +79,12 @@ struct RecreateBrowseView: View {
     private func spriteGrid(_ sprites: [RecreatableArtModel]) -> some View {
         LazyVGrid(columns: columns, spacing: 16) {
             ForEach(sprites) { sprite in
-                Button(action: {
-                    spriteToConfirm = sprite
-                    showConfirmAlert = true
-                }) {
+                Button {
+                    previewSprite = sprite
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showPreview = true
+                    }
+                } label: {
                     VStack(spacing: 4) {
                         Image(uiImage: sprite.thumbnail)
                             .resizable()
@@ -130,5 +107,58 @@ struct RecreateBrowseView: View {
             }
         }
         .padding(.horizontal)
+    }
+    
+    // MARK: - Sprite preview overlay
+    
+    private func spritePreviewOverlay(_ sprite: RecreatableArtModel) -> some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showPreview = false
+                    }
+                }
+            
+            VStack(spacing: 0) {
+                HStack {
+                    Text(sprite.name)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Spacer()
+                    
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showPreview = false
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                            spriteToConfirm = sprite
+                            showConfirmAlert = true
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                
+                Image(uiImage: sprite.thumbnail)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+            }
+            .frame(maxWidth: 300, maxHeight: 350)
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .shadow(radius: 10)
+        }
+        .transition(.opacity)
     }
 }

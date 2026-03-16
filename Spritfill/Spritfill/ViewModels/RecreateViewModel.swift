@@ -160,6 +160,40 @@ class RecreateViewModel: ObservableObject {
         finishedSessions.removeAll { $0.id == id }
     }
     
+    // MARK: - Grouped browse data (for views)
+    
+    var groupedCommunitySprites: [(name: String, sprites: [RecreatableArtModel])] {
+        let premade = browseSprites.filter { $0.sourceType == .premade }
+        var groups: [(name: String, sprites: [RecreatableArtModel])] = []
+        var ungrouped: [RecreatableArtModel] = []
+        var seen: Set<String> = []
+        
+        for sprite in premade {
+            if let premadeData = PremadeSprites.all.first(where: { $0.id == sprite.id }),
+               let group = premadeData.group {
+                if !seen.contains(group) {
+                    seen.insert(group)
+                    let members = premade.filter { s in
+                        PremadeSprites.all.first(where: { $0.id == s.id })?.group == group
+                    }
+                    groups.append((name: group, sprites: members))
+                }
+            } else {
+                ungrouped.append(sprite)
+            }
+        }
+        
+        if !ungrouped.isEmpty {
+            groups.append((name: "Individual Sprites", sprites: ungrouped))
+        }
+        
+        return groups
+    }
+    
+    var userMadeSprites: [RecreatableArtModel] {
+        browseSprites.filter { $0.sourceType == .userMade }
+    }
+    
     // MARK: - Helpers
     
     private func buildColorNumberMap(from pixelGrid: [String]) -> [String: Int] {
