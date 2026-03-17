@@ -43,7 +43,16 @@ struct RecreateSession: Codable, Identifiable {
         referenceGrid.filter { $0 != "clear" }.count
     }
     
+    var hasWrongPlacements: Bool {
+        for i in 0..<referenceGrid.count {
+            if referenceGrid[i] == "clear" && i < userPixels.count && userPixels[i] != "clear" {
+                return true
+            }
+        }
+        return false
+    }
+    
     var isComplete: Bool {
-        totalColoredPixels > 0 && completionCount == totalColoredPixels
+        totalColoredPixels > 0 && completionCount == totalColoredPixels && !hasWrongPlacements
     }
 }

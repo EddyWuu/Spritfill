@@ -56,7 +56,7 @@ struct RecreateView: View {
             }
             .navigationDestination(isPresented: $navigateToCanvas) {
                 if let session = activeSession {
-                    RecreateCanvasView(session: session)
+                    RecreateCanvasView(session: session, selectedTab: $selectedTab)
                 }
             }
             .onAppear {

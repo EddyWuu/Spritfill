@@ -18,6 +18,7 @@ class CanvasViewModel: ObservableObject {
     @Published var pixels: [Color]
     
     @Published var toolsVM: ToolsViewModel
+    @Published var isFinished: Bool = false
     
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
@@ -25,8 +26,31 @@ class CanvasViewModel: ObservableObject {
     // MARK: - Undo history
     
     private var undoHistory: [[Color]] = []
-    private let maxUndoSteps = 50
     @Published var canUndo: Bool = false
+    private var memoryObserver: Any?
+    
+    private var maxUndoSteps: Int {
+        let pixelCount = pixels.count
+        if pixelCount > 4096 { return 5 }       // 64x64+: ~2.5 MB max
+        if pixelCount > 1024 { return 15 }       // 32x32+: ~0.5 MB max
+        return 30                                 // 16x16: ~0.25 MB max
+    }
+    
+    private func setupMemoryWarning() {
+        memoryObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.undoHistory.removeAll()
+            self?.canUndo = false
+        }
+    }
+    
+    deinit {
+        if let observer = memoryObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
     
     /// Save current pixel state before an action
     private func saveSnapshot() {
@@ -75,6 +99,7 @@ class CanvasViewModel: ObservableObject {
         
         self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0], palette: selectedPalette)
         self.toolsVM.canvasVM = self
+        setupMemoryWarning()
     }
     
     // MARK: - Init: From Saved Project
@@ -98,8 +123,10 @@ class CanvasViewModel: ObservableObject {
                 return Color(hex: hex)
             }
         }
-
+        
+        self.isFinished = data.isFinished
         self.toolsVM.canvasVM = self
+        setupMemoryWarning()
     }
 
     // MARK: - Zoom calculations
@@ -172,7 +199,8 @@ class CanvasViewModel: ObservableObject {
             name: projectName,
             settings: projectSettings,
             pixelGrid: flatHexGrid,
-            lastEdited: Date()
+            lastEdited: Date(),
+            isFinished: isFinished
         )
     }
     
@@ -377,6 +405,36 @@ class CanvasViewModel: ObservableObject {
         renderer.scale = UIScreen.main.scale
         renderer.isOpaque = false
         return renderer.uiImage ?? UIImage()
+    }
+    
+    // MARK: - Export
+    
+    @MainActor
+    func exportImage() -> UIImage {
+        let dims = projectSettings.selectedCanvasSize.dimensions
+        let tileSize = CGFloat(projectSettings.selectedTileSize.size)
+        let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
+                                height: CGFloat(dims.height) * tileSize)
+        let canvasView = ProjectCanvasExportView(viewModel: self)
+        return renderCanvasImage(from: canvasView, size: exportSize)
+    }
+    
+    func exportAndSaveToPhotos(completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let image = self.exportImage()
+            PhotoSaver.saveAsPNG(image) {
+                completion?()
+            }
+        }
+    }
+    
+    func exportAndGetShareImage(completion: @escaping (IdentifiableImage) -> Void) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            let image = self.exportImage()
+            completion(IdentifiableImage(image: image))
+        }
     }
 }
 

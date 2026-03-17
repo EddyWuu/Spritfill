@@ -267,6 +267,7 @@ enum TileSizes: String, CaseIterable, Codable {
 enum CanvasRoute: Hashable {
     case newProject
     case projectCreate(UUID)
+    case projectView(UUID)
 }
 
 

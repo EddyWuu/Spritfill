@@ -13,6 +13,9 @@ struct ProjectCreateView: View {
     @ObservedObject private var toolsVM: ToolsViewModel
     @StateObject private var projectManager = ProjectManagerViewModel()
     @Environment(\.dismiss) private var dismiss
+    
+    var onFinish: (() -> Void)? = nil
+    
     @State private var showRenameAlert = false
     @State private var newProjectName = ""
     @State private var shareImage: IdentifiableImage? = nil
@@ -22,9 +25,12 @@ struct ProjectCreateView: View {
     @State private var savedAlertMessage = ""
     
     @State private var showDeleteAlert = false
+    @State private var showFinishAlert = false
+    @State private var showFinishCongrats = false
     
-    init(viewModel: CanvasViewModel) {
+    init(viewModel: CanvasViewModel, onFinish: (() -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onFinish = onFinish
         self.toolsVM = viewModel.toolsVM
     }
 
@@ -64,15 +70,27 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            exportAndSaveToPhotos()
+                            viewModel.exportAndSaveToPhotos {
+                                savedAlertMessage = "Image saved to Photos!"
+                                showSavedAlert = true
+                            }
                         }) {
                             Image(systemName: "square.and.arrow.down")
                         }
                         
                         Button(action: {
-                            exportAndShare()
+                            viewModel.exportAndGetShareImage { image in
+                                shareImage = image
+                            }
                         }) {
                             Image(systemName: "square.and.arrow.up")
+                        }
+                        
+                        Button(action: {
+                            showFinishAlert = true
+                        }) {
+                            Image(systemName: "checkmark.seal")
+                                .foregroundColor(.green)
                         }
                     }
                 }
@@ -143,33 +161,25 @@ struct ProjectCreateView: View {
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])
         }
-    }
-    
-    // MARK: - Export helpers
-    
-    @MainActor
-    private func exportImage() -> UIImage {
-        let dims = viewModel.projectSettings.selectedCanvasSize.dimensions
-        let tileSize = CGFloat(viewModel.projectSettings.selectedTileSize.size)
-        let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
-                                height: CGFloat(dims.height) * tileSize)
-        let canvasView = ProjectCanvasExportView(viewModel: viewModel)
-        return viewModel.renderCanvasImage(from: canvasView, size: exportSize)
-    }
-    
-    private func exportAndSaveToPhotos() {
-        DispatchQueue.main.async {
-            let image = exportImage()
-            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-            savedAlertMessage = "Image saved to Photos!"
-            showSavedAlert = true
+        .alert("Finish Project?", isPresented: $showFinishAlert) {
+            Button("Finish", role: .destructive) {
+                viewModel.isFinished = true
+                projectManager.save(viewModel)
+                showFinishCongrats = true
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Mark \"\(viewModel.projectName)\" as finished? You can still edit it later from the Finished tab.")
         }
-    }
-    
-    private func exportAndShare() {
-        DispatchQueue.main.async {
-            let image = exportImage()
-            shareImage = IdentifiableImage(image: image)
+        .alert("Congratulations! 🎉", isPresented: $showFinishCongrats) {
+            Button("Done") {
+                dismiss()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    onFinish?()
+                }
+            }
+        } message: {
+            Text("Great work on \"\(viewModel.projectName)\"!")
         }
     }
 }

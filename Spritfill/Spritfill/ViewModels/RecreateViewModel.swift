@@ -180,4 +180,71 @@ class RecreateViewModel: ObservableObject {
         }
         return map
     }
+    
+    // MARK: - Export
+    
+    @MainActor
+    func saveSessionToPhotos(_ session: RecreateSession, completion: (() -> Void)? = nil) {
+        let width = session.canvasSize.dimensions.width
+        let height = session.canvasSize.dimensions.height
+        let tileSize: CGFloat = 16
+        let renderW = CGFloat(width) * tileSize
+        let renderH = CGFloat(height) * tileSize
+        
+        let pixelGrid = session.userPixels
+        let view = Canvas { context, size in
+            for row in 0..<height {
+                for col in 0..<width {
+                    let index = row * width + col
+                    guard index < pixelGrid.count else { continue }
+                    let hex = pixelGrid[index]
+                    guard hex != "clear" else { continue }
+                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
+                                      width: tileSize, height: tileSize)
+                    context.fill(Path(rect), with: .color(Color(hex: hex)))
+                }
+            }
+        }
+        .frame(width: renderW, height: renderH)
+        
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
+        
+        if let image = renderer.uiImage {
+            PhotoSaver.saveAsPNG(image) {
+                completion?()
+            }
+        }
+    }
+    
+    @MainActor
+    func exportSessionImage(_ session: RecreateSession) -> UIImage? {
+        let width = session.canvasSize.dimensions.width
+        let height = session.canvasSize.dimensions.height
+        let tileSize: CGFloat = 16
+        let renderW = CGFloat(width) * tileSize
+        let renderH = CGFloat(height) * tileSize
+        
+        let pixelGrid = session.userPixels
+        let view = Canvas { context, size in
+            for row in 0..<height {
+                for col in 0..<width {
+                    let index = row * width + col
+                    guard index < pixelGrid.count else { continue }
+                    let hex = pixelGrid[index]
+                    guard hex != "clear" else { continue }
+                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
+                                      width: tileSize, height: tileSize)
+                    context.fill(Path(rect), with: .color(Color(hex: hex)))
+                }
+            }
+        }
+        .frame(width: renderW, height: renderH)
+        
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
+        return renderer.uiImage
+    }
 }

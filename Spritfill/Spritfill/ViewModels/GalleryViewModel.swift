@@ -56,8 +56,22 @@ class GalleryViewModel: ObservableObject {
     private let storage = LocalStorageService.shared
     private let fileManager = FileManager.default
     
-    // Thumbnail cache
-    private var thumbnailCache: [UUID: UIImage] = [:]
+    // Thumbnail cache — NSCache auto-evicts under memory pressure
+    private let thumbnailCache: NSCache<NSUUID, UIImage> = {
+        let cache = NSCache<NSUUID, UIImage>()
+        cache.countLimit = 30
+        cache.totalCostLimit = 20 * 1024 * 1024  // 20 MB
+        return cache
+    }()
+    
+    init() {
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.thumbnailCache.removeAllObjects()
+        }
+    }
     
     // Board constants
     let boardSize: CGFloat = 3000
@@ -66,6 +80,17 @@ class GalleryViewModel: ObservableObject {
     let maxItemSize: CGFloat = 300
     let minZoom: CGFloat = 0.3
     let maxZoom: CGFloat = 2.0
+    
+    // MARK: - Gesture handling
+    
+    func applyPinchEnd(scale: CGFloat) {
+        let newZoom = (zoomScale * scale).clamped(to: minZoom...maxZoom)
+        zoomScale = newZoom
+    }
+    
+    var canPan: Bool {
+        !isEditMode
+    }
     
     // MARK: - Persistence
     
@@ -150,7 +175,7 @@ class GalleryViewModel: ObservableObject {
     private func generateThumbnail(for project: ProjectData) {
         let width = project.settings.selectedCanvasSize.dimensions.width
         let height = project.settings.selectedCanvasSize.dimensions.height
-        let thumbSize: CGFloat = 200
+        let thumbSize: CGFloat = 100
         let tileSize = min(thumbSize / CGFloat(width), thumbSize / CGFloat(height))
         let renderW = CGFloat(width) * tileSize
         let renderH = CGFloat(height) * tileSize
@@ -167,12 +192,12 @@ class GalleryViewModel: ObservableObject {
         renderer.scale = UIScreen.main.scale
         renderer.isOpaque = false
         if let image = renderer.uiImage {
-            thumbnailCache[project.id] = image
+            thumbnailCache.setObject(image, forKey: project.id as NSUUID)
         }
     }
     
     func thumbnail(for id: UUID) -> UIImage? {
-        thumbnailCache[id]
+        thumbnailCache.object(forKey: id as NSUUID)
     }
     
     // MARK: - Board items accessors

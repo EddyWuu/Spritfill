@@ -48,17 +48,29 @@ struct RecreateProjectCanvasView: View {
                                 // User has painted this cell
                                 context.fill(Path(rect), with: .color(userColor))
                                 
-                                // If wrong color, show the number on top so user knows
-                                if targetHex != "clear" {
-                                    if userHex.lowercased() != targetHex.lowercased() {
-                                        if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
-                                            let fontSize = max(cellSize * 0.4, 6)
-                                            let text = Text("\(number)")
-                                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                                                .foregroundColor(.white)
-                                            let resolved = context.resolve(text)
-                                            context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
-                                        }
+                                if targetHex == "clear" {
+                                    // Wrong placement — painted on a cell that should be empty
+                                    let inset = cellSize * 0.2
+                                    let x1 = rect.minX + inset
+                                    let y1 = rect.minY + inset
+                                    let x2 = rect.maxX - inset
+                                    let y2 = rect.maxY - inset
+                                    var xPath = Path()
+                                    xPath.move(to: CGPoint(x: x1, y: y1))
+                                    xPath.addLine(to: CGPoint(x: x2, y: y2))
+                                    xPath.move(to: CGPoint(x: x2, y: y1))
+                                    xPath.addLine(to: CGPoint(x: x1, y: y2))
+                                    context.stroke(xPath, with: .color(.red.opacity(0.4)),
+                                                   lineWidth: max(cellSize * 0.08, 1))
+                                } else if userHex.lowercased() != targetHex.lowercased() {
+                                    // Wrong color — show the target number
+                                    if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
+                                        let fontSize = max(cellSize * 0.4, 6)
+                                        let text = Text("\(number)")
+                                            .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                            .foregroundColor(.white)
+                                        let resolved = context.resolve(text)
+                                        context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
                                     }
                                 }
                             } else if targetHex != "clear" {

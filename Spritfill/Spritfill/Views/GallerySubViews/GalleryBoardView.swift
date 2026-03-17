@@ -70,12 +70,12 @@ struct GalleryBoardView: View {
         .background(Color(.systemGroupedBackground))
     }
     
-    // MARK: - Pan gesture (only when not in edit mode or as fallback)
+    // MARK: - Pan gesture
     
     private func panGesture(geo: GeometryProxy) -> some Gesture {
         DragGesture()
             .onChanged { value in
-                if !viewModel.isEditMode {
+                if viewModel.canPan {
                     panOffset = CGSize(
                         width: panStart.width + value.translation.width,
                         height: panStart.height + value.translation.height
@@ -83,7 +83,7 @@ struct GalleryBoardView: View {
                 }
             }
             .onEnded { _ in
-                if !viewModel.isEditMode {
+                if viewModel.canPan {
                     panStart = panOffset
                 }
             }
@@ -97,8 +97,7 @@ struct GalleryBoardView: View {
                 pinchScale = scale
             }
             .onEnded { scale in
-                let newZoom = (viewModel.zoomScale * scale).clamped(to: viewModel.minZoom...viewModel.maxZoom)
-                viewModel.zoomScale = newZoom
+                viewModel.applyPinchEnd(scale: scale)
                 pinchScale = 1.0
             }
     }

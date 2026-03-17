@@ -40,19 +40,22 @@ class RecreateCanvasViewModel: ObservableObject {
     
     // MARK: - Undo history
     
-    private struct UndoSnapshot {
-        let pixels: [Color]
-        let hexes: [String]
+    private var undoHistory: [[String]] = []
+    private var memoryObserver: Any?
+    
+    private var maxUndoSteps: Int {
+        let pixelCount = userPixels.count
+        if pixelCount > 4096 { return 5 }
+        if pixelCount > 1024 { return 15 }
+        return 30
     }
     
-    private var undoHistory: [UndoSnapshot] = []
-    private let maxUndoSteps = 50
     @Published var canUndo: Bool = false
     private var actionInProgress = false
     
     func beginAction() {
         if !actionInProgress {
-            undoHistory.append(UndoSnapshot(pixels: userPixels, hexes: userPixelHexes))
+            undoHistory.append(userPixelHexes)
             if undoHistory.count > maxUndoSteps {
                 undoHistory.removeFirst()
             }
@@ -67,8 +70,10 @@ class RecreateCanvasViewModel: ObservableObject {
     
     func undo() {
         guard let snapshot = undoHistory.popLast() else { return }
-        userPixels = snapshot.pixels
-        userPixelHexes = snapshot.hexes
+        userPixelHexes = snapshot
+        userPixels = snapshot.map { hex in
+            hex == "clear" ? Color.clear : Color(hex: hex)
+        }
         canUndo = !undoHistory.isEmpty
     }
     
@@ -102,8 +107,17 @@ class RecreateCanvasViewModel: ObservableObject {
         referenceGrid.filter { $0 != "clear" }.count
     }
     
+    var hasWrongPlacements: Bool {
+        for i in 0..<referenceGrid.count {
+            if referenceGrid[i] == "clear" && i < userPixelHexes.count && userPixelHexes[i] != "clear" {
+                return true
+            }
+        }
+        return false
+    }
+    
     var isComplete: Bool {
-        totalColoredPixels > 0 && completionCount == totalColoredPixels
+        totalColoredPixels > 0 && completionCount == totalColoredPixels && !hasWrongPlacements
     }
     
     // MARK: - Zoom calculations
@@ -155,6 +169,20 @@ class RecreateCanvasViewModel: ObservableObject {
         if userPixels.count < totalPixels {
             userPixels.append(contentsOf: Array(repeating: Color.clear, count: totalPixels - userPixels.count))
             userPixelHexes.append(contentsOf: Array(repeating: "clear", count: totalPixels - userPixelHexes.count))
+        }
+        
+        memoryObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.undoHistory.removeAll()
+            self?.canUndo = false
+        }
+    }
+    
+    deinit {
+        if let observer = memoryObserver {
+            NotificationCenter.default.removeObserver(observer)
         }
     }
     
@@ -244,5 +272,39 @@ class RecreateCanvasViewModel: ObservableObject {
         session.userPixels = userPixelHexes
         session.lastEdited = Date()
         storage.saveSession(session)
+    }
+    
+    // MARK: - Export
+    
+    @MainActor
+    func saveCompletedSpriteToPhotos(completion: (() -> Void)? = nil) {
+        let tileSize: CGFloat = 16
+        let renderW = CGFloat(gridWidth) * tileSize
+        let renderH = CGFloat(gridHeight) * tileSize
+        
+        let view = Canvas { [userPixels = self.userPixels, gridWidth = self.gridWidth, gridHeight = self.gridHeight] context, size in
+            for row in 0..<gridHeight {
+                for col in 0..<gridWidth {
+                    let index = row * gridWidth + col
+                    guard index < userPixels.count else { continue }
+                    let color = userPixels[index]
+                    guard !color.isClear else { continue }
+                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
+                                      width: tileSize, height: tileSize)
+                    context.fill(Path(rect), with: .color(color))
+                }
+            }
+        }
+        .frame(width: renderW, height: renderH)
+        
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = UIScreen.main.scale
+        renderer.isOpaque = false
+        
+        if let image = renderer.uiImage {
+            PhotoSaver.saveAsPNG(image) {
+                completion?()
+            }
+        }
     }
 }

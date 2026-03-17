@@ -28,8 +28,11 @@ struct RecreateBrowseView: View {
                 }
             }
             
-            if showPreview, let sprite = previewSprite {
+            if let sprite = previewSprite {
                 spritePreviewOverlay(sprite)
+                    .opacity(showPreview ? 1 : 0)
+                    .allowsHitTesting(showPreview)
+                    .animation(.easeInOut(duration: 0.2), value: showPreview)
             }
         }
     }
@@ -118,8 +121,9 @@ struct RecreateBrowseView: View {
             Color.black.opacity(0.5)
                 .ignoresSafeArea()
                 .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showPreview = false
+                    showPreview = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        previewSprite = nil
                     }
                 }
             
@@ -132,10 +136,9 @@ struct RecreateBrowseView: View {
                     Spacer()
                     
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showPreview = false
-                        }
+                        showPreview = false
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                            previewSprite = nil
                             spriteToConfirm = sprite
                             showConfirmAlert = true
                         }

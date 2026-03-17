@@ -28,9 +28,9 @@ struct ContentView: View {
                     Label("Recreate", systemImage: "pencil")
                 }
             
-            DownloadsView()
+            CatalogView()
                 .tabItem {
-                    Label("Downloads", systemImage: "arrow.down.circle")
+                    Label("Catalog", systemImage: "books.vertical")
                 }
         }
     }

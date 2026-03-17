@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RecreateCanvasView: View {
     let session: RecreateSession
+    @Binding var selectedTab: RecreateView.RecreateTab
     
     @StateObject private var viewModel: RecreateCanvasViewModel
     @Environment(\.dismiss) private var dismiss
@@ -16,8 +17,9 @@ struct RecreateCanvasView: View {
     @State private var showSavedAlert = false
     @State private var showDeleteAlert = false
     
-    init(session: RecreateSession) {
+    init(session: RecreateSession, selectedTab: Binding<RecreateView.RecreateTab>) {
         self.session = session
+        self._selectedTab = selectedTab
         _viewModel = StateObject(wrappedValue: RecreateCanvasViewModel(session: session))
     }
 
@@ -89,16 +91,17 @@ struct RecreateCanvasView: View {
         }
         .onChange(of: viewModel.isComplete) { _, isComplete in
             if isComplete {
+                viewModel.saveProgress()
                 showCompletionAlert = true
             }
         }
         .alert("Great Work! 🎉", isPresented: $showCompletionAlert) {
-            Button("Save to Photos") {
-                saveCompletedSpriteToPhotos()
+            Button("Done") {
+                selectedTab = .finished
+                dismiss()
             }
-            Button("Done", role: .cancel) { }
         } message: {
-            Text("You've completed recreating \(session.spriteName)! Would you like to save it to your photos?")
+            Text("You've completed recreating \(session.spriteName)!")
         }
         .alert("Saved!", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) { }
@@ -114,39 +117,6 @@ struct RecreateCanvasView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This will delete all progress for \(session.spriteName). This cannot be undone.")
-        }
-    }
-    
-    @MainActor
-    private func saveCompletedSpriteToPhotos() {
-        let gridWidth = viewModel.gridWidth
-        let gridHeight = viewModel.gridHeight
-        let tileSize: CGFloat = 16
-        let renderW = CGFloat(gridWidth) * tileSize
-        let renderH = CGFloat(gridHeight) * tileSize
-        
-        let view = Canvas { context, size in
-            for row in 0..<gridHeight {
-                for col in 0..<gridWidth {
-                    let index = row * gridWidth + col
-                    guard index < viewModel.userPixels.count else { continue }
-                    let color = viewModel.userPixels[index]
-                    guard !color.isClear else { continue }
-                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
-                                      width: tileSize, height: tileSize)
-                    context.fill(Path(rect), with: .color(color))
-                }
-            }
-        }
-        .frame(width: renderW, height: renderH)
-        
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
-        renderer.isOpaque = false
-        
-        if let image = renderer.uiImage {
-            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-            showSavedAlert = true
         }
     }
 }
