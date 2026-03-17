@@ -20,7 +20,7 @@ struct RecreateSession: Codable, Identifiable {
     let sourceID: String        // premade sprite ID string, or user project UUID string
     let spriteName: String
     let canvasSize: CanvasSizes
-    let palette: ColorPalettes
+    let palette: ColorPalettes?
     let referenceGrid: [String] // the target pixel grid (hex / "clear")
     var userPixels: [String]    // user's painted pixels (hex / "clear")
     var lastEdited: Date

@@ -29,14 +29,16 @@ class ToolsViewModel: ObservableObject {
     @Published var selectedColor: Color
     @Published var selectedColorIndex: Int = 0
     private var palette: ColorPalettes
+    private var embeddedPaletteColors: [String]?
 
-    init(defaultColor: Color, palette: ColorPalettes) {
+    init(defaultColor: Color, palette: ColorPalettes, embeddedPaletteColors: [String]? = nil) {
         self.selectedColor = defaultColor
         self.palette = palette
+        self.embeddedPaletteColors = embeddedPaletteColors
     }
     
     var availableColors: [Color] {
-        palette.colors
+        palette.resolvedColors(embeddedColors: embeddedPaletteColors)
     }
     
     var availableTools: [ToolType] {

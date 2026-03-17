@@ -11,12 +11,13 @@ struct PremadeSpriteData: Identifiable {
     let id: String
     let name: String
     let canvasSize: CanvasSizes
-    let palette: ColorPalettes
+    let palette: ColorPalettes?
     let pixelGrid: [String]
     let group: String?
     let groupOrder: Int
+    let paletteColors: [String]?
     
-    init(id: String, name: String, canvasSize: CanvasSizes, palette: ColorPalettes, pixelGrid: [String], group: String? = nil, groupOrder: Int = 0) {
+    init(id: String, name: String, canvasSize: CanvasSizes, palette: ColorPalettes? = nil, pixelGrid: [String], group: String? = nil, groupOrder: Int = 0, paletteColors: [String]? = nil) {
         self.id = id
         self.name = name
         self.canvasSize = canvasSize
@@ -24,6 +25,17 @@ struct PremadeSpriteData: Identifiable {
         self.pixelGrid = pixelGrid
         self.group = group
         self.groupOrder = groupOrder
+        self.paletteColors = paletteColors
+    }
+    
+    var resolvedPaletteColors: [String] {
+        if let custom = paletteColors, !custom.isEmpty {
+            return custom
+        }
+        if let palette = palette {
+            return palette.colors.compactMap { $0.toHex() }
+        }
+        return []
     }
 }
 
@@ -41,7 +53,6 @@ struct PremadeSprites {
         potion, shield, slime, gem, cat, dog, arrow, chest, key, crown,
         bomb, cactus, ghost, spaceship, avocado, flower, dragon,
         treasureMap, campfire, anchor, lantern,
-        // Community Sprites
         fire, rainbow, pokemonBall,
     ]
 }

@@ -83,7 +83,12 @@ class CanvasViewModel: ObservableObject {
         self.projectID = data.id
         self.projectName = data.name
         self.projectSettings = data.settings
-        self.toolsVM = ToolsViewModel(defaultColor: data.settings.selectedPalette.colors[0], palette: data.settings.selectedPalette)
+        let resolvedColors = data.settings.selectedPalette.resolvedColors(embeddedColors: data.settings.customPaletteColors)
+        self.toolsVM = ToolsViewModel(
+            defaultColor: resolvedColors[0],
+            palette: data.settings.selectedPalette,
+            embeddedPaletteColors: data.settings.customPaletteColors
+        )
         
         // rebuild 2D array from 1D
         self.pixels = data.pixelGrid.map { hex in

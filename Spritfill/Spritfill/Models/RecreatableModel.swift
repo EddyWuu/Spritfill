@@ -14,7 +14,7 @@ struct RecreatableArtModel: Identifiable {
     let name: String
     let sourceType: RecreateSource
     let canvasSize: CanvasSizes
-    let palette: ColorPalettes
+    let palette: ColorPalettes?
     let pixelGrid: [String]
     let colorNumberMap: [String: Int]
     

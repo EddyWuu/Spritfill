@@ -70,7 +70,7 @@ struct ProjectDetailsPopupView: View {
                         Text("Palette:")
                             .font(.headline)
                         Spacer()
-                        Text(viewModel.projectSettings.selectedPalette.rawValue)
+                        Text(viewModel.projectSettings.selectedPalette.displayName)
                             .font(.body)
                             .foregroundColor(.secondary)
                     }

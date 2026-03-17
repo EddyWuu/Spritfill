@@ -12,29 +12,49 @@ struct ProjectSettings: Codable {
     var selectedCanvasSize: CanvasSizes
     var selectedTileSize: TileSizes
     var selectedPalette: ColorPalettes
-    
-    // MARK: initializer
+    var customPaletteColors: [String]?
     
     init(selectedCanvasSize: CanvasSizes, selectedTileSize: TileSizes, selectedPalette: ColorPalettes) {
         self.selectedCanvasSize = selectedCanvasSize
         self.selectedTileSize = selectedTileSize
         self.selectedPalette = selectedPalette
+        
+        if case .custom(let id) = selectedPalette,
+           let palette = CustomPaletteService.shared.fetchPalette(by: id) {
+            self.customPaletteColors = palette.hexColors
+        }
     }
 }
 
 
 // MARK: - Color Palettes
 
-enum ColorPalettes: String, CaseIterable, Codable {
+enum ColorPalettes: Hashable, Codable {
     
-    case endesga64 = "Endesga 64"   // 64 colors
-    case endesga32 = "Endesga 32"   // 32 colors
-    case zughy32 = "Zughy 32"   // 32 colors
-    case generic16 = "Generic 16"   // 16 colors
-    case pico8 = "Pico-8"   // 16 colors
+    case endesga64
+    case endesga32
+    case zughy32
+    case generic16
+    case pico8
+    case custom(id: String)
+    
+    static var builtInCases: [ColorPalettes] {
+        [.endesga64, .endesga32, .zughy32, .generic16, .pico8]
+    }
+    
+    var displayName: String {
+        switch self {
+        case .endesga64: return "Endesga 64"
+        case .endesga32: return "Endesga 32"
+        case .zughy32: return "Zughy 32"
+        case .generic16: return "Generic 16"
+        case .pico8: return "Pico-8"
+        case .custom(let id):
+            return CustomPaletteService.shared.fetchPalette(by: id)?.name ?? "Custom"
+        }
+    }
     
     var colors: [Color] {
-        
         switch self {
         case .endesga64:
             return [
@@ -96,6 +116,77 @@ enum ColorPalettes: String, CaseIterable, Codable {
                 Color(hex: "#29ADFF"), Color(hex: "#83769C"), Color(hex: "#FF77A8"), Color(hex: "#FFCCAA")
             ]
             
+        case .custom(let id):
+            if let palette = CustomPaletteService.shared.fetchPalette(by: id) {
+                return palette.hexColors.map { Color(hex: $0) }
+            }
+            return [.black, .white]
+        }
+    }
+    
+    func resolvedColors(embeddedColors: [String]?) -> [Color] {
+        if case .custom(let id) = self {
+            if let palette = CustomPaletteService.shared.fetchPalette(by: id) {
+                return palette.hexColors.map { Color(hex: $0) }
+            }
+            if let embedded = embeddedColors, !embedded.isEmpty {
+                return embedded.map { Color(hex: $0) }
+            }
+            return [.black, .white]
+        }
+        return colors
+    }
+    
+    // Custom Codable to handle associated value
+    
+    enum CodingKeys: String, CodingKey {
+        case type, customId
+    }
+    
+    init(from decoder: Decoder) throws {
+        // Try new keyed format first
+        if let container = try? decoder.container(keyedBy: CodingKeys.self),
+           let type = try? container.decode(String.self, forKey: .type) {
+            switch type {
+            case "Endesga 64": self = .endesga64
+            case "Endesga 32": self = .endesga32
+            case "Zughy 32": self = .zughy32
+            case "Generic 16": self = .generic16
+            case "Pico-8": self = .pico8
+            case "custom":
+                let id = try container.decode(String.self, forKey: .customId)
+                self = .custom(id: id)
+            default:
+                self = .endesga64
+            }
+            return
+        }
+        
+        // Fall back to old raw string format for existing saved projects
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        switch rawValue {
+        case "Endesga 64": self = .endesga64
+        case "Endesga 32": self = .endesga32
+        case "Zughy 32": self = .zughy32
+        case "Generic 16": self = .generic16
+        case "Pico-8": self = .pico8
+        default: self = .endesga64
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .endesga64: try container.encode("Endesga 64", forKey: .type)
+        case .endesga32: try container.encode("Endesga 32", forKey: .type)
+        case .zughy32: try container.encode("Zughy 32", forKey: .type)
+        case .generic16: try container.encode("Generic 16", forKey: .type)
+        case .pico8: try container.encode("Pico-8", forKey: .type)
+        case .custom(let id):
+            try container.encode("custom", forKey: .type)
+            try container.encode(id, forKey: .customId)
         }
     }
 }

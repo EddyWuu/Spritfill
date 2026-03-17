@@ -16,8 +16,11 @@ struct NewProjectSetUpView: View {
     @State private var selectedTileSize: TileSizes?
     
     let allTileSizes = TileSizes.allCases
-    let allPalettes = ColorPalettes.allCases
     let allCanvasSizes = CanvasSizes.allCases
+    
+    @State private var customPalettes: [CustomPaletteData] = []
+    @State private var showPaletteEditor = false
+    @State private var editingPalette: CustomPaletteData? = nil
     
     @State private var projectName: String = ""
     
@@ -109,7 +112,7 @@ struct NewProjectSetUpView: View {
                     
                     VStack(spacing: 10) {
                         
-                        ForEach(allPalettes, id: \.self) { palette in
+                        ForEach(ColorPalettes.builtInCases, id: \.self) { palette in
                             Button(action: {
                                 selectedPalette = palette
                             }) {
@@ -119,7 +122,7 @@ struct NewProjectSetUpView: View {
                                         .frame(height: 50)
                                         .overlay(
                                             HStack {
-                                                Text(palette.rawValue)
+                                                Text(palette.displayName)
                                                     .foregroundColor(.black)
                                                     .font(.subheadline)
                                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -133,6 +136,79 @@ struct NewProjectSetUpView: View {
                                             }
                                         )
                                 }
+                            }
+                        }
+                        
+                        if !customPalettes.isEmpty {
+                            Divider()
+                            
+                            Text("Your Palettes")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            ForEach(customPalettes) { palette in
+                                let paletteEnum = ColorPalettes.custom(id: palette.id)
+                                Button(action: {
+                                    selectedPalette = paletteEnum
+                                }) {
+                                    HStack {
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(selectedPalette == paletteEnum ? Color.blue : Color.gray.opacity(0.3))
+                                            .frame(height: 50)
+                                            .overlay(
+                                                HStack {
+                                                    Text(palette.name)
+                                                        .foregroundColor(.black)
+                                                        .font(.subheadline)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .padding(.leading, 10)
+                                                    
+                                                    Text("\(palette.hexColors.count) colors")
+                                                        .foregroundColor(.black)
+                                                        .font(.subheadline)
+                                                        .frame(maxWidth: .infinity, alignment: .trailing)
+                                                        .padding(.trailing, 10)
+                                                }
+                                            )
+                                    }
+                                }
+                                .contextMenu {
+                                    Button {
+                                        editingPalette = palette
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil")
+                                    }
+                                    
+                                    Button(role: .destructive) {
+                                        CustomPaletteService.shared.deletePalette(id: palette.id)
+                                        customPalettes = CustomPaletteService.shared.fetchAllPalettes()
+                                        if selectedPalette == paletteEnum {
+                                            selectedPalette = nil
+                                        }
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                            }
+                        }
+                        
+                        Button {
+                            showPaletteEditor = true
+                        } label: {
+                            HStack {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .strokeBorder(Color.blue, style: StrokeStyle(lineWidth: 2, dash: [6]))
+                                    .frame(height: 50)
+                                    .overlay(
+                                        HStack {
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundColor(.blue)
+                                            Text("Create Custom Palette")
+                                                .foregroundColor(.blue)
+                                                .font(.subheadline)
+                                        }
+                                    )
                             }
                         }
                     }
@@ -160,6 +236,21 @@ struct NewProjectSetUpView: View {
                     }
                 }
                 .disabled(selectedCanvasSize == nil || selectedPalette == nil || selectedTileSize == nil)
+            }
+        }
+        .onAppear {
+            customPalettes = CustomPaletteService.shared.fetchAllPalettes()
+        }
+        .sheet(isPresented: $showPaletteEditor) {
+            PaletteEditorView { savedPalette in
+                customPalettes = CustomPaletteService.shared.fetchAllPalettes()
+                selectedPalette = .custom(id: savedPalette.id)
+            }
+        }
+        .sheet(item: $editingPalette) { palette in
+            PaletteEditorView(existingPalette: palette) { savedPalette in
+                customPalettes = CustomPaletteService.shared.fetchAllPalettes()
+                selectedPalette = .custom(id: savedPalette.id)
             }
         }
 
