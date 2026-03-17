@@ -15,8 +15,16 @@ struct CatalogView: View {
     @State private var showDetail = false
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
+    @Environment(\.horizontalSizeClass) private var sizeClass
     
-    let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
+    private var columns: [GridItem] {
+        let isRegular = sizeClass == .regular
+        return [GridItem(.adaptive(minimum: isRegular ? 120 : 100), spacing: isRegular ? 20 : 16)]
+    }
+    
+    private var gridSpacing: CGFloat {
+        sizeClass == .regular ? 20 : 16
+    }
     
     var body: some View {
         NavigationStack {
@@ -36,7 +44,7 @@ struct CatalogView: View {
                         .padding(.bottom, 4)
                         
                         // Sprite grid
-                        LazyVGrid(columns: columns, spacing: 16) {
+                        LazyVGrid(columns: columns, spacing: gridSpacing) {
                             ForEach(section.sprites) { sprite in
                                 Button {
                                     // Show sprite detail overlay

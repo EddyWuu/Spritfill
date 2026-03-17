@@ -75,6 +75,7 @@ class RecreateCanvasViewModel: ObservableObject {
             hex == "clear" ? Color.clear : Color(hex: hex)
         }
         canUndo = !undoHistory.isEmpty
+        recalculateStats()
     }
     
     // MARK: - Computed properties
@@ -89,35 +90,34 @@ class RecreateCanvasViewModel: ObservableObject {
     let colorNumberMap: [String: Int]
     let numberedColors: [(number: Int, hex: String, color: Color)]
     
-    var completionCount: Int {
-        var count = 0
-        for i in 0..<referenceGrid.count {
-            let targetHex = referenceGrid[i]
-            if targetHex == "clear" { continue }
-            if i < userPixelHexes.count && userPixelHexes[i] != "clear" {
-                if userPixelHexes[i].lowercased() == targetHex.lowercased() {
-                    count += 1
-                }
+    // Cached stats — updated only when pixels change via recalculateStats()
+    @Published private(set) var completionCount: Int = 0
+    @Published private(set) var totalColoredPixels: Int = 0
+    @Published private(set) var hasWrongPlacements: Bool = false
+    @Published private(set) var isComplete: Bool = false
+    
+    /// Recompute completion stats. Call after pixel changes, not on every frame.
+    private func recalculateStats() {
+        var completion = 0
+        var wrongPlacement = false
+        let refGrid = session.referenceGrid
+        let hexes = userPixelHexes
+        let count = refGrid.count
+        
+        for i in 0..<count {
+            let target = refGrid[i]
+            let user = i < hexes.count ? hexes[i] : "clear"
+            
+            if target == "clear" {
+                if user != "clear" { wrongPlacement = true }
+            } else if user != "clear" && user.lowercased() == target.lowercased() {
+                completion += 1
             }
         }
-        return count
-    }
-    
-    var totalColoredPixels: Int {
-        referenceGrid.filter { $0 != "clear" }.count
-    }
-    
-    var hasWrongPlacements: Bool {
-        for i in 0..<referenceGrid.count {
-            if referenceGrid[i] == "clear" && i < userPixelHexes.count && userPixelHexes[i] != "clear" {
-                return true
-            }
-        }
-        return false
-    }
-    
-    var isComplete: Bool {
-        totalColoredPixels > 0 && completionCount == totalColoredPixels && !hasWrongPlacements
+        
+        completionCount = completion
+        hasWrongPlacements = wrongPlacement
+        isComplete = totalColoredPixels > 0 && completion == totalColoredPixels && !wrongPlacement
     }
     
     // MARK: - Zoom calculations
@@ -171,6 +171,9 @@ class RecreateCanvasViewModel: ObservableObject {
             userPixelHexes.append(contentsOf: Array(repeating: "clear", count: totalPixels - userPixelHexes.count))
         }
         
+        // Compute totalColoredPixels once (reference grid is immutable)
+        self.totalColoredPixels = session.referenceGrid.filter { $0 != "clear" }.count
+        
         memoryObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification,
             object: nil, queue: .main
@@ -178,9 +181,15 @@ class RecreateCanvasViewModel: ObservableObject {
             self?.undoHistory.removeAll()
             self?.canUndo = false
         }
+        
+        // Initial stats calculation
+        recalculateStats()
     }
     
+    private var saveTimer: Timer?
+    
     deinit {
+        saveTimer?.invalidate()
         if let observer = memoryObserver {
             NotificationCenter.default.removeObserver(observer)
         }
@@ -213,6 +222,7 @@ class RecreateCanvasViewModel: ObservableObject {
         case .pan:
             break
         }
+        recalculateStats()
         objectWillChange.send()
     }
     
@@ -276,7 +286,14 @@ class RecreateCanvasViewModel: ObservableObject {
         session.lastEdited = Date()
         storage.saveSession(session)
     }
-    
+
+    /// Debounced save — coalesces rapid paint actions into a single disk write
+    func debouncedSave() {
+        saveTimer?.invalidate()
+        saveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+            self?.saveProgress()
+        }
+    }    
     // MARK: - Export
     
     @MainActor

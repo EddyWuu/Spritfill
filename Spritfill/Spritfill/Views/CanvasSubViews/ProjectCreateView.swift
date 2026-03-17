@@ -27,6 +27,7 @@ struct ProjectCreateView: View {
     @State private var showDeleteAlert = false
     @State private var showFinishAlert = false
     @State private var showFinishCongrats = false
+    @State private var showColorAdder = false
     
     init(viewModel: CanvasViewModel, onFinish: (() -> Void)? = nil) {
         self.viewModel = viewModel
@@ -110,7 +111,7 @@ struct ProjectCreateView: View {
                 Divider()
                 
                 // MARK: - Tool buttons
-                ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel)
+                ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder)
                     .background(Color(.secondarySystemBackground))
                 
                 Divider()
@@ -160,6 +161,11 @@ struct ProjectCreateView: View {
         }
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])
+        }
+        .sheet(isPresented: $showColorAdder) {
+            ColorAdderSheet(toolsVM: toolsVM)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
         .alert("Finish Project?", isPresented: $showFinishAlert) {
             Button("Finish", role: .destructive) {

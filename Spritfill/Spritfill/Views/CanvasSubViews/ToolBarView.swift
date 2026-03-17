@@ -10,6 +10,7 @@ import SwiftUI
 struct ToolsBarView: View {
     @ObservedObject var toolsVM: ToolsViewModel
     @ObservedObject var canvasVM: CanvasViewModel
+    @Binding var showColorAdder: Bool
 
     var body: some View {
         HStack(spacing: 8) {
@@ -26,6 +27,13 @@ struct ToolsBarView: View {
                     .foregroundColor(canvasVM.canUndo ? .primary : .gray.opacity(0.4))
             }
             .disabled(!canvasVM.canUndo)
+            
+            // Add colors to palette
+            Button(action: { showColorAdder = true }) {
+                Image(systemName: "paintpalette")
+                    .font(.title3)
+                    .foregroundColor(.primary)
+            }
             
             // Show currently selected color swatch
             Circle()

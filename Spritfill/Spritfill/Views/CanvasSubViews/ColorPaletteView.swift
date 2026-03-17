@@ -15,30 +15,49 @@ struct ColorPaletteView: View {
     var body: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(0..<toolsVM.availableColors.count, id: \.self) { index in
-                    let color = toolsVM.availableColors[index]
-                    let isSelected = index == toolsVM.selectedColorIndex
-
-                    Circle()
-                        .fill(color)
-                        .frame(width: 32, height: 32)
-                        .overlay(
-                            Circle()
-                                .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2.5)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(isSelected ? Color.black : Color.clear, lineWidth: 1)
-                                .padding(1)
-                        )
-                        .shadow(color: isSelected ? .black.opacity(0.3) : .clear, radius: 2)
-                        .onTapGesture {
-                            toolsVM.selectColor(color, at: index)
-                        }
+                // Base palette colors
+                ForEach(0..<toolsVM.basePaletteCount, id: \.self) { index in
+                    colorCircle(at: index)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            
+            // Extra colors section
+            if !toolsVM.extraColors.isEmpty {
+                Divider()
+                    .padding(.horizontal, 12)
+                
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(toolsVM.basePaletteCount..<toolsVM.availableColors.count, id: \.self) { index in
+                        colorCircle(at: index)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            }
         }
+    }
+    
+    private func colorCircle(at index: Int) -> some View {
+        let color = toolsVM.availableColors[index]
+        let isSelected = index == toolsVM.selectedColorIndex
+        
+        return Circle()
+            .fill(color)
+            .frame(width: 32, height: 32)
+            .overlay(
+                Circle()
+                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2.5)
+            )
+            .overlay(
+                Circle()
+                    .stroke(isSelected ? Color.black : Color.clear, lineWidth: 1)
+                    .padding(1)
+            )
+            .shadow(color: isSelected ? .black.opacity(0.3) : .clear, radius: 2)
+            .onTapGesture {
+                toolsVM.selectColor(color, at: index)
+            }
     }
 }

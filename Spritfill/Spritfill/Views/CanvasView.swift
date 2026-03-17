@@ -13,13 +13,21 @@ struct CanvasView: View {
     @State private var path: [CanvasRoute] = []
     @State private var canvasViewModels: [UUID: CanvasViewModel] = [:]
     @State private var selectedTab: CanvasTab = .inProgress
+    @Environment(\.horizontalSizeClass) private var sizeClass
     
     enum CanvasTab: String, CaseIterable {
         case inProgress = "In Progress"
         case finished = "Finished"
     }
 
-    private let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
+    private var columns: [GridItem] {
+        let isRegular = sizeClass == .regular
+        return [GridItem(.adaptive(minimum: isRegular ? 120 : 100), spacing: isRegular ? 20 : 16)]
+    }
+    
+    private var gridSpacing: CGFloat {
+        sizeClass == .regular ? 20 : 16
+    }
     
     private var inProgressProjects: [ProjectData] {
         projectManager.allProjects.filter { !$0.isFinished }
@@ -120,7 +128,7 @@ struct CanvasView: View {
     
     private var inProgressTab: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
+            LazyVGrid(columns: columns, spacing: gridSpacing) {
                 
                 // New project button
                 Button {
@@ -155,6 +163,13 @@ struct CanvasView: View {
                         projectCard(project)
                     }
                     .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            projectManager.delete(project)
+                        } label: {
+                            Label("Delete Project", systemImage: "trash")
+                        }
+                    }
                 }
             }
             .padding()
@@ -180,7 +195,7 @@ struct CanvasView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
+                    LazyVGrid(columns: columns, spacing: gridSpacing) {
                         ForEach(finishedProjects, id: \.id) { project in
                             Button {
                                 path.append(.projectView(project.id))
@@ -188,6 +203,13 @@ struct CanvasView: View {
                                 projectCard(project, showFinished: true)
                             }
                             .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    projectManager.delete(project)
+                                } label: {
+                                    Label("Delete Project", systemImage: "trash")
+                                }
+                            }
                         }
                     }
                     .padding()

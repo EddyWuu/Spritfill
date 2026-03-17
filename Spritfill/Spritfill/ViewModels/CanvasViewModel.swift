@@ -112,7 +112,8 @@ class CanvasViewModel: ObservableObject {
         self.toolsVM = ToolsViewModel(
             defaultColor: resolvedColors[0],
             palette: data.settings.selectedPalette,
-            embeddedPaletteColors: data.settings.customPaletteColors
+            embeddedPaletteColors: data.settings.customPaletteColors,
+            extraColors: data.settings.extraColors
         )
         
         // rebuild 2D array from 1D
@@ -202,6 +203,11 @@ class CanvasViewModel: ObservableObject {
             lastEdited: Date(),
             isFinished: isFinished
         )
+    }
+    
+    /// Sync extra colors from ToolsViewModel back to project settings for persistence
+    func syncExtraColors(_ colors: [String]) {
+        projectSettings.extraColors = colors
     }
     
     func updatePixel(row: Int, col: Int) {

@@ -28,17 +28,47 @@ class ToolsViewModel: ObservableObject {
     @Published var selectedTool: ToolType = .pencil
     @Published var selectedColor: Color
     @Published var selectedColorIndex: Int = 0
+    @Published var extraColors: [String] = []
     private var palette: ColorPalettes
     private var embeddedPaletteColors: [String]?
 
-    init(defaultColor: Color, palette: ColorPalettes, embeddedPaletteColors: [String]? = nil) {
+    init(defaultColor: Color, palette: ColorPalettes, embeddedPaletteColors: [String]? = nil, extraColors: [String] = []) {
         self.selectedColor = defaultColor
         self.palette = palette
         self.embeddedPaletteColors = embeddedPaletteColors
+        self.extraColors = extraColors
+    }
+    
+    var baseColors: [Color] {
+        palette.resolvedColors(embeddedColors: embeddedPaletteColors)
     }
     
     var availableColors: [Color] {
-        palette.resolvedColors(embeddedColors: embeddedPaletteColors)
+        var colors = baseColors
+        colors.append(contentsOf: extraColors.map { Color(hex: $0) })
+        return colors
+    }
+    
+    /// Number of colors in the base palette (before extras)
+    var basePaletteCount: Int {
+        baseColors.count
+    }
+    
+    /// Add a user-picked color to the extra colors list
+    func addColor(_ hex: String) {
+        let normalized = hex.uppercased()
+        // Avoid duplicates across base + extras
+        let allHexes = baseColors.map { $0.toHex()?.uppercased() ?? "" } + extraColors.map { $0.uppercased() }
+        guard !allHexes.contains(normalized) else { return }
+        extraColors.append(normalized)
+        canvasVM?.syncExtraColors(extraColors)
+    }
+    
+    /// Remove a user-added extra color by index (relative to extraColors array)
+    func removeExtraColor(at index: Int) {
+        guard index >= 0, index < extraColors.count else { return }
+        extraColors.remove(at: index)
+        canvasVM?.syncExtraColors(extraColors)
     }
     
     var availableTools: [ToolType] {

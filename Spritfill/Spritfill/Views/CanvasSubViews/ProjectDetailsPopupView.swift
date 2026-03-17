@@ -70,9 +70,16 @@ struct ProjectDetailsPopupView: View {
                         Text("Palette:")
                             .font(.headline)
                         Spacer()
-                        Text(viewModel.projectSettings.selectedPalette.displayName)
-                            .font(.body)
-                            .foregroundColor(.secondary)
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(viewModel.projectSettings.selectedPalette.displayName)
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            if !viewModel.projectSettings.extraColors.isEmpty {
+                                Text("+\(viewModel.projectSettings.extraColors.count) custom")
+                                    .font(.caption)
+                                    .foregroundColor(.purple)
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal)

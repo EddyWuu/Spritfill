@@ -25,6 +25,43 @@ struct RecreateProjectCanvasView: View {
             ZStack {
                 Canvas { context, size in
                     let cellSize = zoomScale
+                    let showGrid = cellSize > 8
+                    
+                    // Pre-resolve all unique number labels ONCE (not per-pixel)
+                    let fontSize = max(cellSize * 0.4, 6)
+                    var resolvedLabels: [Int: GraphicsContext.ResolvedText] = [:]
+                    
+                    // Only resolve text if cells are large enough to see numbers
+                    if cellSize >= 4 {
+                        for (_, number) in viewModel.colorNumberMap {
+                            let text = Text("\(number)")
+                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                .foregroundColor(.gray.opacity(0.7))
+                            resolvedLabels[number] = context.resolve(text)
+                        }
+                    }
+                    
+                    // Pre-resolve wrong-color label style (white text)
+                    var resolvedWrongLabels: [Int: GraphicsContext.ResolvedText] = [:]
+                    if cellSize >= 4 {
+                        for (_, number) in viewModel.colorNumberMap {
+                            let text = Text("\(number)")
+                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            resolvedWrongLabels[number] = context.resolve(text)
+                        }
+                    }
+                    
+                    // Checkerboard colors
+                    let lightBg = Color.gray.opacity(0.1)
+                    let darkBg = Color.gray.opacity(0.2)
+                    
+                    let referenceGrid = viewModel.referenceGrid
+                    let userPixels = viewModel.userPixels
+                    let userPixelHexes = viewModel.userPixelHexes
+                    let colorNumberMap = viewModel.colorNumberMap
+                    let pixelCount = userPixelHexes.count
+                    
                     for row in 0..<gridHeight {
                         for col in 0..<gridWidth {
                             let index = row * gridWidth + col
@@ -35,41 +72,32 @@ struct RecreateProjectCanvasView: View {
                                 height: cellSize
                             )
 
-                            let targetHex = viewModel.referenceGrid[index]
-                            let userColor = index < viewModel.userPixels.count ? viewModel.userPixels[index] : Color.clear
-                            let userHex = index < viewModel.userPixelHexes.count ? viewModel.userPixelHexes[index] : "clear"
+                            let targetHex = referenceGrid[index]
+                            let userHex = index < pixelCount ? userPixelHexes[index] : "clear"
 
                             // Checkerboard background
-                            let isLight = (row + col) % 2 == 0
-                            let bg = isLight ? Color.gray.opacity(0.1) : Color.gray.opacity(0.2)
+                            let bg = (row + col) % 2 == 0 ? lightBg : darkBg
                             context.fill(Path(rect), with: .color(bg))
 
                             if userHex != "clear" {
                                 // User has painted this cell
+                                let userColor = index < userPixels.count ? userPixels[index] : Color.clear
                                 context.fill(Path(rect), with: .color(userColor))
                                 
                                 if targetHex == "clear" {
                                     // Wrong placement — painted on a cell that should be empty
                                     let inset = cellSize * 0.2
-                                    let x1 = rect.minX + inset
-                                    let y1 = rect.minY + inset
-                                    let x2 = rect.maxX - inset
-                                    let y2 = rect.maxY - inset
                                     var xPath = Path()
-                                    xPath.move(to: CGPoint(x: x1, y: y1))
-                                    xPath.addLine(to: CGPoint(x: x2, y: y2))
-                                    xPath.move(to: CGPoint(x: x2, y: y1))
-                                    xPath.addLine(to: CGPoint(x: x1, y: y2))
+                                    xPath.move(to: CGPoint(x: rect.minX + inset, y: rect.minY + inset))
+                                    xPath.addLine(to: CGPoint(x: rect.maxX - inset, y: rect.maxY - inset))
+                                    xPath.move(to: CGPoint(x: rect.maxX - inset, y: rect.minY + inset))
+                                    xPath.addLine(to: CGPoint(x: rect.minX + inset, y: rect.maxY - inset))
                                     context.stroke(xPath, with: .color(.red.opacity(0.4)),
                                                    lineWidth: max(cellSize * 0.08, 1))
                                 } else if userHex.lowercased() != targetHex.lowercased() {
                                     // Wrong color — show the target number
-                                    if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
-                                        let fontSize = max(cellSize * 0.4, 6)
-                                        let text = Text("\(number)")
-                                            .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                                            .foregroundColor(.white)
-                                        let resolved = context.resolve(text)
+                                    if let number = colorNumberMap[targetHex.lowercased()],
+                                       let resolved = resolvedWrongLabels[number] {
                                         context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
                                     }
                                 }
@@ -77,24 +105,31 @@ struct RecreateProjectCanvasView: View {
                                 // Show reference at lighter opacity
                                 context.fill(Path(rect), with: .color(Color(hex: targetHex).opacity(0.15)))
 
-                                // Draw the number
-                                if let number = viewModel.colorNumberMap[targetHex.lowercased()] {
-                                    let fontSize = max(cellSize * 0.4, 6)
-                                    let text = Text("\(number)")
-                                        .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                                        .foregroundColor(.gray.opacity(0.7))
-
-                                    let resolved = context.resolve(text)
+                                // Draw the pre-resolved number label
+                                if let number = colorNumberMap[targetHex.lowercased()],
+                                   let resolved = resolvedLabels[number] {
                                     context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
                                 }
                             }
-
-                            // Grid lines when zoomed in enough
-                            if cellSize > 8 {
-                                let borderRect = rect.insetBy(dx: 0.5, dy: 0.5)
-                                context.stroke(Path(borderRect), with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
-                            }
                         }
+                    }
+                    
+                    // Draw grid lines as two single stroked paths (much faster than per-cell)
+                    if showGrid {
+                        var gridPath = Path()
+                        let totalWidth = CGFloat(gridWidth) * cellSize
+                        let totalHeight = CGFloat(gridHeight) * cellSize
+                        for row in 0...gridHeight {
+                            let y = CGFloat(row) * cellSize
+                            gridPath.move(to: CGPoint(x: 0, y: y))
+                            gridPath.addLine(to: CGPoint(x: totalWidth, y: y))
+                        }
+                        for col in 0...gridWidth {
+                            let x = CGFloat(col) * cellSize
+                            gridPath.move(to: CGPoint(x: x, y: 0))
+                            gridPath.addLine(to: CGPoint(x: x, y: totalHeight))
+                        }
+                        context.stroke(gridPath, with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
                     }
                 }
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
@@ -143,8 +178,8 @@ struct RecreateProjectCanvasView: View {
                             }
                             viewModel.endAction()
                             dragVisitedIndices.removeAll()
-                            // Auto-save after each paint/erase action
-                            viewModel.saveProgress()
+                            // Auto-save after each paint/erase action (debounced)
+                            viewModel.debouncedSave()
                         }
                     }
             )

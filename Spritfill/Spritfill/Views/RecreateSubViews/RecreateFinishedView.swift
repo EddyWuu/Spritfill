@@ -15,8 +15,16 @@ struct RecreateFinishedView: View {
     @State private var showDetail = false
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
+    @Environment(\.horizontalSizeClass) private var sizeClass
     
-    private let columns = [GridItem(.adaptive(minimum: 100), spacing: 16)]
+    private var columns: [GridItem] {
+        let isRegular = sizeClass == .regular
+        return [GridItem(.adaptive(minimum: isRegular ? 120 : 100), spacing: isRegular ? 20 : 16)]
+    }
+    
+    private var gridSpacing: CGFloat {
+        sizeClass == .regular ? 20 : 16
+    }
     
     var body: some View {
         ZStack {
@@ -67,7 +75,7 @@ struct RecreateFinishedView: View {
     
     private var finishedList: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 16) {
+            LazyVGrid(columns: columns, spacing: gridSpacing) {
                 ForEach(viewModel.finishedSessions) { item in
                     Button {
                         selectedItem = item
@@ -105,6 +113,13 @@ struct RecreateFinishedView: View {
                         .shadow(radius: 2)
                     }
                     .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            viewModel.deleteSession(item)
+                        } label: {
+                            Label("Delete Project", systemImage: "trash")
+                        }
+                    }
                 }
             }
             .padding()

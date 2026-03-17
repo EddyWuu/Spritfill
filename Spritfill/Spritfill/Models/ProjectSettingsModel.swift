@@ -13,16 +13,27 @@ struct ProjectSettings: Codable {
     var selectedTileSize: TileSizes
     var selectedPalette: ColorPalettes
     var customPaletteColors: [String]?
+    var extraColors: [String]
     
     init(selectedCanvasSize: CanvasSizes, selectedTileSize: TileSizes, selectedPalette: ColorPalettes) {
         self.selectedCanvasSize = selectedCanvasSize
         self.selectedTileSize = selectedTileSize
         self.selectedPalette = selectedPalette
+        self.extraColors = []
         
         if case .custom(let id) = selectedPalette,
            let palette = CustomPaletteService.shared.fetchPalette(by: id) {
             self.customPaletteColors = palette.hexColors
         }
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        selectedCanvasSize = try container.decode(CanvasSizes.self, forKey: .selectedCanvasSize)
+        selectedTileSize = try container.decode(TileSizes.self, forKey: .selectedTileSize)
+        selectedPalette = try container.decode(ColorPalettes.self, forKey: .selectedPalette)
+        customPaletteColors = try container.decodeIfPresent([String].self, forKey: .customPaletteColors)
+        extraColors = try container.decodeIfPresent([String].self, forKey: .extraColors) ?? []
     }
 }
 
