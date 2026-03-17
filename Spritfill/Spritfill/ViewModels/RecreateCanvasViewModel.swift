@@ -250,6 +250,9 @@ class RecreateCanvasViewModel: ObservableObject {
     func selectColor(_ color: Color, hex: String) {
         selectedColor = color
         selectedColorHex = hex
+        if selectedTool != .paint {
+            selectedTool = .paint
+        }
     }
     
     func isSelected(tool: RecreateTool) -> Bool {

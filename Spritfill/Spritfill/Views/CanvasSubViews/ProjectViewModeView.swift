@@ -122,7 +122,7 @@ struct ProjectViewModeView: View {
         }
         .sheet(isPresented: $showProjectDetails) {
             ProjectDetailsPopupView(viewModel: viewModel)
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(360)])
                 .presentationDragIndicator(.visible)
         }
     }

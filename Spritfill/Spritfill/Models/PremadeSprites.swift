@@ -42,8 +42,8 @@ struct PremadeSpriteData: Identifiable {
 struct PremadeSprites {
     
     static let all: [PremadeSpriteData] = [
-        // 16x16 Characters
-        knightIdle, knightRest, knightAttack,
+        // 32x32 Characters
+        knightIdle32, knightAttack32, knightRun32,
         // Ducks
         duck1, duck2, duck3, duck4, duck5, duck6, ducks1,
         // 32x32 Landscapes

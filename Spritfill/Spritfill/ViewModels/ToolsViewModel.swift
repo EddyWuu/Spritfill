@@ -71,5 +71,8 @@ class ToolsViewModel: ObservableObject {
     func selectColor(_ color: Color, at index: Int = -1) {
         selectedColor = color
         selectedColorIndex = index
+        if selectedTool != .fill && selectedTool != .pencil {
+            selectedTool = .pencil
+        }
     }
 }

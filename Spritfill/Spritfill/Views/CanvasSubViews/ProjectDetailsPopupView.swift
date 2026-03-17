@@ -87,7 +87,7 @@ struct ProjectDetailsPopupView: View {
                 
                 Spacer()
             }
-            .padding(.top)
+            .padding(.top, 16)
             .navigationTitle("Project Details")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
