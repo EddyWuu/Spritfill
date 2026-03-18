@@ -12,7 +12,7 @@ struct ProjectCanvasExportView: View {
     var overrideTileSize: CGFloat? = nil
 
     var body: some View {
-        let tileSize = overrideTileSize ?? CGFloat(viewModel.projectSettings.selectedTileSize.size)
+        let tileSize = overrideTileSize ?? CGFloat(viewModel.projectSettings.selectedTileSize)
         let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
 

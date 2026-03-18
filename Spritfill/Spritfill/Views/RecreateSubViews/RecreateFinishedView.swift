@@ -201,7 +201,7 @@ struct RecreateFinishedView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "square.and.arrow.up")
-                            Text("Share")
+                            Text("Export")
                         }
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(.white)

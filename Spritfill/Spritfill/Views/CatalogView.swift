@@ -135,7 +135,7 @@ struct CatalogView: View {
                 
                 Divider()
                 
-                // Save and Share buttons
+                // Save and Export buttons
                 HStack(spacing: 20) {
                     Button {
                         // Save sprite as PNG to photo library
@@ -161,7 +161,7 @@ struct CatalogView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "square.and.arrow.up")
-                            Text("Share")
+                            Text("Export")
                         }
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(.white)

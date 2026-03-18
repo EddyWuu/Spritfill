@@ -84,7 +84,7 @@ class CanvasViewModel: ObservableObject {
     
     // MARK: - Init: New Project
     
-    init(projectName: String, selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: TileSizes) {
+    init(projectName: String, selectedCanvasSize: CanvasSizes, selectedPalette: ColorPalettes, selectedTileSize: Int) {
         
         self.projectID = UUID()
         self.projectName = projectName
@@ -154,18 +154,11 @@ class CanvasViewModel: ObservableObject {
     }
     
     var maximumZoomScale: CGFloat {
-        let gridArea = baseCanvasSize.width * baseCanvasSize.height
-        let multiplier: CGFloat
-        if gridArea <= 256 {         // 16×16
-            multiplier = 6.0
-        } else if gridArea <= 1024 { // 32×32
-            multiplier = 5.0
-        } else if gridArea <= 4096 { // 64×64
-            multiplier = 4.0
-        } else {                     // 128×128+
-            multiplier = 3.0
-        }
-        let result = fitScale * multiplier
+        // Target: each pixel should be ~35pt on screen at max zoom,
+        // regardless of canvas size. This makes zoom depth consistent
+        // across 16×16 and 128×128 canvases.
+        let targetPixelSize: CGFloat = 35.0
+        let result = targetPixelSize // since base canvas is 1pt per pixel, zoom = target pixel size
         // Safety: max must always exceed min
         return max(result, minimumZoomScale + 1.0)
     }
@@ -539,10 +532,12 @@ class CanvasViewModel: ObservableObject {
     
     // MARK: - Export
     
+    @Published var isExporting: Bool = false
+    
     @MainActor
     func exportImage() -> UIImage {
         let dims = projectSettings.selectedCanvasSize.dimensions
-        let tileSize = CGFloat(projectSettings.selectedTileSize.size)
+        let tileSize = CGFloat(projectSettings.selectedTileSize)
         let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
                                 height: CGFloat(dims.height) * tileSize)
         let canvasView = ProjectCanvasExportView(viewModel: self)
@@ -550,9 +545,12 @@ class CanvasViewModel: ObservableObject {
     }
     
     func exportAndSaveToPhotos(completion: (() -> Void)? = nil) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+        isExporting = true
+        Task { @MainActor in
+            // Yield so the UI can show the loading state
+            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
             let image = self.exportImage()
+            self.isExporting = false
             PhotoSaver.saveAsPNG(image) {
                 completion?()
             }
@@ -560,9 +558,11 @@ class CanvasViewModel: ObservableObject {
     }
     
     func exportAndGetShareImage(completion: @escaping (IdentifiableImage) -> Void) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+        isExporting = true
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
             let image = self.exportImage()
+            self.isExporting = false
             completion(IdentifiableImage(image: image))
         }
     }

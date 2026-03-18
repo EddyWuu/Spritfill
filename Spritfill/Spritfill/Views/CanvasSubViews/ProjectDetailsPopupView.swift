@@ -55,7 +55,7 @@ struct ProjectDetailsPopupView: View {
                         Text("Tile Size:")
                             .font(.headline)
                         Spacer()
-                        let tileSize = viewModel.projectSettings.selectedTileSize.size
+                        let tileSize = viewModel.projectSettings.selectedTileSize
                         Text("\(tileSize) × \(tileSize) pixels")
                             .font(.body)
                             .foregroundColor(.secondary)

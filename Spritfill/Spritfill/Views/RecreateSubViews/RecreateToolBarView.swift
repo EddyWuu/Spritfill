@@ -12,7 +12,7 @@ struct RecreateToolBarView: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            ForEach(RecreateCanvasViewModel.RecreateTool.allCases, id: \.self) { tool in
+            ForEach(RecreateCanvasViewModel.RecreateTool.allCases.filter { $0 != .pan }, id: \.self) { tool in
                 RecreateToolButtonView(tool: tool, viewModel: viewModel)
             }
             
@@ -25,6 +25,9 @@ struct RecreateToolBarView: View {
                     .foregroundColor(viewModel.canUndo ? .primary : .gray.opacity(0.4))
             }
             .disabled(!viewModel.canUndo)
+            
+            // Pan / move screen button
+            RecreateToolButtonView(tool: .pan, viewModel: viewModel)
             
             // Show currently selected color swatch
             Circle()

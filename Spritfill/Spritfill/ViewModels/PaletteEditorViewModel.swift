@@ -16,6 +16,7 @@ class PaletteEditorViewModel: ObservableObject {
     @Published var brightness: Double = 1.0
     @Published var hexInput: String = ""
     @Published var addedFlash: Bool = false
+    @Published var overrideHex: String? = nil  // Exact hex from typed input — avoids HSB roundtrip loss
     
     let existingPalette: CustomPaletteData?
     
@@ -26,11 +27,17 @@ class PaletteEditorViewModel: ObservableObject {
     }
     
     var selectedColor: Color {
-        Color(hue: hue, saturation: saturation, brightness: brightness)
+        if let hex = overrideHex {
+            return Color(hex: hex)
+        }
+        return Color(hue: hue, saturation: saturation, brightness: brightness)
     }
     
     var selectedHex: String {
-        selectedColor.toHex() ?? "#000000"
+        if let hex = overrideHex {
+            return hex
+        }
+        return selectedColor.toHex() ?? "#000000"
     }
     
     var isDuplicate: Bool {
@@ -68,6 +75,7 @@ class PaletteEditorViewModel: ObservableObject {
     
     func navigateToHex(_ cleaned: String) {
         let hex = "#" + cleaned.uppercased()
+        overrideHex = hex
         let color = Color(hex: hex)
         let uiColor = UIColor(color)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -78,6 +86,7 @@ class PaletteEditorViewModel: ObservableObject {
     }
     
     func navigateToColor(_ hex: String) {
+        overrideHex = hex.uppercased().hasPrefix("#") ? hex.uppercased() : "#" + hex.uppercased()
         let uiColor = UIColor(Color(hex: hex))
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         uiColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)

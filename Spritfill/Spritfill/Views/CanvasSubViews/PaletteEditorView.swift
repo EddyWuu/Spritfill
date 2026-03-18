@@ -18,56 +18,58 @@ struct PaletteEditorView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 12) {
+            ScrollView {
+                VStack(spacing: 12) {
                 
-                TextField("Palette Name", text: $viewModel.paletteName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                // Hue/Saturation grid
-                GeometryReader { geo in
-                    ZStack {
-                        // Draw the hue × saturation grid
-                        Canvas { context, size in
-                            let cols = Int(size.width)
-                            let rows = Int(size.height)
-                            let colStep = max(1, cols / 64)
-                            let rowStep = max(1, rows / 32)
-                            
-                            for x in stride(from: 0, to: cols, by: colStep) {
-                                for y in stride(from: 0, to: rows, by: rowStep) {
-                                    let h = Double(x) / Double(cols)
-                                    let s = 1.0 - (Double(y) / Double(rows))
-                                    let color = Color(hue: h, saturation: s, brightness: viewModel.brightness)
-                                    context.fill(
-                                        Path(CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(colStep), height: CGFloat(rowStep))),
-                                        with: .color(color)
-                                    )
+                    TextField("Palette Name", text: $viewModel.paletteName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    // Hue/Saturation grid
+                    GeometryReader { geo in
+                        ZStack {
+                            // Draw the hue × saturation grid
+                            Canvas { context, size in
+                                let cols = Int(size.width)
+                                let rows = Int(size.height)
+                                let colStep = max(1, cols / 64)
+                                let rowStep = max(1, rows / 32)
+                                
+                                for x in stride(from: 0, to: cols, by: colStep) {
+                                    for y in stride(from: 0, to: rows, by: rowStep) {
+                                        let h = Double(x) / Double(cols)
+                                        let s = 1.0 - (Double(y) / Double(rows))
+                                        let color = Color(hue: h, saturation: s, brightness: viewModel.brightness)
+                                        context.fill(
+                                            Path(CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(colStep), height: CGFloat(rowStep))),
+                                            with: .color(color)
+                                        )
+                                    }
                                 }
                             }
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            // Crosshair indicator
+                            Circle()
+                                .stroke(Color.white, lineWidth: 2)
+                                .frame(width: 16, height: 16)
+                                .shadow(color: .black.opacity(0.5), radius: 1)
+                                .position(
+                                    x: viewModel.hue * geo.size.width,
+                                    y: (1.0 - viewModel.saturation) * geo.size.height
+                                )
                         }
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        
-                        // Crosshair indicator
-                        Circle()
-                            .stroke(Color.white, lineWidth: 2)
-                            .frame(width: 16, height: 16)
-                            .shadow(color: .black.opacity(0.5), radius: 1)
-                            .position(
-                                x: viewModel.hue * geo.size.width,
-                                y: (1.0 - viewModel.saturation) * geo.size.height
-                            )
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    viewModel.overrideHex = nil
+                                    viewModel.hue = min(max(value.location.x / geo.size.width, 0), 1)
+                                    viewModel.saturation = min(max(1.0 - value.location.y / geo.size.height, 0), 1)
+                                }
+                        )
                     }
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                viewModel.hue = min(max(value.location.x / geo.size.width, 0), 1)
-                                viewModel.saturation = min(max(1.0 - value.location.y / geo.size.height, 0), 1)
-                            }
-                    )
-                }
-                .frame(height: 140)
-                .padding(.horizontal)
+                    .frame(height: 140)
+                    .padding(.horizontal)
                 
                 // Brightness slider
                 HStack(spacing: 10) {
@@ -91,7 +93,13 @@ struct PaletteEditorView: View {
                             .position(x: geo.size.width / 2, y: geo.size.height / 2)
                         }
                         
-                        Slider(value: $viewModel.brightness, in: 0...1)
+                        Slider(value: Binding(
+                            get: { viewModel.brightness },
+                            set: { newValue in
+                                viewModel.overrideHex = nil
+                                viewModel.brightness = newValue
+                            }
+                        ), in: 0...1)
                             .tint(.clear)
                     }
                     .frame(height: 28)
@@ -196,7 +204,7 @@ struct PaletteEditorView: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
-                    .frame(maxHeight: .infinity)
+                    .frame(height: 60)
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("\(viewModel.colors.count) colors")
@@ -204,33 +212,34 @@ struct PaletteEditorView: View {
                             .foregroundColor(.secondary)
                             .padding(.horizontal)
                         
-                        ScrollView {
-                            LazyVGrid(columns: columns, spacing: 6) {
-                                ForEach(Array(viewModel.colors.enumerated()), id: \.offset) { index, hex in
-                                    ZStack(alignment: .topTrailing) {
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .fill(Color(hex: hex))
-                                            .frame(width: 36, height: 36)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 6)
-                                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                            )
-                                        
-                                        Button {
-                                            viewModel.removeColor(at: index)
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .font(.system(size: 12))
-                                                .foregroundColor(.white)
-                                                .background(Circle().fill(Color.red).frame(width: 14, height: 14))
-                                        }
-                                        .offset(x: 4, y: -4)
+                        LazyVGrid(columns: columns, spacing: 6) {
+                            ForEach(Array(viewModel.colors.enumerated()), id: \.offset) { index, hex in
+                                ZStack(alignment: .topTrailing) {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color(hex: hex))
+                                        .frame(width: 36, height: 36)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6)
+                                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                    
+                                    Button {
+                                        viewModel.removeColor(at: index)
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.white)
+                                            .background(Circle().fill(Color.red).frame(width: 14, height: 14))
                                     }
+                                    .offset(x: 4, y: -4)
                                 }
                             }
-                            .padding(.horizontal)
                         }
+                        .padding(.horizontal)
                     }
+                }
+                
+                Spacer(minLength: 20)
                 }
             }
             .padding(.top, 8)

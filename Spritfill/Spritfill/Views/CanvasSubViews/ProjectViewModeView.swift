@@ -68,7 +68,7 @@ struct ProjectViewModeView: View {
                             }
                         }
                         
-                        actionButton(icon: "square.and.arrow.up", label: "Share", color: .indigo) {
+                        actionButton(icon: "square.and.arrow.up", label: "Export", color: .indigo) {
                             viewModel.exportAndGetShareImage { image in
                                 shareImage = image
                             }
@@ -88,6 +88,25 @@ struct ProjectViewModeView: View {
                 .background(Color(.secondarySystemBackground))
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            
+            // Export loading overlay
+            if viewModel.isExporting {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .overlay(
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .tint(.white)
+                            Text("Exporting…")
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                        }
+                        .padding(24)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    )
+                    .allowsHitTesting(true)
+            }
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .tabBar)

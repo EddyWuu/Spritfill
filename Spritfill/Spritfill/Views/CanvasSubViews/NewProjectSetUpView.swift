@@ -13,9 +13,8 @@ struct NewProjectSetUpView: View {
 
     @State private var selectedCanvasSize: CanvasSizes?
     @State private var selectedPalette: ColorPalettes?
-    @State private var selectedTileSize: TileSizes?
+    @State private var tileSize: Double = 8
     
-    let allTileSizes = TileSizes.allCases
     let allCanvasSizes = CanvasSizes.allCases
     
     @State private var customPalettes: [CustomPaletteData] = []
@@ -28,266 +27,218 @@ struct NewProjectSetUpView: View {
     @State private var canvasViewModel: CanvasViewModel?
     
     var body: some View {
-            
-        VStack {
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 15) {
-                    
-                    Text("Project Name")
-                        .font(.headline)
-                        .padding(.leading, 15)
-
-                    TextField("Enter project name", text: $projectName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    
-                    Text("Tile Size")
-                        .font(.headline)
-                        .padding(.leading, 15)
-                    
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                        
-                        ForEach(allTileSizes, id: \.self) { tile in
-                            Button(action: {
-                                selectedTileSize = tile
-                            }) {
-                                ZStack {
-                                    Rectangle()
-                                        .fill(selectedTileSize == tile ? Color.blue : Color.gray.opacity(0.3))
-                                        .frame(width: 45, height: 45)
-                                        .cornerRadius(2)
-                                    
-                                    Text("\(Int(tile.size))²")
-                                        .font(.subheadline)
-                                        .foregroundColor(.black)
-                                }
-                            }
-                        }
-                    }
-                    
-                    Text("Canvas Size")
-                        .font(.headline)
-                        .padding(.leading, 15)
-                    
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 16) {
-                        
-                        ForEach(allCanvasSizes, id: \.self) { canvas in
-                            Button(action: {
-                                selectedCanvasSize = canvas
-                            }) {
-                                VStack {
-                                    let aspectRatio = CGFloat(canvas.dimensions.width) / CGFloat(canvas.dimensions.height)
-                                    
-                                    ZStack {
-                                        
-                                        let maxSize: CGFloat = 90
-                                        let width = aspectRatio >= 1 ? maxSize : maxSize * aspectRatio
-                                        let height = aspectRatio <= 1 ? maxSize : maxSize / aspectRatio
-                                        
-                                        Rectangle()
-                                            .fill(selectedCanvasSize == canvas ? Color.blue : Color.gray.opacity(0.3))
-                                            .frame(width: width, height: max(height, 30))
-                                            .cornerRadius(4)
-                                            .border(Color.white, width: 1)
-                                        
-                                        Text("\(canvas.dimensions.width / 16)x\(canvas.dimensions.height / 16)")
-                                            .font(.headline)
-                                            .foregroundColor(.black)
-                                    }
-                                    
-                                    Text("\(canvas.dimensions.width)x\(canvas.dimensions.height)")
-                                        .font(.caption)
-                                        .foregroundColor(Color.gray.opacity(0.7))
-                                }
-                            }
-                        }
-                    }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                
+                // MARK: - Project Name
+                sectionHeader("Project Name", icon: "character.cursor.ibeam")
+                
+                TextField("Enter project name", text: $projectName)
+                    .padding(12)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(10)
                     .padding(.horizontal)
-                    
-                    Text("Color Palette")
-                        .font(.headline)
-                        .padding(.leading, 15)
-                    
-                    VStack(spacing: 10) {
+                
+                // MARK: - Tile Size
+                sectionHeader(
+                    "Tile Size",
+                    icon: "square.grid.3x3",
+                    subtitle: "Export resolution per pixel — larger = bigger image"
+                )
+                
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("\(Int(tileSize))×\(Int(tileSize)) px\(Int(tileSize) == 8 ? " (default)" : "")")
+                            .font(.headline)
+                            .monospacedDigit()
                         
-                        ForEach(ColorPalettes.builtInCases, id: \.self) { palette in
-                            Button(action: {
-                                selectedPalette = palette
-                            }) {
-                                VStack(spacing: 0) {
-                                    HStack {
-                                        Text(palette.displayName)
-                                            .foregroundColor(.primary)
-                                            .font(.subheadline)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.leading, 10)
-                                        
-                                        Text("\(palette.colors.count) colors")
-                                            .foregroundColor(.secondary)
-                                            .font(.caption)
-                                            .padding(.trailing, 10)
-                                    }
-                                    .padding(.vertical, 10)
-                                    
-                                    // Color swatch bar — single Canvas draw
-                                    Canvas { context, size in
-                                        let colors = palette.colors
-                                        let count = colors.count
-                                        guard count > 0 else { return }
-                                        let stripWidth = size.width / CGFloat(count)
-                                        for i in 0..<count {
-                                            let rect = CGRect(x: CGFloat(i) * stripWidth, y: 0,
-                                                              width: stripWidth + 0.5, height: size.height)
-                                            context.fill(Path(rect), with: .color(colors[i]))
-                                        }
-                                    }
-                                    .frame(height: 10)
-                                    .clipShape(
-                                        UnevenRoundedRectangle(
-                                            topLeadingRadius: 0,
-                                            bottomLeadingRadius: 8,
-                                            bottomTrailingRadius: 8,
-                                            topTrailingRadius: 0
-                                        )
-                                    )
-                                }
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedPalette == palette ? Color.blue.opacity(0.2) : Color.gray.opacity(0.15))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(selectedPalette == palette ? Color.blue : Color.clear, lineWidth: 2)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                        }
+                        Spacer()
                         
-                        if !customPalettes.isEmpty {
-                            Divider()
-                            
-                            Text("Your Palettes")
-                                .font(.subheadline)
+                        if let canvas = selectedCanvasSize {
+                            let exportW = canvas.dimensions.width * Int(tileSize)
+                            let exportH = canvas.dimensions.height * Int(tileSize)
+                            Text("Export: \(exportW)×\(exportH)")
+                                .font(.caption)
                                 .foregroundColor(.secondary)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            ForEach(customPalettes) { palette in
-                                let paletteEnum = ColorPalettes.custom(id: palette.id)
-                                Button(action: {
-                                    selectedPalette = paletteEnum
-                                }) {
-                                    VStack(spacing: 0) {
-                                        HStack {
-                                            Text(palette.name)
-                                                .foregroundColor(.primary)
-                                                .font(.subheadline)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                                .padding(.leading, 10)
-                                            
-                                            Text("\(palette.hexColors.count) colors")
-                                                .foregroundColor(.secondary)
-                                                .font(.caption)
-                                                .padding(.trailing, 10)
-                                        }
-                                        .padding(.vertical, 10)
-                                        
-                                        // Color swatch bar — single Canvas draw
-                                        Canvas { context, size in
-                                            let hexColors = palette.hexColors
-                                            let count = hexColors.count
-                                            guard count > 0 else { return }
-                                            let stripWidth = size.width / CGFloat(count)
-                                            for i in 0..<count {
-                                                let rect = CGRect(x: CGFloat(i) * stripWidth, y: 0,
-                                                                  width: stripWidth + 0.5, height: size.height)
-                                                context.fill(Path(rect), with: .color(Color(hex: hexColors[i])))
-                                            }
-                                        }
-                                        .frame(height: 10)
-                                        .clipShape(
-                                            UnevenRoundedRectangle(
-                                                topLeadingRadius: 0,
-                                                bottomLeadingRadius: 8,
-                                                bottomTrailingRadius: 8,
-                                                topTrailingRadius: 0
-                                            )
-                                        )
-                                    }
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(selectedPalette == paletteEnum ? Color.blue.opacity(0.2) : Color.gray.opacity(0.15))
-                                    )
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(selectedPalette == paletteEnum ? Color.blue : Color.clear, lineWidth: 2)
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                }
-                                .contextMenu {
-                                    Button {
-                                        editingPalette = palette
-                                    } label: {
-                                        Label("Edit", systemImage: "pencil")
-                                    }
-                                    
-                                    Button(role: .destructive) {
-                                        CustomPaletteService.shared.deletePalette(id: palette.id)
-                                        customPalettes = CustomPaletteService.shared.fetchAllPalettes()
-                                        if selectedPalette == paletteEnum {
-                                            selectedPalette = nil
-                                        }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                }
-                            }
                         }
+                    }
+                    
+                    Slider(value: $tileSize, in: 1...32, step: 1)
+                        .tint(.blue)
+                    
+                    HStack {
+                        Text("1 px")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("32 px")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // MARK: - Canvas Size
+                sectionHeader(
+                    "Canvas Size",
+                    icon: "rectangle.dashed",
+                    subtitle: "Number of pixels to draw on — bigger = more detail"
+                )
+                
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 12)], spacing: 12) {
+                    ForEach(allCanvasSizes, id: \.self) { canvas in
+                        let isSelected = selectedCanvasSize == canvas
+                        let w = canvas.dimensions.width
+                        let h = canvas.dimensions.height
+                        let aspectRatio = CGFloat(w) / CGFloat(h)
                         
                         Button {
-                            showPaletteEditor = true
+                            selectedCanvasSize = canvas
                         } label: {
-                            HStack {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .strokeBorder(Color.blue, style: StrokeStyle(lineWidth: 2, dash: [6]))
-                                    .frame(height: 50)
+                            VStack(spacing: 8) {
+                                // Aspect-ratio preview box
+                                let maxDim: CGFloat = 50
+                                let previewW = aspectRatio >= 1 ? maxDim : maxDim * aspectRatio
+                                let previewH = aspectRatio <= 1 ? maxDim : maxDim / aspectRatio
+                                
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
+                                    .frame(width: max(previewW, 20), height: max(previewH, 20))
                                     .overlay(
-                                        HStack {
-                                            Image(systemName: "plus.circle.fill")
-                                                .foregroundColor(.blue)
-                                            Text("Create Custom Palette")
-                                                .foregroundColor(.blue)
-                                                .font(.subheadline)
-                                        }
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
                                     )
+                                
+                                Text("\(w)×\(h)")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(isSelected ? .white : .primary)
+                                
+                                Text(canvasSizeLabel(w: w, h: h))
+                                    .font(.caption2)
+                                    .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(isSelected ? Color.blue : Color(.secondarySystemBackground))
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal)
+                
+                // MARK: - Color Palette
+                sectionHeader(
+                    "Color Palette",
+                    icon: "paintpalette",
+                    subtitle: "Starting colors — you can always add more while drawing"
+                )
+                
+                VStack(spacing: 10) {
+                    ForEach(ColorPalettes.builtInCases, id: \.self) { palette in
+                        paletteButton(
+                            name: palette.displayName,
+                            colorCount: palette.colors.count,
+                            isSelected: selectedPalette == palette,
+                            colors: palette.colors
+                        ) {
+                            selectedPalette = palette
+                        }
+                    }
+                    
+                    if !customPalettes.isEmpty {
+                        HStack {
+                            Rectangle()
+                                .fill(Color.secondary.opacity(0.3))
+                                .frame(height: 1)
+                            Text("Your Palettes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Rectangle()
+                                .fill(Color.secondary.opacity(0.3))
+                                .frame(height: 1)
+                        }
+                        .padding(.vertical, 4)
+                        
+                        ForEach(customPalettes) { palette in
+                            let paletteEnum = ColorPalettes.custom(id: palette.id)
+                            paletteButton(
+                                name: palette.name,
+                                colorCount: palette.hexColors.count,
+                                isSelected: selectedPalette == paletteEnum,
+                                colors: palette.hexColors.map { Color(hex: $0) }
+                            ) {
+                                selectedPalette = paletteEnum
+                            }
+                            .contextMenu {
+                                Button {
+                                    editingPalette = palette
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                
+                                Button(role: .destructive) {
+                                    CustomPaletteService.shared.deletePalette(id: palette.id)
+                                    customPalettes = CustomPaletteService.shared.fetchAllPalettes()
+                                    if selectedPalette == paletteEnum {
+                                        selectedPalette = nil
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
-                    .padding(.horizontal)
                     
-                    Spacer()
+                    Button {
+                        showPaletteEditor = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title3)
+                            Text("Create Custom Palette")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .strokeBorder(Color.blue, style: StrokeStyle(lineWidth: 1.5, dash: [8, 4]))
+                        )
+                    }
                 }
+                .padding(.horizontal)
+                
+                Spacer(minLength: 30)
             }
+            .padding(.top, 8)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Create") {
                     if let canvasSize = selectedCanvasSize,
-                       let palette = selectedPalette,
-                       let tileSize = selectedTileSize {
+                       let palette = selectedPalette {
 
                         let viewModel = CanvasViewModel(
                             projectName: projectName.isEmpty ? "Untitled Project" : projectName,
                             selectedCanvasSize: canvasSize,
                             selectedPalette: palette,
-                            selectedTileSize: tileSize
+                            selectedTileSize: Int(tileSize)
                         )
 
                         onProjectCreated(viewModel)
                     }
                 }
-                .disabled(selectedCanvasSize == nil || selectedPalette == nil || selectedTileSize == nil)
+                .disabled(selectedCanvasSize == nil || selectedPalette == nil)
             }
         }
         .onAppear {
@@ -306,5 +257,104 @@ struct NewProjectSetUpView: View {
             }
         }
 
+    }
+    
+    // MARK: - Section Header
+    
+    @ViewBuilder
+    private func sectionHeader(_ title: String, icon: String, subtitle: String? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
+                Text(title)
+                    .font(.headline)
+            }
+            if let subtitle {
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.leading, 16)
+    }
+    
+    // MARK: - Canvas Size Label
+    
+    private func canvasSizeLabel(w: Int, h: Int) -> String {
+        if w == h { return "Square" }
+        if w > h { return "Landscape" }
+        return "Portrait"
+    }
+    
+    // MARK: - Palette Button
+    
+    private func paletteButton(name: String, colorCount: Int, isSelected: Bool, colors: [Color], action: @escaping () -> Void) -> some View {
+        // Split colors into balanced rows (max 64 per row, evenly distributed)
+        let maxPerRow = 64
+        let count = colors.count
+        let rowCount = max(1, Int(ceil(Double(count) / Double(maxPerRow))))
+        let basePerRow = count / rowCount
+        let remainder = count % rowCount  // first 'remainder' rows get one extra
+        let rowHeight: CGFloat = 8
+        let swatchHeight = CGFloat(rowCount) * rowHeight
+        
+        return Button(action: action) {
+            VStack(spacing: 0) {
+                HStack {
+                    Text(name)
+                        .foregroundColor(isSelected ? .white : .primary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 12)
+                    
+                    Text("\(colorCount) colors")
+                        .foregroundColor(isSelected ? .white.opacity(0.7) : .secondary)
+                        .font(.caption)
+                        .padding(.trailing, 12)
+                }
+                .padding(.vertical, 11)
+                
+                // Color swatch bars — balanced rows, each filling full width
+                Canvas { context, size in
+                    guard count > 0 else { return }
+                    
+                    var startIdx = 0
+                    for row in 0..<rowCount {
+                        let rowColorCount = basePerRow + (row < remainder ? 1 : 0)
+                        let stripWidth = size.width / CGFloat(rowColorCount)
+                        let y = CGFloat(row) * rowHeight
+                        
+                        for i in 0..<rowColorCount {
+                            let rect = CGRect(x: CGFloat(i) * stripWidth, y: y,
+                                              width: stripWidth + 0.5, height: rowHeight)
+                            context.fill(Path(rect), with: .color(colors[startIdx + i]))
+                        }
+                        startIdx += rowColorCount
+                    }
+                }
+                .frame(height: swatchHeight)
+                .clipShape(
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: 0,
+                        bottomLeadingRadius: 12,
+                        bottomTrailingRadius: 12,
+                        topTrailingRadius: 0
+                    )
+                )
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.blue : Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 2)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 }

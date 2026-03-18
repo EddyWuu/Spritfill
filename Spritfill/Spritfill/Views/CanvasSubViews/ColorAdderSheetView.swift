@@ -18,15 +18,22 @@ struct ColorAdderSheetView: View {
     @State private var brightness: Double = 1.0
     @State private var hexInput: String = ""
     @State private var addedFlash: Bool = false
+    @State private var overrideHex: String? = nil  // Exact hex from typed input — avoids HSB roundtrip loss
     
     @FocusState private var hexFieldFocused: Bool
     
     private var selectedColor: Color {
-        Color(hue: hue, saturation: saturation, brightness: brightness)
+        if let hex = overrideHex {
+            return Color(hex: hex)
+        }
+        return Color(hue: hue, saturation: saturation, brightness: brightness)
     }
     
     private var selectedHex: String {
-        selectedColor.toHex() ?? "#000000"
+        if let hex = overrideHex {
+            return hex
+        }
+        return selectedColor.toHex() ?? "#000000"
     }
     
     private var isDuplicate: Bool {
@@ -73,6 +80,7 @@ struct ColorAdderSheetView: View {
                     .gesture(
                         DragGesture(minimumDistance: 0)
                             .onChanged { value in
+                                overrideHex = nil
                                 hue = min(max(value.location.x / geo.size.width, 0), 1)
                                 saturation = min(max(1.0 - value.location.y / geo.size.height, 0), 1)
                             }
@@ -102,7 +110,13 @@ struct ColorAdderSheetView: View {
                             .position(x: geo.size.width / 2, y: geo.size.height / 2)
                         }
                         
-                        Slider(value: $brightness, in: 0...1)
+                        Slider(value: Binding(
+                            get: { brightness },
+                            set: { newValue in
+                                overrideHex = nil
+                                brightness = newValue
+                            }
+                        ), in: 0...1)
                             .tint(.clear)
                     }
                     .frame(height: 28)
@@ -278,6 +292,7 @@ struct ColorAdderSheetView: View {
     
     private func navigateToHex(_ cleaned: String) {
         let hex = "#" + cleaned.uppercased()
+        overrideHex = hex  // Preserve exact hex to avoid HSB roundtrip rounding
         let color = Color(hex: hex)
         let uiColor = UIColor(color)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -288,6 +303,7 @@ struct ColorAdderSheetView: View {
     }
     
     private func navigateToColor(_ hex: String) {
+        overrideHex = hex.uppercased().hasPrefix("#") ? hex.uppercased() : "#" + hex.uppercased()
         let uiColor = UIColor(Color(hex: hex))
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         uiColor.getHue(&h, saturation: &s, brightness: &b, alpha: &a)

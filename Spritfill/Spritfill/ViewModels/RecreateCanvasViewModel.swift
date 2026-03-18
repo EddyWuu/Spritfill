@@ -135,8 +135,10 @@ class RecreateCanvasViewModel: ObservableObject {
     }
     
     var maximumZoomScale: CGFloat {
-        let result = fitScale * 5.0
-        return max(result, minimumZoomScale + 1.0)
+        // Target: each pixel should be ~35pt on screen at max zoom,
+        // regardless of canvas size. Base canvas is 1pt per pixel.
+        let targetPixelSize: CGFloat = 35.0
+        return max(targetPixelSize, minimumZoomScale + 1.0)
     }
     
     // MARK: - Init
@@ -293,7 +295,7 @@ class RecreateCanvasViewModel: ObservableObject {
         saveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
             self?.saveProgress()
         }
-    }    
+    }
     // MARK: - Export
     
     @MainActor

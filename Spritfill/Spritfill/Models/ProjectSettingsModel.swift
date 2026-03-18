@@ -10,12 +10,12 @@ import SwiftUI
 struct ProjectSettings: Codable {
     
     var selectedCanvasSize: CanvasSizes
-    var selectedTileSize: TileSizes
+    var selectedTileSize: Int
     var selectedPalette: ColorPalettes
     var customPaletteColors: [String]?
     var extraColors: [String]
     
-    init(selectedCanvasSize: CanvasSizes, selectedTileSize: TileSizes, selectedPalette: ColorPalettes) {
+    init(selectedCanvasSize: CanvasSizes, selectedTileSize: Int, selectedPalette: ColorPalettes) {
         self.selectedCanvasSize = selectedCanvasSize
         self.selectedTileSize = selectedTileSize
         self.selectedPalette = selectedPalette
@@ -30,10 +30,18 @@ struct ProjectSettings: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         selectedCanvasSize = try container.decode(CanvasSizes.self, forKey: .selectedCanvasSize)
-        selectedTileSize = try container.decode(TileSizes.self, forKey: .selectedTileSize)
         selectedPalette = try container.decode(ColorPalettes.self, forKey: .selectedPalette)
         customPaletteColors = try container.decodeIfPresent([String].self, forKey: .customPaletteColors)
         extraColors = try container.decodeIfPresent([String].self, forKey: .extraColors) ?? []
+        
+        // Backward-compatible: old projects saved TileSizes enum, new ones save Int directly
+        if let intValue = try? container.decode(Int.self, forKey: .selectedTileSize) {
+            selectedTileSize = intValue
+        } else if let legacyEnum = try? container.decode(LegacyTileSizes.self, forKey: .selectedTileSize) {
+            selectedTileSize = legacyEnum.size
+        } else {
+            selectedTileSize = 8
+        }
     }
 }
 
@@ -249,26 +257,16 @@ enum CanvasSizes: String, CaseIterable, Codable {
     }
 }
 
-// MARK: - Tile Sizes
+// MARK: - Tile Sizes (Legacy — kept only for backward-compatible decoding)
 
-enum TileSizes: String, CaseIterable, Codable {
-    
-    case small   // 8x8 per tile
-    case medium  // 16x16 per tile
-    case big     // 32x32 per tile
+private enum LegacyTileSizes: String, Codable {
+    case small, medium, big
     
     var size: Int {
-        
         switch self {
-        
-        case .small:
-            return 8
-        
-        case .medium:
-            return 16
-        
-        case .big:
-            return 32
+        case .small: return 8
+        case .medium: return 16
+        case .big: return 32
         }
     }
 }

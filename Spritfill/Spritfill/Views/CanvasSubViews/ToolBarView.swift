@@ -14,11 +14,11 @@ struct ToolsBarView: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            // Scrollable tools + symmetry toggles
+            // Scrollable tools + symmetry toggles (pan excluded — it's pinned on right)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    // Drawing tools
-                    ForEach(toolsVM.availableTools, id: \.self) { tool in
+                    // Drawing tools (excluding pan)
+                    ForEach(toolsVM.availableTools.filter { $0 != .pan }, id: \.self) { tool in
                         ToolButtonView(tool: tool, toolsVM: toolsVM)
                     }
                     
@@ -59,6 +59,9 @@ struct ToolsBarView: View {
                         .foregroundColor(canvasVM.canUndo ? .primary : .gray.opacity(0.4))
                 }
                 .disabled(!canvasVM.canUndo)
+                
+                // Pan / move screen button
+                ToolButtonView(tool: .pan, toolsVM: toolsVM)
                 
                 // Add colors to palette
                 Button(action: { showColorAdder = true }) {
