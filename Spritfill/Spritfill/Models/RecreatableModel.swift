@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A sprite available for recreating (shown in the Browse tab)
+// A sprite available for recreating (shown in the Browse tab)
 struct RecreatableArtModel: Identifiable {
     
     let id: String
@@ -22,7 +22,7 @@ struct RecreatableArtModel: Identifiable {
     var gridHeight: Int { canvasSize.dimensions.height }
 }
 
-/// A recreate session shown in the In Progress tab
+// A recreate session shown in the In Progress tab
 struct RecreateSessionItem: Identifiable {
     let id: UUID
     let session: RecreateSession

@@ -11,14 +11,16 @@ class ToolsViewModel: ObservableObject {
     
     enum ToolType: CaseIterable {
         
-        case pencil, eraser, fill, shift, pan
+        case pencil, eraser, fill, eyedropper, shift, flip, pan
 
         var iconName: String {
             switch self {
             case .pencil: return "pencil"
             case .eraser: return "eraser"
-            case .fill: return "paintbrush"
+            case .fill: return "drop.halffull"
+            case .eyedropper: return "eyedropper"
             case .shift: return "arrow.up.and.down.and.arrow.left.and.right"
+            case .flip: return "arrow.left.and.right.righttriangle.left.righttriangle.right"
             case .pan: return "hand.draw"
             }
         }
@@ -29,6 +31,11 @@ class ToolsViewModel: ObservableObject {
     @Published var selectedColor: Color
     @Published var selectedColorIndex: Int = 0
     @Published var extraColors: [String] = []
+    
+    // Symmetry toggles — can be active alongside pencil/eraser/fill
+    @Published var horizontalSymmetry: Bool = false
+    @Published var verticalSymmetry: Bool = false
+    
     private var palette: ColorPalettes
     private var embeddedPaletteColors: [String]?
 
@@ -49,12 +56,12 @@ class ToolsViewModel: ObservableObject {
         return colors
     }
     
-    /// Number of colors in the base palette (before extras)
+    // Number of colors in the base palette (before extras)
     var basePaletteCount: Int {
         baseColors.count
     }
     
-    /// Add a user-picked color to the extra colors list
+    // Add a user-picked color to the extra colors list
     func addColor(_ hex: String) {
         let normalized = hex.uppercased()
         // Avoid duplicates across base + extras
@@ -64,7 +71,7 @@ class ToolsViewModel: ObservableObject {
         canvasVM?.syncExtraColors(extraColors)
     }
     
-    /// Remove a user-added extra color by index (relative to extraColors array)
+    // Remove a user-added extra color by index (relative to extraColors array)
     func removeExtraColor(at index: Int) {
         guard index >= 0, index < extraColors.count else { return }
         extraColors.remove(at: index)
@@ -87,7 +94,11 @@ class ToolsViewModel: ObservableObject {
             pixel = .clear
         case .fill:
             break
+        case .eyedropper:
+            break
         case .shift:
+            break
+        case .flip:
             break
         case .pan:
             break

@@ -96,7 +96,7 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published private(set) var hasWrongPlacements: Bool = false
     @Published private(set) var isComplete: Bool = false
     
-    /// Recompute completion stats. Call after pixel changes, not on every frame.
+    // Recompute completion stats. Call after pixel changes, not on every frame.
     private func recalculateStats() {
         var completion = 0
         var wrongPlacement = false
@@ -271,15 +271,15 @@ class RecreateCanvasViewModel: ObservableObject {
     
     // MARK: - Persistence
     
-    /// Whether this session has been deleted (prevents saveProgress from re-creating it)
+    // Whether this session has been deleted (prevents saveProgress from re-creating it)
     private(set) var isDeleted = false
     
-    /// Mark session as deleted so saveProgress becomes a no-op
+    // Mark session as deleted so saveProgress becomes a no-op
     func markDeleted() {
         isDeleted = true
     }
     
-    /// Save current progress to disk
+    // Save current progress to disk
     func saveProgress() {
         guard !isDeleted else { return }
         session.userPixels = userPixelHexes
@@ -287,7 +287,7 @@ class RecreateCanvasViewModel: ObservableObject {
         storage.saveSession(session)
     }
 
-    /// Debounced save — coalesces rapid paint actions into a single disk write
+    // Debounced save — coalesces rapid paint actions into a single disk write
     func debouncedSave() {
         saveTimer?.invalidate()
         saveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in

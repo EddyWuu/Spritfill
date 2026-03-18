@@ -100,7 +100,7 @@ struct ProjectCreateView: View {
                 .background(Color(.systemBackground))
                 
                 // MARK: - Canvas
-                ProjectCanvasView(viewModel: viewModel)
+                ProjectCanvasView(viewModel: viewModel, toolsVM: toolsVM)
                     .frame(height: geo.size.height * 0.48)
                     .clipped()
                 
@@ -122,6 +122,10 @@ struct ProjectCreateView: View {
                     
                     if toolsVM.selectedTool == .shift {
                         ShiftControlView(canvasVM: viewModel)
+                    }
+                    
+                    if toolsVM.selectedTool == .flip {
+                        FlipControlView(canvasVM: viewModel)
                     }
                 }
                 .frame(maxHeight: .infinity)
@@ -163,7 +167,7 @@ struct ProjectCreateView: View {
             ShareSheet(activityItems: [item.image])
         }
         .sheet(isPresented: $showColorAdder) {
-            ColorAdderSheet(toolsVM: toolsVM)
+            ColorAdderSheetView(toolsVM: toolsVM)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }

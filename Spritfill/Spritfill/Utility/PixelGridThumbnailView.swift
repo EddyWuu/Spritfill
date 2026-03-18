@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// Lightweight SwiftUI view that renders a pixel grid from hex strings.
-/// Used for thumbnails across browse, in-progress, finished, gallery, and downloads.
+// Lightweight SwiftUI view that renders a pixel grid from hex strings.
+// Used for thumbnails across browse, in-progress, finished, gallery, and downloads.
 struct PixelGridThumbnailView: View {
     
     let pixelGrid: [String]

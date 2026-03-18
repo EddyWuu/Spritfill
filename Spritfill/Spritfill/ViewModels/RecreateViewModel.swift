@@ -11,13 +11,13 @@ class RecreateViewModel: ObservableObject {
     
     // MARK: - Published state
     
-    /// Browse tab: premade + user sprites available to recreate
+    // Browse tab: premade + user sprites available to recreate
     @Published var browseSprites: [RecreatableArtModel] = []
     
-    /// In Progress tab: saved sessions the user has started
+    // In Progress tab: saved sessions the user has started
     @Published var inProgressSessions: [RecreateSessionItem] = []
     
-    /// Finished tab: completed recreations
+    // Finished tab: completed recreations
     @Published var finishedSessions: [RecreateSessionItem] = []
     
     private let projectStorage = LocalStorageService.shared

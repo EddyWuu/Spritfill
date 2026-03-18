@@ -1,5 +1,5 @@
 //
-//  ColorAdderSheet.swift
+//  ColorAdderSheetView.swift
 //  Spritfill
 //
 //  Created by Edmond Wu on 2026-03-17.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// A lightweight sheet for picking and adding individual colors to the active palette.
-struct ColorAdderSheet: View {
+// A lightweight sheet for picking and adding individual colors to the active palette.
+struct ColorAdderSheetView: View {
     
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var toolsVM: ToolsViewModel

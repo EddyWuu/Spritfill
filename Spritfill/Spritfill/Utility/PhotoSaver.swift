@@ -8,8 +8,8 @@
 import UIKit
 import Photos
 
-/// Saves a UIImage as PNG to the photo library, preserving transparency.
-/// UIImageWriteToSavedPhotosAlbum converts to JPEG (no alpha), so we use PHPhotoLibrary instead.
+// Saves a UIImage as PNG to the photo library, preserving transparency.
+// UIImageWriteToSavedPhotosAlbum converts to JPEG (no alpha), so we use PHPhotoLibrary instead.
 enum PhotoSaver {
     
     static func saveAsPNG(_ image: UIImage, completion: (() -> Void)? = nil) {

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// A single item on the gallery photo board
+// A single item on the gallery photo board
 struct GalleryBoardItem: Codable, Identifiable {
     let id: UUID                 // matches ProjectData.id
     var position: CGPoint        // center position on the board

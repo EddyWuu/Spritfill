@@ -7,13 +7,13 @@
 
 import Foundation
 
-/// Tracks which kind of sprite source a recreate session is based on
+// Tracks which kind of sprite source a recreate session is based on
 enum RecreateSource: String, Codable {
     case premade   // from PremadeSprites
     case userMade  // from user's own saved projects
 }
 
-/// A saved in-progress recreate session
+// A saved in-progress recreate session
 struct RecreateSession: Codable, Identifiable {
     let id: UUID                // session ID
     let sourceType: RecreateSource

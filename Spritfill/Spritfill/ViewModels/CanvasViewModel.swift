@@ -52,7 +52,7 @@ class CanvasViewModel: ObservableObject {
         }
     }
     
-    /// Save current pixel state before an action
+    // Save current pixel state before an action
     private func saveSnapshot() {
         undoHistory.append(pixels)
         if undoHistory.count > maxUndoSteps {
@@ -61,14 +61,14 @@ class CanvasViewModel: ObservableObject {
         canUndo = true
     }
     
-    /// Undo the last action — restores the previous pixel state
+    // Undo the last action — restores the previous pixel state
     func undo() {
         guard let previous = undoHistory.popLast() else { return }
         pixels = previous
         canUndo = !undoHistory.isEmpty
     }
     
-    /// Call once at the start of a drawing gesture to capture the "before" state
+    // Call once at the start of a drawing gesture to capture the "before" state
     private var actionInProgress = false
     
     func beginAction() {
@@ -132,14 +132,14 @@ class CanvasViewModel: ObservableObject {
 
     // MARK: - Zoom calculations
     
-    /// Base canvas size is 1pt per pixel — tile size is only used for export
+    // Base canvas size is 1pt per pixel — tile size is only used for export
     var baseCanvasSize: CGSize {
         let gridWidth = projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = projectSettings.selectedCanvasSize.dimensions.height
         return CGSize(width: CGFloat(gridWidth), height: CGFloat(gridHeight))
     }
     
-    /// Scale that fits the entire canvas in the view with ~90% padding
+    // Scale that fits the entire canvas in the view with ~90% padding
     var fitScale: CGFloat {
         guard viewSize != .zero else { return 1.0 }
         let canvas = baseCanvasSize
@@ -205,7 +205,7 @@ class CanvasViewModel: ObservableObject {
         )
     }
     
-    /// Sync extra colors from ToolsViewModel back to project settings for persistence
+    // Sync extra colors from ToolsViewModel back to project settings for persistence
     func syncExtraColors(_ colors: [String]) {
         projectSettings.extraColors = colors
     }
@@ -250,7 +250,7 @@ class CanvasViewModel: ObservableObject {
         objectWillChange.send()
     }
     
-    /// Apply tool at a grid index (used for drag drawing to avoid duplicate coordinate math)
+    // Apply tool at a grid index (used for drag drawing to avoid duplicate coordinate math)
     func applyToolAtIndex(_ index: Int) {
         let width = projectSettings.selectedCanvasSize.dimensions.width
         let height = projectSettings.selectedCanvasSize.dimensions.height
@@ -260,15 +260,103 @@ class CanvasViewModel: ObservableObject {
         let col = index % width
         guard row >= 0, row < height, col >= 0, col < width else { return }
         
+        // Eyedropper is handled separately via eyedropperPickColor
+        if toolsVM.selectedTool == .eyedropper { return }
+        
         if toolsVM.selectedTool == .fill {
             floodFill(at: index, with: toolsVM.selectedColor)
         } else {
             toolsVM.applyTool(to: &pixels[index])
         }
+        
+        // Apply symmetry mirrors
+        let hSym = toolsVM.horizontalSymmetry
+        let vSym = toolsVM.verticalSymmetry
+        
+        if hSym {
+            let mirrorCol = width - 1 - col
+            let mirrorIndex = row * width + mirrorCol
+            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
+                if toolsVM.selectedTool == .fill {
+                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                } else {
+                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                }
+            }
+        }
+        
+        if vSym {
+            let mirrorRow = height - 1 - row
+            let mirrorIndex = mirrorRow * width + col
+            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
+                if toolsVM.selectedTool == .fill {
+                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                } else {
+                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                }
+            }
+        }
+        
+        // Diagonal mirror when both symmetries are active
+        if hSym && vSym {
+            let mirrorRow = height - 1 - row
+            let mirrorCol = width - 1 - col
+            let mirrorIndex = mirrorRow * width + mirrorCol
+            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
+                if toolsVM.selectedTool == .fill {
+                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                } else {
+                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                }
+            }
+        }
+        
         objectWillChange.send()
     }
     
-    /// Convert a screen-space point to a grid index, given the geo size, canvas offset, and zoom scale
+    /// Eyedropper: pick the color at a grid index, set it as selected, and switch to pencil
+    func eyedropperPickColor(at index: Int) {
+        guard index >= 0, index < pixels.count else { return }
+        let color = pixels[index]
+        guard !color.isClear else { return }
+        
+        // Convert picked pixel to RGBA for comparison
+        var pr: CGFloat = 0, pg: CGFloat = 0, pb: CGFloat = 0, pa: CGFloat = 0
+        UIColor(color).getRed(&pr, green: &pg, blue: &pb, alpha: &pa)
+        
+        // Find matching palette color using a wider tolerance (3/255)
+        // to handle color space rounding from hex → Color → UIColor roundtrips
+        let colors = toolsVM.availableColors
+        var matchIndex = -1
+        let tolerance: CGFloat = 3.0 / 255.0
+        
+        for i in 0..<colors.count {
+            var cr: CGFloat = 0, cg: CGFloat = 0, cb: CGFloat = 0, ca: CGFloat = 0
+            UIColor(colors[i]).getRed(&cr, green: &cg, blue: &cb, alpha: &ca)
+            if abs(pr - cr) < tolerance && abs(pg - cg) < tolerance && abs(pb - cb) < tolerance {
+                matchIndex = i
+                break
+            }
+        }
+        
+        // If matched, use the palette color directly so the swatch highlights
+        if matchIndex >= 0 {
+            toolsVM.selectColor(colors[matchIndex], at: matchIndex)
+        } else {
+            toolsVM.selectedColor = color
+            toolsVM.selectedColorIndex = -1
+        }
+        toolsVM.selectedTool = .pencil
+    }
+    
+    /// Returns the color at a grid index (for eyedropper preview)
+    func colorAtIndex(_ index: Int) -> Color? {
+        guard index >= 0, index < pixels.count else { return nil }
+        let color = pixels[index]
+        return color.isClear ? nil : color
+    }
+    
+    // Convert a screen-space point to a grid index, given the geo size, canvas offset, and zoom scale
     func gridIndex(from screenPoint: CGPoint, geoSize: CGSize, canvasOffset: CGSize, zoomScale: CGFloat) -> Int? {
         let gridWidth = projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = projectSettings.selectedCanvasSize.dimensions.height
@@ -324,6 +412,42 @@ class CanvasViewModel: ObservableObject {
                 case .right:
                     sourceRow = row
                     sourceCol = (col - 1 + width) % width
+                }
+                
+                newPixels[row * width + col] = pixels[sourceRow * width + sourceCol]
+            }
+        }
+        
+        pixels = newPixels
+        objectWillChange.send()
+    }
+    
+    // MARK: - Flip
+    
+    enum FlipDirection {
+        case horizontal, vertical
+    }
+    
+    func flipPixels(_ direction: FlipDirection) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        
+        saveSnapshot()
+        
+        var newPixels = Array(repeating: Color.clear, count: width * height)
+        
+        for row in 0..<height {
+            for col in 0..<width {
+                let sourceRow: Int
+                let sourceCol: Int
+                
+                switch direction {
+                case .horizontal:
+                    sourceRow = row
+                    sourceCol = width - 1 - col
+                case .vertical:
+                    sourceRow = height - 1 - row
+                    sourceCol = col
                 }
                 
                 newPixels[row * width + col] = pixels[sourceRow * width + sourceCol]

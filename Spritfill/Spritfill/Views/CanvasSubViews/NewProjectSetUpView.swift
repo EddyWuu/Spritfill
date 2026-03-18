@@ -116,26 +116,52 @@ struct NewProjectSetUpView: View {
                             Button(action: {
                                 selectedPalette = palette
                             }) {
-                                HStack {
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(selectedPalette == palette ? Color.blue : Color.gray.opacity(0.3))
-                                        .frame(height: 50)
-                                        .overlay(
-                                            HStack {
-                                                Text(palette.displayName)
-                                                    .foregroundColor(.black)
-                                                    .font(.subheadline)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .padding(.leading, 10)
-                                                
-                                                Text("\(palette.colors.count) colors")
-                                                    .foregroundColor(.black)
-                                                    .font(.subheadline)
-                                                    .frame(maxWidth: .infinity, alignment: .trailing)
-                                                    .padding(.trailing, 10)
-                                            }
+                                VStack(spacing: 0) {
+                                    HStack {
+                                        Text(palette.displayName)
+                                            .foregroundColor(.primary)
+                                            .font(.subheadline)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .padding(.leading, 10)
+                                        
+                                        Text("\(palette.colors.count) colors")
+                                            .foregroundColor(.secondary)
+                                            .font(.caption)
+                                            .padding(.trailing, 10)
+                                    }
+                                    .padding(.vertical, 10)
+                                    
+                                    // Color swatch bar — single Canvas draw
+                                    Canvas { context, size in
+                                        let colors = palette.colors
+                                        let count = colors.count
+                                        guard count > 0 else { return }
+                                        let stripWidth = size.width / CGFloat(count)
+                                        for i in 0..<count {
+                                            let rect = CGRect(x: CGFloat(i) * stripWidth, y: 0,
+                                                              width: stripWidth + 0.5, height: size.height)
+                                            context.fill(Path(rect), with: .color(colors[i]))
+                                        }
+                                    }
+                                    .frame(height: 10)
+                                    .clipShape(
+                                        UnevenRoundedRectangle(
+                                            topLeadingRadius: 0,
+                                            bottomLeadingRadius: 8,
+                                            bottomTrailingRadius: 8,
+                                            topTrailingRadius: 0
                                         )
+                                    )
                                 }
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(selectedPalette == palette ? Color.blue.opacity(0.2) : Color.gray.opacity(0.15))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(selectedPalette == palette ? Color.blue : Color.clear, lineWidth: 2)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
                         }
                         
@@ -152,26 +178,52 @@ struct NewProjectSetUpView: View {
                                 Button(action: {
                                     selectedPalette = paletteEnum
                                 }) {
-                                    HStack {
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(selectedPalette == paletteEnum ? Color.blue : Color.gray.opacity(0.3))
-                                            .frame(height: 50)
-                                            .overlay(
-                                                HStack {
-                                                    Text(palette.name)
-                                                        .foregroundColor(.black)
-                                                        .font(.subheadline)
-                                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                                        .padding(.leading, 10)
-                                                    
-                                                    Text("\(palette.hexColors.count) colors")
-                                                        .foregroundColor(.black)
-                                                        .font(.subheadline)
-                                                        .frame(maxWidth: .infinity, alignment: .trailing)
-                                                        .padding(.trailing, 10)
-                                                }
+                                    VStack(spacing: 0) {
+                                        HStack {
+                                            Text(palette.name)
+                                                .foregroundColor(.primary)
+                                                .font(.subheadline)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .padding(.leading, 10)
+                                            
+                                            Text("\(palette.hexColors.count) colors")
+                                                .foregroundColor(.secondary)
+                                                .font(.caption)
+                                                .padding(.trailing, 10)
+                                        }
+                                        .padding(.vertical, 10)
+                                        
+                                        // Color swatch bar — single Canvas draw
+                                        Canvas { context, size in
+                                            let hexColors = palette.hexColors
+                                            let count = hexColors.count
+                                            guard count > 0 else { return }
+                                            let stripWidth = size.width / CGFloat(count)
+                                            for i in 0..<count {
+                                                let rect = CGRect(x: CGFloat(i) * stripWidth, y: 0,
+                                                                  width: stripWidth + 0.5, height: size.height)
+                                                context.fill(Path(rect), with: .color(Color(hex: hexColors[i])))
+                                            }
+                                        }
+                                        .frame(height: 10)
+                                        .clipShape(
+                                            UnevenRoundedRectangle(
+                                                topLeadingRadius: 0,
+                                                bottomLeadingRadius: 8,
+                                                bottomTrailingRadius: 8,
+                                                topTrailingRadius: 0
                                             )
+                                        )
                                     }
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(selectedPalette == paletteEnum ? Color.blue.opacity(0.2) : Color.gray.opacity(0.15))
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(selectedPalette == paletteEnum ? Color.blue : Color.clear, lineWidth: 2)
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
                                 .contextMenu {
                                     Button {

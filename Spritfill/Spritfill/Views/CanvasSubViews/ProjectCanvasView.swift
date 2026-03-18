@@ -9,11 +9,18 @@ import SwiftUI
 
 struct ProjectCanvasView: View {
     @ObservedObject var viewModel: CanvasViewModel
+    @ObservedObject var toolsVM: ToolsViewModel
 
     // All offsets are in screen-space (points on screen)
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var dragVisitedIndices: Set<Int> = []
+    
+    // Eyedropper magnifier state
+    @State private var magnifierPosition: CGPoint = .zero
+    @State private var showMagnifier: Bool = false
+    @State private var magnifierColor: Color? = nil
+    @State private var magnifierIndex: Int? = nil
 
     var body: some View {
         
@@ -25,6 +32,10 @@ struct ProjectCanvasView: View {
             // Render at the full scaled size — no scaleEffect needed
             let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
                                           height: CGFloat(gridHeight) * zoomScale)
+
+            // Read symmetry state outside Canvas so SwiftUI tracks changes
+            let hSymmetry = toolsVM.horizontalSymmetry
+            let vSymmetry = toolsVM.verticalSymmetry
 
             ZStack {
                 Canvas { context, size in
@@ -49,9 +60,37 @@ struct ProjectCanvasView: View {
                             }
                         }
                     }
+                    
+                    // Symmetry guide lines
+                    let canvasWidth = CGFloat(gridWidth) * cellSize
+                    let canvasHeight = CGFloat(gridHeight) * cellSize
+                    
+                    if vSymmetry {
+                        var hLine = Path()
+                        let midY = canvasHeight / 2
+                        hLine.move(to: CGPoint(x: 0, y: midY))
+                        hLine.addLine(to: CGPoint(x: canvasWidth, y: midY))
+                        context.stroke(hLine, with: .color(Color.orange.opacity(0.7)),
+                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
+                    }
+                    
+                    if hSymmetry {
+                        var vLine = Path()
+                        let midX = canvasWidth / 2
+                        vLine.move(to: CGPoint(x: midX, y: 0))
+                        vLine.addLine(to: CGPoint(x: midX, y: canvasHeight))
+                        context.stroke(vLine, with: .color(Color.orange.opacity(0.7)),
+                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
+                    }
                 }
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
+                
+                // Eyedropper magnifier overlay
+                if showMagnifier {
+                    magnifierView
+                        .position(x: magnifierPosition.x, y: magnifierPosition.y - 80)
+                }
             }
             .frame(width: geo.size.width, height: geo.size.height)
             .clipped()
@@ -59,8 +98,22 @@ struct ProjectCanvasView: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        let tool = viewModel.toolsVM.selectedTool
-                        if tool == .pan {
+                        let tool = toolsVM.selectedTool
+                        if tool == .eyedropper {
+                            // Show magnifier and track color under finger
+                            magnifierPosition = value.location
+                            if let index = viewModel.gridIndex(from: value.location,
+                                                                geoSize: geo.size,
+                                                                canvasOffset: canvasOffset,
+                                                                zoomScale: zoomScale) {
+                                magnifierIndex = index
+                                magnifierColor = viewModel.colorAtIndex(index)
+                            } else {
+                                magnifierIndex = nil
+                                magnifierColor = nil
+                            }
+                            showMagnifier = true
+                        } else if tool == .pan {
                             let proposed = CGSize(
                                 width: dragStart.width + value.translation.width,
                                 height: dragStart.height + value.translation.height
@@ -70,7 +123,7 @@ struct ProjectCanvasView: View {
                                 geoSize: geo.size,
                                 canvasSize: scaledCanvasSize
                             )
-                        } else if tool != .shift {
+                        } else if tool != .shift && tool != .flip {
                             // Draw on drag for pencil/eraser/fill
                             viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: value.location,
@@ -85,11 +138,21 @@ struct ProjectCanvasView: View {
                         }
                     }
                     .onEnded { value in
-                        let tool = viewModel.toolsVM.selectedTool
-                        if tool == .pan {
+                        let tool = toolsVM.selectedTool
+                        if tool == .eyedropper {
+                            // Pick the color under the finger
+                            if let index = magnifierIndex ?? viewModel.gridIndex(from: value.location,
+                                                                                   geoSize: geo.size,
+                                                                                   canvasOffset: canvasOffset,
+                                                                                   zoomScale: zoomScale) {
+                                viewModel.eyedropperPickColor(at: index)
+                            }
+                            showMagnifier = false
+                            magnifierColor = nil
+                            magnifierIndex = nil
+                        } else if tool == .pan {
                             dragStart = canvasOffset
-                        } else if tool != .shift {
-                            // Also handle tap (single point, no drag distance)
+                        } else if tool != .shift && tool != .flip {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
                                 if let index = viewModel.gridIndex(from: value.location,
@@ -133,5 +196,37 @@ struct ProjectCanvasView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Eyedropper magnifier
+    
+    private var magnifierView: some View {
+        VStack(spacing: 4) {
+            Circle()
+                .fill(magnifierColor ?? Color.gray.opacity(0.2))
+                .frame(width: 60, height: 60)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white, lineWidth: 3)
+                )
+                .overlay(
+                    Circle()
+                        .stroke(Color.black.opacity(0.3), lineWidth: 1)
+                        .padding(-1)
+                )
+                .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+            
+            // Hex label
+            if let color = magnifierColor, let hex = color.toHex() {
+                Text(hex)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(4)
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
