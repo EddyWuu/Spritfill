@@ -7,20 +7,20 @@
 ---
 
 ## 1. Overview
-Spritfill is a pixel art creation app. We respect your privacy and collect minimal data. This policy explains what we collect and why.
+Spritfill is a pixel art creation app. I respect your privacy and collect minimal data. This policy explains what I collect and why.
 
-## 2. Data We Collect
-When you voluntarily submit artwork for community review, we collect:
+## 2. Data I Collect
+When you voluntarily submit artwork for community review, I collect:
 - **Artist name** (can be a pseudonym — real name is not required)
 - **Your pixel artwork** (the sprite image and pixel grid data)
 - **Submission timestamp**
 
-That's it. We do not collect emails, device IDs, location data, analytics, or any other personal information.
+That's it. I do not collect emails, device IDs, location data, analytics, or any other personal information.
 
-## 3. How We Use Your Data
+## 3. How I Use Your Data
 - Submitted artwork is manually reviewed by the developer
 - If approved, the artwork and artist name may be featured in the app's community catalog for all users to enjoy
-- We do not sell, share, or transfer your data to third parties
+- I do not sell, share, or transfer your data to third parties
 
 ## 4. Data Storage
 Submitted artwork is stored on Google Firebase (Firestore), hosted on Google Cloud Platform servers. Data is transmitted securely via HTTPS.
@@ -43,7 +43,7 @@ You may:
 - Request deletion of your submitted data at any time
 
 ## 9. Changes to This Policy
-We may update this policy from time to time. Changes will be reflected in the "Last updated" date above.
+I may update this policy from time to time. Changes will be reflected in the "Last updated" date above.
 
 ## 10. Contact
-For privacy questions or deletion requests, contact: [YOUR EMAIL HERE]
+For privacy questions or deletion requests, contact: ducksss777@gmail.com
