@@ -45,6 +45,7 @@ struct PremadeSprites {
         // 32x32 Characters
         knightIdle32, knightAttack32, knightRun32,
         archerIdle32, archerAttack32, archerRun32,
+        spearmanIdle32, spearmanAttack32, spearmanRun32,
         // Ducks
         duck1, duck2, duck3, duck4, duck5, duck6, ducks1,
         // 32x32 Landscapes

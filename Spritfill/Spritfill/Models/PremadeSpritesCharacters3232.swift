@@ -331,4 +331,198 @@ extension PremadeSprites {
         
         return PremadeSpriteData(id: "archer_run_32", name: "Archer — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Archer", groupOrder: 2)
     }()
+    
+    // MARK: - Spearman Idle (32x32)
+    
+    static let spearmanIdle32: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#111111"
+        let dk = "#252525"
+        let db = "#371F1F"
+        let bl = "#424A6E"
+        let mr = "#551C25"
+        let bg = "#637192"
+        let gr = "#838383"
+        let dr = "#891E2B"
+        let sb = "#8A4636"
+        let lb = "#92A1B9"
+        let si = "#B4B4B4"
+        let rd = "#C4222E"
+        let og = "#E07237"
+        let sk = "#E69C67"
+        let ls = "#F6CA9F"
+        let p = "#FF0040"
+        let yl = "#FFC823"
+        let ly = "#FFEB55"
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, lb, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, lb, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, bg, c, c, c, c, c, bg, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, bg, c, c, c, c, bl, bg, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, c, bl, bg, bg, lb, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, c, bl, bl, bl, bl, lb, lb, bl, bl, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, bl, bl, bg, bg, bg, lb, lb, bg, bg, bl, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, bl, bl, bg, bg, lb, lb, lb, lb, lb, lb, bg, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, bl, bl, sk, sk, o, o, lb, lb, o, o, sk, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, bl, sk, sk, o, o, sk, sk, o, o, sk, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, c, ls, ls, ls, ls, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, c, p, p, ls, ls, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, rd, mr, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, dr, mr, yl, yl, ly, ly, og, og, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db, db, ls, ls, rd, dr, rd, p, yl, yl, yl, og, og, ls, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db, db, ls, ls, dr, dr, si, si, si, si, si, si, gr, ls, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, dr, gr, si, si, si, si, si, si, gr, db, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, gr, si, si, si, si, si, si, gr, db, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, gr, si, si, si, si, si, si, gr, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, db, db, db, bl, bl, db, db, db, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, dk, dk, dk, rd, rd, dk, dk, dk, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, dk, dk, dk, rd, rd, dk, dk, dk, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, dk, dk, dk, rd, rd, dk, dk, dk, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, sb, c, p, rd, db, db, db, rd, rd, db, db, db, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "spearman_idle_32", name: "Spearman — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 0)
+    }()
+    
+    // MARK: - Spearman Attack (32x32)
+    
+    static let spearmanAttack32: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#111111"
+        let dk = "#252525"
+        let dk2 = "#262626"
+        let db = "#371F1F"
+        let db2 = "#381F20"
+        let bl = "#424A6E"
+        let mr = "#551C25"
+        let bg = "#637192"
+        let bg2 = "#647292"
+        let gr = "#838383"
+        let dr = "#891E2B"
+        let br = "#8A4736"
+        let lb = "#92A1B9"
+        let si = "#B4B4B4"
+        let rd = "#C4222E"
+        let rd2 = "#C4232F"
+        let og = "#E07237"
+        let sk = "#E69C67"
+        let sk2 = "#E69C68"
+        let ls = "#F6CA9F"
+        let p = "#FF0040"
+        let yl = "#FFC823"
+        let ly = "#FFEB55"
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, bg, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, bl, bg, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, bl, bg, bg, lb, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, bl, bl, bl, bl, lb, lb, bl, bl, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, bl, bl, bg, bg, bg, lb, lb, bg, bg, bl, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, bl, bl, bg, bg, lb, lb, lb, lb, lb, lb, bg, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, bl, bl, sk, sk, o, o, lb, lb, o, o, sk, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, bl, sk, sk, o, o, sk, sk, o, o, sk, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, ls, ls, ls, ls, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, p, p, ls, ls, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, c, c, lb, lb, c,
+            c, c, c, c, c, c, c, c, c, p, rd, rd, mr, ls, ls, ls, ls, ls, c, c, c, c, c, c, c, c, br, bg2, bg2, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, rd, dr, mr, yl, yl, ly, ly, og, og, c, c, c, c, br, br, br, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, ls, ls, rd, dr, rd, p, yl, yl, yl, og, og, ls, br, br, br, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, ls, ls, ls, ls, dr, dr, si, si, si, si, si, br, br, br, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, sk2, sk2, p, rd2, dr, gr, si, si, br, br, br, si, gr, db, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db2, db2, p, rd2, rd, br, br, br, si, si, si, si, gr, db, db, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db2, db2, br, br, br, gr, si, si, si, si, si, si, gr, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, br, br, br, br, c, p, rd2, rd, db, db, db, bl, bl, db, db, db, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, p, rd2, rd2, dk2, dk, dk, dk, rd, rd, dk, dk, dk, dk2, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, p, rd2, rd2, dk2, dk, dk, dk, rd, c, dk, dk, dk2, dk2, dk2, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, p, rd2, rd2, dk2, dk, dk, rd2, rd, c, c, c, dk2, dk2, dk2, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, p, rd2, rd2, rd2, db2, db, db2, rd2, c, c, c, c, db2, db2, db2, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "spearman_attack_32", name: "Spearman — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 1)
+    }()
+    
+    // MARK: - Spearman Run (32x32)
+    
+    static let spearmanRun32: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#111111"
+        let dk = "#252525"
+        let dk2 = "#262626"
+        let db = "#371F1F"
+        let db2 = "#381F20"
+        let bl = "#424A6E"
+        let mr = "#551C25"
+        let bg = "#637192"
+        let bg2 = "#647292"
+        let gr = "#838383"
+        let gr2 = "#848484"
+        let dr = "#891E2B"
+        let br = "#8A4736"
+        let lb = "#92A1B9"
+        let si = "#B4B4B4"
+        let rd = "#C4222E"
+        let rd2 = "#C4232F"
+        let og = "#E07237"
+        let sk = "#E69C67"
+        let sk2 = "#E69C68"
+        let ls = "#F6CA9F"
+        let p = "#FF0040"
+        let yl = "#FFC823"
+        let ly = "#FFEB55"
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, bg, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, bl, bg, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, bl, bg, bg, lb, lb, lb, bg, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, bl, bl, bl, bl, lb, lb, bl, bl, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, bl, bl, bg, bg, bg, lb, lb, bg, bg, bl, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, bl, bl, bg, bg, lb, lb, lb, lb, lb, lb, bg, bl, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, bl, bl, sk, sk, sk2, sk2, lb, lb, o, o, sk, bl, c, c, c, c, c, c, c, lb, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, bl, sk, sk, sk2, sk2, sk, sk, o, o, sk, bl, c, c, c, c, c, lb, lb, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, ls, ls, ls, ls, ls, ls, ls, ls, ls, c, c, c, c, br, bg2, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, p, p, ls, ls, ls, ls, ls, ls, ls, c, c, c, br, br, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, rd, rd, mr, ls, ls, ls, ls, ls, c, c, br, br, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, p, rd, dr, mr, yl, yl, ly, ly, og, br, br, db2, db2, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, ls, ls, rd, dr, rd, p, yl, yl, br, br, og, sk2, db2, db2, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, ls, ls, ls, ls, dr, dr, si, si, br, br, si, si, gr2, ls, ls, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, sk2, sk2, p, rd2, dr, gr, br, br, si, si, si, si, gr, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db2, db2, p, rd2, br, br, si, si, si, si, si, si, gr, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, db2, db2, br, br, rd2, gr, si, si, si, si, si, si, gr, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, br, br, p, rd2, rd, db, db, db, bl, bl, db, db, db, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, br, br, p, p, rd2, rd2, dk2, dk, dk2, rd2, rd, rd, dk, dk, dk, dk2, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, br, br, c, p, rd2, rd2, db2, dk2, dk2, dk, rd2, rd2, rd, c, dk, dk, dk2, dk2, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, p, rd2, rd2, p, db2, db2, db2, rd2, rd2, rd2, p, c, c, dk2, dk2, dk2, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, p, rd2, c, c, c, c, c, c, p, p, c, c, c, db2, db2, db2, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "spearman_run_32", name: "Spearman — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 2)
+    }()
 }
