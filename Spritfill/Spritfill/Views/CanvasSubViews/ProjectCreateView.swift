@@ -71,6 +71,14 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
+                            projectManager.save(viewModel)
+                            savedAlertMessage = "Project saved!"
+                            showSavedAlert = true
+                        }) {
+                            Image(systemName: "externaldrive")
+                        }
+                        
+                        Button(action: {
                             viewModel.exportAndSaveToPhotos {
                                 savedAlertMessage = "Image saved to Photos!"
                                 showSavedAlert = true

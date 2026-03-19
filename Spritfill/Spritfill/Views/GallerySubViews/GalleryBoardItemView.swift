@@ -15,10 +15,22 @@ struct GalleryBoardItemView: View {
     @State private var dragOffset: CGSize = .zero
     @State private var resizeStartSize: CGFloat = 0
     
+    private var isSelected: Bool {
+        viewModel.selectedItemID == item.id
+    }
+    
     var body: some View {
         let size = item.displaySize
         
         ZStack(alignment: .topTrailing) {
+            // Edit mode background box
+            if viewModel.isEditMode {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.blue.opacity(isSelected ? 0.15 : 0.08))
+                    .stroke(Color.blue.opacity(isSelected ? 0.5 : 0.2), lineWidth: isSelected ? 2 : 1)
+                    .frame(width: size + 16, height: size + 16)
+            }
+            
             // Sprite image
             if let image = viewModel.thumbnail(for: item.id) {
                 Image(uiImage: image)
@@ -34,7 +46,7 @@ struct GalleryBoardItemView: View {
             
             // Edit mode overlays
             if viewModel.isEditMode {
-                // Archive button (top-left)
+                // Archive button (top-right)
                 Button(action: {
                     viewModel.archiveItem(id: item.id)
                 }) {
@@ -53,6 +65,11 @@ struct GalleryBoardItemView: View {
             x: item.position.x + (viewModel.isEditMode ? dragOffset.width : 0),
             y: item.position.y + (viewModel.isEditMode ? dragOffset.height : 0)
         )
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                viewModel.selectItem(id: item.id)
+            }
+        }
         .gesture(viewModel.isEditMode ? dragGesture : nil)
     }
     

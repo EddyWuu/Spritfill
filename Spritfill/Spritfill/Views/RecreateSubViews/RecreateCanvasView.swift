@@ -50,6 +50,13 @@ struct RecreateCanvasView: View {
                             .foregroundColor(.green)
                     }
                     
+                    Button(action: {
+                        viewModel.saveProgress()
+                        showSavedAlert = true
+                    }) {
+                        Image(systemName: "externaldrive")
+                    }
+                    
                     Button(action: { showDeleteAlert = true }) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
@@ -106,7 +113,7 @@ struct RecreateCanvasView: View {
         .alert("Saved!", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text("Your recreated sprite has been saved to your photo library.")
+            Text("Your progress has been saved.")
         }
         .alert("Delete Session?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {

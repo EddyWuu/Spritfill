@@ -23,8 +23,8 @@ struct GalleryBoardView: View {
                 // Board background
                 boardBackground
                 
-                // Sprite items
-                ForEach(viewModel.visibleItems) { item in
+                // Sprite items (selected one drawn last = on top)
+                ForEach(viewModel.sortedVisibleItems) { item in
                     GalleryBoardItemView(viewModel: viewModel, item: item)
                 }
             }

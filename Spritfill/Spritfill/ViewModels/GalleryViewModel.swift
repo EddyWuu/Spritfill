@@ -52,24 +52,23 @@ class GalleryViewModel: ObservableObject {
     @Published var showStorage: Bool = false
     @Published var zoomScale: CGFloat = 1.0
     @Published var boardOffset: CGSize = .zero
+    @Published var selectedItemID: UUID? = nil
+    @Published var expandedImage: UIImage? = nil
+    @Published var showExpandedImage: Bool = false
     
     private let storage = LocalStorageService.shared
     private let fileManager = FileManager.default
     
-    // Thumbnail cache — NSCache auto-evicts under memory pressure
-    private let thumbnailCache: NSCache<NSUUID, UIImage> = {
-        let cache = NSCache<NSUUID, UIImage>()
-        cache.countLimit = 30
-        cache.totalCostLimit = 20 * 1024 * 1024  // 20 MB
-        return cache
-    }()
+    // Thumbnail storage — using Dictionary instead of NSCache to prevent eviction during zoom
+    private var thumbnailStore: [UUID: UIImage] = [:]
     
     init() {
         NotificationCenter.default.addObserver(
             forName: UIApplication.didReceiveMemoryWarningNotification,
             object: nil, queue: .main
         ) { [weak self] _ in
-            self?.thumbnailCache.removeAllObjects()
+            // Only clear on actual memory warning, not during normal use
+            self?.thumbnailStore.removeAll()
         }
     }
     
@@ -175,8 +174,9 @@ class GalleryViewModel: ObservableObject {
     private func generateThumbnail(for project: ProjectData) {
         let width = project.settings.selectedCanvasSize.dimensions.width
         let height = project.settings.selectedCanvasSize.dimensions.height
-        let thumbSize: CGFloat = 100
-        let tileSize = min(thumbSize / CGFloat(width), thumbSize / CGFloat(height))
+        // Render at a large size to eliminate subpixel gaps between tiles
+        let thumbSize: CGFloat = 512
+        let tileSize = floor(thumbSize / CGFloat(max(width, height)))
         let renderW = CGFloat(width) * tileSize
         let renderH = CGFloat(height) * tileSize
         
@@ -189,15 +189,15 @@ class GalleryViewModel: ObservableObject {
         .frame(width: renderW, height: renderH)
         
         let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
+        renderer.scale = 1.0  // 1x is enough for pixel art thumbnails
         renderer.isOpaque = false
         if let image = renderer.uiImage {
-            thumbnailCache.setObject(image, forKey: project.id as NSUUID)
+            thumbnailStore[project.id] = image
         }
     }
     
     func thumbnail(for id: UUID) -> UIImage? {
-        thumbnailCache.object(forKey: id as NSUUID)
+        thumbnailStore[id]
     }
     
     // MARK: - Board items accessors
@@ -234,5 +234,36 @@ class GalleryViewModel: ObservableObject {
         guard let index = boardItems.firstIndex(where: { $0.id == id }) else { return }
         boardItems[index].isArchived = false
         saveLayout()
+    }
+    
+    // MARK: - Selection (tap to bring to top)
+    
+    func selectItem(id: UUID) {
+        if selectedItemID == id {
+            selectedItemID = nil
+        } else {
+            selectedItemID = id
+        }
+    }
+    
+    func deselectItem() {
+        selectedItemID = nil
+    }
+    
+    func expandSelectedItem() {
+        guard let id = selectedItemID, let image = thumbnail(for: id) else { return }
+        expandedImage = image
+        showExpandedImage = true
+    }
+    
+    /// Sorted visible items so the selected one is drawn last (on top)
+    var sortedVisibleItems: [GalleryBoardItem] {
+        let items = visibleItems
+        guard let selectedID = selectedItemID else { return items }
+        var sorted = items.filter { $0.id != selectedID }
+        if let selected = items.first(where: { $0.id == selectedID }) {
+            sorted.append(selected)
+        }
+        return sorted
     }
 }

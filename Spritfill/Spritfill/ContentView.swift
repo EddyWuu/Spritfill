@@ -15,12 +15,12 @@ struct ContentView: View {
             
             CanvasView()
                 .tabItem {
-                    Label("Canvas", systemImage: "square.and.arrow.up")
+                    Label("Canvas", systemImage: "paintbrush")
                 }
             
             GalleryView()
                 .tabItem {
-                    Label("Gallery", systemImage: "photo")
+                    Label("Gallery", systemImage: "photo.on.rectangle")
                 }
             
             RecreateView()

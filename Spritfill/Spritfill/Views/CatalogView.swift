@@ -111,7 +111,8 @@ struct CatalogView: View {
                         .animation(.easeInOut(duration: 0.2), value: showDetail)
                 }
             }
-            .navigationTitle("Community Sprites")
+            .navigationTitle("Catalog")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 viewModel.loadCommunitySprites()
             }

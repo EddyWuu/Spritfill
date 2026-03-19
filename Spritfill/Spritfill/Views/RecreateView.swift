@@ -59,6 +59,8 @@ struct RecreateView: View {
                     RecreateCanvasView(session: session, selectedTab: $selectedTab)
                 }
             }
+            .navigationTitle("Recreate")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 recreateViewModel.loadAll()
             }
