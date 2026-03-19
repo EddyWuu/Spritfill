@@ -47,12 +47,17 @@ struct PremadeSprites {
         // Ducks
         duck1, duck2, duck3, duck4, duck5, duck6, ducks1,
         // 32x32 Landscapes
-        mountainRange, forest, sunset, castle, ocean,
+        mountainRange, forest, sunset, castle, ocean, streetAtNight, studyRoom, citySkyrises,
         // 16x16 Items & Objects
         heart, pixelMan, sword, tree, mushroom, star, coin, skull,
         potion, shield, slime, gem, cat, dog, arrow, chest, key, crown,
-        bomb, cactus, ghost, spaceship, avocado, flower, dragon,
-        treasureMap, campfire, anchor, lantern,
+        bomb, cactus, ghost, spaceship, avocado, flower,
+        treasureMap, campfire, lantern,
         fire, rainbow, pokemonBall,
+        // New 16x16 sprites
+        moon, apple, lightning, snowflake, rocket,
+        hourglass, alien, musicNote, penguin, sun,
+        cupcake, frog, diamondRing, crab, candle, pawPrint,
+        watermelon, bat,
     ]
 }

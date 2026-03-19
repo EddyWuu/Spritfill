@@ -1137,4 +1137,683 @@ extension PremadeSprites {
 
         return PremadeSpriteData(id: "rainbow", name: "Rainbow", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
     }()
+    
+    // MARK: - Moon (16x16)
+    
+    static let moon: PremadeSpriteData = {
+        let c = "clear"
+        let y = "#ffeb57"  // bright yellow
+        let d = "#edab50"  // darker gold
+        let w = "#ffffff"  // white highlight
+        let g = "#c0cbdc"  // gray crater
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, y, y, y, y, y, c, c, c, c, c, c,
+            c, c, c, y, y, y, y, y, y, y, y, y, c, c, c, c,
+            c, c, y, y, y, y, w, y, y, y, y, y, y, c, c, c,
+            c, c, y, y, y, w, w, y, y, y, y, y, y, c, c, c,
+            c, y, y, y, y, y, y, y, y, g, y, y, y, y, c, c,
+            c, y, y, y, y, y, y, y, g, g, y, y, y, y, c, c,
+            c, y, y, y, y, y, y, y, y, y, y, y, y, y, c, c,
+            c, y, y, y, g, y, y, y, y, y, y, y, y, y, c, c,
+            c, y, y, g, g, g, y, y, y, y, y, d, y, y, c, c,
+            c, y, y, y, g, y, y, y, y, y, d, d, y, y, c, c,
+            c, c, y, y, y, y, y, y, y, y, y, y, y, c, c, c,
+            c, c, y, y, y, y, y, d, y, y, y, y, y, c, c, c,
+            c, c, c, y, y, y, y, y, y, y, y, y, c, c, c, c,
+            c, c, c, c, c, y, y, y, y, y, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "moon", name: "Moon", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Apple (16x16)
+    
+    static let apple: PremadeSpriteData = {
+        let c = "clear"
+        let r = "#ea323c"  // red
+        let d = "#891e2b"  // dark red
+        let l = "#f68187"  // light pink highlight
+        let g = "#33984b"  // green stem
+        let k = "#1e6f50"  // dark green leaf
+        let s = "#5ac54f"  // light green leaf
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, g, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, g, g, c, s, s, c, c, c, c, c,
+            c, c, c, c, c, c, g, c, k, s, s, c, c, c, c, c,
+            c, c, c, c, d, d, d, d, d, d, d, d, c, c, c, c,
+            c, c, c, d, r, r, r, d, r, r, r, r, d, c, c, c,
+            c, c, d, r, r, l, r, r, r, r, r, r, r, d, c, c,
+            c, c, d, r, l, l, r, r, r, r, r, r, r, d, c, c,
+            c, c, d, r, r, l, r, r, r, r, r, r, r, d, c, c,
+            c, c, d, r, r, r, r, r, r, r, r, r, r, d, c, c,
+            c, c, d, r, r, r, r, r, r, r, r, r, r, d, c, c,
+            c, c, c, d, r, r, r, r, r, r, r, r, d, c, c, c,
+            c, c, c, c, d, r, r, r, r, r, r, d, c, c, c, c,
+            c, c, c, c, c, d, d, d, d, d, d, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "apple", name: "Apple", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Fish (16x16)
+    
+    static let fish: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let b = "#0098dc"  // blue body
+        let l = "#0af1ff"  // light blue
+        let d = "#005980"  // dark blue
+        let w = "#ffffff"  // eye white
+        let e = "#131313"  // eye pupil
+        let f = "#edab50"  // fin gold
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, o, o, o, o, c, c, c, c, c,
+            c, o, o, c, c, o, b, b, l, b, b, o, c, c, c, c,
+            o, d, d, o, o, b, b, l, l, w, e, b, o, c, c, c,
+            o, d, b, b, b, b, b, b, b, b, b, b, b, o, o, c,
+            c, o, d, b, b, b, b, b, b, b, b, b, b, f, f, o,
+            c, o, d, b, b, b, b, b, b, b, b, b, b, f, f, o,
+            o, d, b, b, b, b, b, b, b, b, b, b, b, o, o, c,
+            o, d, d, o, o, b, b, d, d, b, b, b, o, c, c, c,
+            c, o, o, c, c, o, b, b, d, b, b, o, c, c, c, c,
+            c, c, c, c, c, c, o, o, o, o, o, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "fish", name: "Fish", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Lightning Bolt (16x16)
+    
+    static let lightning: PremadeSpriteData = {
+        let c = "clear"
+        let y = "#ffeb57"  // bright yellow
+        let d = "#edab50"  // dark gold
+        let w = "#ffffff"  // white highlight
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, y, y, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, y, y, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, y, y, d, c, c, c, c, c, c,
+            c, c, c, c, c, c, y, y, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, y, y, d, c, c, c, c, c, c, c, c,
+            c, c, c, c, y, y, d, c, c, c, c, c, c, c, c, c,
+            c, c, c, y, y, y, y, y, y, y, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, y, y, d, c, c, c, c, c, c,
+            c, c, c, c, c, c, y, y, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, y, y, d, c, c, c, c, c, c, c, c,
+            c, c, c, c, y, y, d, c, c, c, c, c, c, c, c, c,
+            c, c, c, y, y, d, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, y, d, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "lightning", name: "Lightning", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Snowflake (16x16)
+    
+    static let snowflake: PremadeSpriteData = {
+        let c = "clear"
+        let w = "#ffffff"  // white
+        let b = "#c0cbdc"  // light blue-gray
+        let l = "#0af1ff"  // ice blue
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, b, c, c, c, c, c, c, c, c,
+            c, c, l, c, c, c, b, w, b, c, c, c, l, c, c, c,
+            c, c, c, b, c, c, b, b, b, c, c, b, c, c, c, c,
+            c, c, c, c, b, c, c, b, c, c, b, c, c, c, c, c,
+            c, c, c, c, c, b, c, w, c, b, c, c, c, c, c, c,
+            c, c, b, b, c, c, w, l, w, c, c, b, b, c, c, c,
+            c, b, w, b, b, w, l, w, l, w, b, b, w, b, c, c,
+            c, c, b, b, c, c, w, l, w, c, c, b, b, c, c, c,
+            c, c, c, c, c, b, c, w, c, b, c, c, c, c, c, c,
+            c, c, c, c, b, c, c, b, c, c, b, c, c, c, c, c,
+            c, c, c, b, c, c, b, b, b, c, c, b, c, c, c, c,
+            c, c, l, c, c, c, b, w, b, c, c, c, l, c, c, c,
+            c, c, c, c, c, c, c, b, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, w, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "snowflake", name: "Snowflake", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Pizza (16x16)
+    
+    static let pizza: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#e07438"  // crust orange
+        let d = "#bf6f4a"  // crust dark
+        let y = "#ffeb57"  // cheese yellow
+        let r = "#ea323c"  // pepperoni red
+        let k = "#891e2b"  // pepperoni dark
+        let g = "#33984b"  // olive/pepper green
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, y, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, y, y, y, c, c, c, c, c, c, c,
+            c, c, c, c, c, y, y, r, y, y, c, c, c, c, c, c,
+            c, c, c, c, y, y, r, k, r, y, y, c, c, c, c, c,
+            c, c, c, y, y, y, y, y, y, y, y, y, c, c, c, c,
+            c, c, y, y, y, g, y, y, y, r, y, y, y, c, c, c,
+            c, c, y, y, y, y, y, y, y, k, r, y, y, c, c, c,
+            c, y, y, r, y, y, y, y, y, y, y, y, y, y, c, c,
+            c, y, y, k, r, y, y, g, y, y, y, y, y, y, c, c,
+            y, y, y, y, y, y, y, y, y, y, r, y, y, y, y, c,
+            y, y, y, y, y, y, y, y, y, r, k, y, y, y, y, c,
+            o, o, o, o, o, o, o, o, o, o, o, o, o, o, o, o,
+            d, d, d, o, d, d, o, d, d, d, o, d, d, o, d, d,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "pizza", name: "Pizza", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Rocket (16x16)
+    
+    static let rocket: PremadeSpriteData = {
+        let c = "clear"
+        let w = "#ffffff"  // body white
+        let g = "#c0cbdc"  // body gray
+        let r = "#ea323c"  // red nose/fins
+        let d = "#891e2b"  // dark red
+        let b = "#0098dc"  // window blue
+        let o = "#e07438"  // flame orange
+        let y = "#ffeb57"  // flame yellow
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, r, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, r, d, r, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, b, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, b, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, r, w, w, g, r, c, c, c, c, c, c,
+            c, c, c, c, r, d, w, w, g, d, r, c, c, c, c, c,
+            c, c, c, c, r, c, w, w, g, c, r, c, c, c, c, c,
+            c, c, c, c, c, c, r, r, r, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, y, o, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, y, o, y, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, y, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "rocket", name: "Rocket", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Butterfly (16x16)
+    
+    static let butterfly: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let p = "#c32454"  // purple-pink wing
+        let l = "#f68187"  // light pink
+        let b = "#0098dc"  // blue wing
+        let i = "#0af1ff"  // ice blue highlight
+        let k = "#391f21"  // body dark
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, o, o, c, c, c, c, c, o, o, c, c, c, c,
+            c, c, o, p, p, o, c, o, c, o, b, b, o, c, c, c,
+            c, o, p, l, p, p, o, k, o, b, i, b, b, o, c, c,
+            c, o, p, p, l, p, o, k, o, b, b, i, b, o, c, c,
+            o, p, p, p, p, p, o, k, o, b, b, b, b, b, o, c,
+            o, p, p, l, p, p, o, k, o, b, b, i, b, b, o, c,
+            o, p, p, p, p, o, c, k, c, o, b, b, b, o, c, c,
+            c, o, o, o, o, c, c, k, c, c, o, o, o, c, c, c,
+            c, c, c, c, o, o, c, k, c, o, o, c, c, c, c, c,
+            c, c, c, o, p, p, o, k, o, b, b, o, c, c, c, c,
+            c, c, o, p, l, p, o, k, o, b, i, b, o, c, c, c,
+            c, c, o, p, p, p, o, k, o, b, b, b, o, c, c, c,
+            c, c, c, o, o, o, c, k, c, o, o, o, c, c, c, c,
+            c, c, c, c, c, c, c, k, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "butterfly", name: "Butterfly", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Hourglass (16x16)
+    
+    static let hourglass: PremadeSpriteData = {
+        let c = "clear"
+        let g = "#edab50"  // gold frame
+        let d = "#bf6f4a"  // dark gold
+        let s = "#f4d29c"  // sand light
+        let t = "#e4a672"  // sand dark
+        let w = "#ffffff"  // glass highlight
+        let b = "#c0cbdc"  // glass
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, g, g, g, g, g, g, g, g, g, g, c, c, c,
+            c, c, c, d, g, g, g, g, g, g, g, g, d, c, c, c,
+            c, c, c, c, d, b, b, b, b, b, b, d, c, c, c, c,
+            c, c, c, c, d, s, s, s, s, s, s, d, c, c, c, c,
+            c, c, c, c, c, d, s, s, s, s, d, c, c, c, c, c,
+            c, c, c, c, c, c, d, s, s, d, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, d, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, d, d, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, d, t, t, d, c, c, c, c, c, c,
+            c, c, c, c, c, d, w, t, t, b, d, c, c, c, c, c,
+            c, c, c, c, d, w, b, t, t, b, b, d, c, c, c, c,
+            c, c, c, c, d, b, t, t, t, t, b, d, c, c, c, c,
+            c, c, c, d, g, g, g, g, g, g, g, g, d, c, c, c,
+            c, c, c, g, g, g, g, g, g, g, g, g, g, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "hourglass", name: "Hourglass", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Alien (16x16)
+    
+    static let alien: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let g = "#33984b"  // green skin
+        let l = "#5ac54f"  // light green
+        let d = "#1e6f50"  // dark green
+        let e = "#131313"  // eyes
+        let w = "#ffffff"  // eye whites
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, o, o, o, o, o, o, c, c, c, c, c,
+            c, c, c, c, o, g, g, g, g, g, g, o, c, c, c, c,
+            c, c, c, o, g, g, g, g, g, g, g, g, o, c, c, c,
+            c, c, o, g, g, g, g, l, l, g, g, g, g, o, c, c,
+            c, c, o, g, w, w, e, g, g, w, w, e, g, o, c, c,
+            c, c, o, g, w, w, e, g, g, w, w, e, g, o, c, c,
+            c, c, c, o, g, g, g, g, g, g, g, g, o, c, c, c,
+            c, c, c, o, g, g, d, d, d, d, g, g, o, c, c, c,
+            c, c, c, c, o, g, g, g, g, g, g, o, c, c, c, c,
+            c, c, c, c, c, o, o, g, g, o, o, c, c, c, c, c,
+            c, c, c, c, o, l, o, g, g, o, l, o, c, c, c, c,
+            c, c, c, c, o, l, o, g, g, o, l, o, c, c, c, c,
+            c, c, c, c, c, o, c, o, o, c, o, c, c, c, c, c,
+            c, c, c, c, o, o, c, c, c, c, o, o, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "alien", name: "Alien", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Music Note (16x16)
+    
+    static let musicNote: PremadeSpriteData = {
+        let c = "clear"
+        let k = "#0e071b"  // black note
+        let d = "#391f21"  // dark
+        let g = "#657392"  // gray
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, k, k, k, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, g, g, k, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, k, k, k, c, c, c, c, c, c, c,
+            c, c, c, c, c, k, d, d, d, k, c, c, c, c, c, c,
+            c, c, c, c, k, d, k, k, d, d, k, c, c, c, c, c,
+            c, c, c, c, k, d, d, d, d, d, k, c, c, c, c, c,
+            c, c, c, c, c, k, k, k, k, k, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "music_note", name: "Music Note", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Penguin (16x16)
+    
+    static let penguin: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline/black
+        let w = "#ffffff"  // white belly
+        let b = "#131313"  // body dark
+        let y = "#ffeb57"  // beak/feet yellow
+        let d = "#edab50"  // beak dark
+        let e = "#ffffff"  // eye
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, o, o, o, o, o, c, c, c, c, c, c,
+            c, c, c, c, o, b, b, b, b, b, o, c, c, c, c, c,
+            c, c, c, o, b, b, b, b, b, b, b, o, c, c, c, c,
+            c, c, c, o, b, e, o, b, e, o, b, o, c, c, c, c,
+            c, c, c, o, b, b, b, b, b, b, b, o, c, c, c, c,
+            c, c, c, o, b, b, y, d, y, b, b, o, c, c, c, c,
+            c, c, c, o, b, b, b, b, b, b, b, o, c, c, c, c,
+            c, c, o, b, b, w, w, w, w, w, b, b, o, c, c, c,
+            c, c, o, b, b, w, w, w, w, w, b, b, o, c, c, c,
+            c, c, c, o, b, w, w, w, w, w, b, o, c, c, c, c,
+            c, c, c, o, b, w, w, w, w, w, b, o, c, c, c, c,
+            c, c, c, c, o, b, b, b, b, b, o, c, c, c, c, c,
+            c, c, c, c, c, o, o, o, o, o, c, c, c, c, c, c,
+            c, c, c, c, o, y, y, o, y, y, o, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "penguin", name: "Penguin", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Sun (16x16)
+    
+    static let sun: PremadeSpriteData = {
+        let c = "clear"
+        let y = "#ffeb57"  // bright yellow
+        let o = "#edab50"  // orange
+        let w = "#ffffff"  // white center
+        let r = "#ffa214"  // ray orange
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, r, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, r, c, c, c, c, c, c, c, c,
+            c, c, c, r, c, c, c, c, c, c, c, r, c, c, c, c,
+            c, c, c, c, r, c, c, c, c, c, r, c, c, c, c, c,
+            c, c, c, c, c, y, y, y, y, y, c, c, c, c, c, c,
+            c, c, c, c, y, y, y, o, y, y, y, c, c, c, c, c,
+            c, c, c, c, y, y, w, w, y, y, y, c, c, c, c, c,
+            c, r, r, c, y, o, w, y, y, o, y, c, r, r, c, c,
+            c, c, c, c, y, y, y, y, y, y, y, c, c, c, c, c,
+            c, c, c, c, y, y, y, o, y, y, y, c, c, c, c, c,
+            c, c, c, c, c, y, y, y, y, y, c, c, c, c, c, c,
+            c, c, c, c, r, c, c, c, c, c, r, c, c, c, c, c,
+            c, c, c, r, c, c, c, c, c, c, c, r, c, c, c, c,
+            c, c, c, c, c, c, c, r, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, r, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "sun", name: "Sun", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Cupcake (16x16)
+    
+    static let cupcake: PremadeSpriteData = {
+        let c = "clear"
+        let p = "#f68187"  // pink frosting
+        let l = "#ffa5b5"  // light pink
+        let w = "#ffffff"  // white highlights
+        let r = "#ea323c"  // cherry red
+        let d = "#891e2b"  // cherry dark
+        let b = "#bf6f4a"  // cup brown
+        let k = "#e4a672"  // cup light
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, d, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, d, r, r, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, r, r, r, c, c, c, c, c, c, c,
+            c, c, c, c, c, p, l, p, l, p, c, c, c, c, c, c,
+            c, c, c, c, p, l, w, p, w, l, p, c, c, c, c, c,
+            c, c, c, p, p, p, l, p, l, p, p, p, c, c, c, c,
+            c, c, c, p, l, p, p, l, p, p, l, p, c, c, c, c,
+            c, c, c, p, p, l, p, p, p, l, p, p, c, c, c, c,
+            c, c, c, c, b, k, b, k, b, k, b, c, c, c, c, c,
+            c, c, c, c, b, k, b, k, b, k, b, c, c, c, c, c,
+            c, c, c, c, c, b, k, b, k, b, c, c, c, c, c, c,
+            c, c, c, c, c, b, b, b, b, b, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "cupcake", name: "Cupcake", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Frog (16x16)
+    
+    static let frog: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let g = "#33984b"  // green
+        let l = "#5ac54f"  // light green
+        let d = "#1e6f50"  // dark green
+        let w = "#ffffff"  // eye white
+        let e = "#131313"  // eye pupil
+        let m = "#f68187"  // mouth pink
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, o, o, o, c, c, c, o, o, o, c, c, c, c,
+            c, c, o, w, w, w, o, c, o, w, w, w, o, c, c, c,
+            c, c, o, w, e, w, o, c, o, w, e, w, o, c, c, c,
+            c, c, c, o, o, o, g, g, g, o, o, o, c, c, c, c,
+            c, c, o, g, g, g, g, g, g, g, g, g, o, c, c, c,
+            c, o, g, g, l, g, g, g, g, g, l, g, g, o, c, c,
+            c, o, g, g, g, g, g, g, g, g, g, g, g, o, c, c,
+            c, o, g, m, m, m, m, m, m, m, m, m, g, o, c, c,
+            c, c, o, g, g, g, g, g, g, g, g, g, o, c, c, c,
+            c, c, c, o, o, g, g, g, g, g, o, o, c, c, c, c,
+            c, c, o, l, o, d, g, g, g, d, o, l, o, c, c, c,
+            c, c, o, l, l, o, c, c, c, o, l, l, o, c, c, c,
+            c, c, c, o, o, c, c, c, c, c, o, o, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "frog", name: "Frog", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Diamond Ring (16x16)
+    
+    static let diamondRing: PremadeSpriteData = {
+        let c = "clear"
+        let g = "#edab50"  // gold ring
+        let d = "#bf6f4a"  // dark gold
+        let b = "#0af1ff"  // diamond blue
+        let l = "#ffffff"  // diamond highlight
+        let s = "#0098dc"  // diamond shadow
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, l, b, l, c, c, c, c, c, c, c,
+            c, c, c, c, c, l, b, b, b, l, c, c, c, c, c, c,
+            c, c, c, c, l, b, b, l, b, b, l, c, c, c, c, c,
+            c, c, c, c, s, b, l, b, b, b, s, c, c, c, c, c,
+            c, c, c, c, c, s, b, b, b, s, c, c, c, c, c, c,
+            c, c, c, c, c, g, s, s, s, g, c, c, c, c, c, c,
+            c, c, c, c, g, d, g, g, g, d, g, c, c, c, c, c,
+            c, c, c, g, d, c, c, c, c, c, d, g, c, c, c, c,
+            c, c, c, g, d, c, c, c, c, c, d, g, c, c, c, c,
+            c, c, c, g, d, c, c, c, c, c, d, g, c, c, c, c,
+            c, c, c, c, g, d, c, c, c, d, g, c, c, c, c, c,
+            c, c, c, c, c, g, g, g, g, g, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "diamond_ring", name: "Diamond Ring", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Crab (16x16)
+    
+    static let crab: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let r = "#ea323c"  // red body
+        let d = "#891e2b"  // dark red
+        let l = "#f68187"  // light pink
+        let w = "#ffffff"  // eye white
+        let e = "#131313"  // eye pupil
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, o, c, c, c, c, c, c, c, o, c, c, c, c,
+            c, c, o, w, o, c, c, c, c, c, o, w, o, c, c, c,
+            c, c, o, e, o, c, c, c, c, c, o, e, o, c, c, c,
+            c, c, c, o, o, o, o, o, o, o, o, o, c, c, c, c,
+            c, c, c, o, r, r, r, l, r, r, r, o, c, c, c, c,
+            c, o, o, r, r, r, r, r, r, r, r, r, o, o, c, c,
+            o, d, o, r, r, l, r, r, r, l, r, r, o, d, o, c,
+            o, r, o, r, r, r, r, r, r, r, r, r, o, r, o, c,
+            o, d, o, o, r, r, r, r, r, r, r, o, o, d, o, c,
+            c, o, o, c, o, r, r, r, r, r, o, c, o, o, c, c,
+            c, c, c, c, c, o, d, r, d, o, c, c, c, c, c, c,
+            c, c, c, c, c, o, o, o, o, o, c, c, c, c, c, c,
+            c, c, c, c, o, d, o, c, o, d, o, c, c, c, c, c,
+            c, c, c, c, o, o, c, c, c, o, o, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "crab", name: "Crab", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Candle (16x16)
+    
+    static let candle: PremadeSpriteData = {
+        let c = "clear"
+        let w = "#ffffff"  // wax white
+        let g = "#c0cbdc"  // wax gray
+        let y = "#ffeb57"  // flame yellow
+        let o = "#ffa214"  // flame orange
+        let r = "#e07438"  // flame base
+        let k = "#391f21"  // wick
+        let d = "#edab50"  // holder gold
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, y, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, y, y, y, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, y, o, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, o, o, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, r, r, r, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, k, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, w, w, g, c, c, c, c, c, c, c,
+            c, c, c, c, c, d, d, d, d, d, c, c, c, c, c, c,
+            c, c, c, c, d, d, d, d, d, d, d, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "candle", name: "Candle", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Paw Print (16x16)
+    
+    static let pawPrint: PremadeSpriteData = {
+        let c = "clear"
+        let b = "#5d2c28"  // brown
+        let d = "#391f21"  // dark brown
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, d, b, c, c, c, c, c, d, b, c, c, c, c,
+            c, c, c, b, b, b, c, c, c, b, b, b, c, c, c, c,
+            c, c, c, c, b, c, c, c, c, c, b, c, c, c, c, c,
+            c, d, b, c, c, c, c, c, c, c, c, c, d, b, c, c,
+            c, b, b, b, c, c, c, c, c, c, c, b, b, b, c, c,
+            c, c, b, c, c, c, c, c, c, c, c, c, b, c, c, c,
+            c, c, c, c, c, d, b, b, b, d, c, c, c, c, c, c,
+            c, c, c, c, d, b, b, b, b, b, d, c, c, c, c, c,
+            c, c, c, d, b, b, b, b, b, b, b, d, c, c, c, c,
+            c, c, c, d, b, b, b, b, b, b, b, d, c, c, c, c,
+            c, c, c, c, d, b, b, b, b, b, d, c, c, c, c, c,
+            c, c, c, c, c, d, d, d, d, d, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "paw_print", name: "Paw Print", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Watermelon (16x16)
+    
+    static let watermelon: PremadeSpriteData = {
+        let c = "clear"
+        let g = "#33984b"  // green rind
+        let l = "#5ac54f"  // light green rind
+        let r = "#ea323c"  // red flesh
+        let p = "#f68187"  // pink flesh
+        let k = "#131313"  // seeds
+        let w = "#ffffff"  // rind edge
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, g, g, g, g, g, g, c, c, c, c, c,
+            c, c, c, c, g, l, g, l, g, l, g, g, c, c, c, c,
+            c, c, c, g, l, w, w, w, w, w, w, l, g, c, c, c,
+            c, c, g, l, w, r, r, r, r, r, r, w, l, g, c, c,
+            c, c, g, w, r, r, k, r, r, k, r, r, w, g, c, c,
+            c, g, l, w, r, r, r, r, r, r, r, r, w, l, g, c,
+            c, g, w, r, r, k, r, r, r, r, k, r, r, w, g, c,
+            g, l, w, r, r, r, r, r, r, r, r, r, r, w, l, g,
+            g, w, r, r, k, r, r, k, r, r, r, k, r, r, w, g,
+            g, w, p, r, r, r, r, r, r, r, r, r, r, p, w, g,
+            g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "watermelon", name: "Watermelon", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
+    
+    // MARK: - Bat (16x16)
+    
+    static let bat: PremadeSpriteData = {
+        let c = "clear"
+        let o = "#0e071b"  // outline
+        let p = "#3d3d3d"  // dark purple body
+        let d = "#657392"  // wing gray
+        let e = "#ea323c"  // red eyes
+        let w = "#c0cbdc"  // wing membrane
+        
+        let grid: [String] = [
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, c, c, o, c, c, c, c, c, c,
+            c, c, c, c, c, c, o, o, o, o, c, c, c, c, c, c,
+            c, c, c, c, c, o, p, e, e, p, o, c, c, c, c, c,
+            c, c, c, c, c, o, p, p, p, p, o, c, c, c, c, c,
+            c, o, o, o, o, p, p, p, p, p, p, o, o, o, o, c,
+            o, d, d, d, o, p, p, p, p, p, p, o, d, d, d, o,
+            o, w, d, d, d, o, p, p, p, p, o, d, d, d, w, o,
+            o, w, w, d, d, d, o, p, p, o, d, d, d, w, w, o,
+            c, o, w, w, d, d, o, p, p, o, d, d, w, w, o, c,
+            c, c, o, w, w, d, c, o, o, c, d, w, w, o, c, c,
+            c, c, c, o, w, d, c, c, c, c, d, w, o, c, c, c,
+            c, c, c, c, o, o, c, c, c, c, o, o, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+            c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
+        ]
+        
+        return PremadeSpriteData(id: "bat", name: "Bat", canvasSize: .smallSquare, palette: .endesga64, pixelGrid: grid)
+    }()
 }

@@ -79,59 +79,56 @@ extension PremadeSprites {
     
     static let forest: PremadeSpriteData = {
         let c = "clear"
-        let sk = "#94fdff"
-        let sb = "#00cdf9"
-        let g = "#33984b"
-        let gd = "#1e6f50"
-        let gl = "#5ac54f"
-        let gx = "#99e65f"
-        let t = "#5d2c28"
-        let td = "#391f21"
-        let e = "#8a4836"
-        let ed = "#5d2c28"
-        let fl = "#ffeb57"
-        let fr = "#ea323c"
+        let sk = "#94fdff"  // sky light
+        let sb = "#00cdf9"  // sky blue
+        let sd = "#0099db"  // sky deep
+        let g = "#33984b"   // green mid
+        let gd = "#1e6f50"  // green dark
+        let gl = "#5ac54f"  // green light
+        let gx = "#99e65f"  // green bright
+        let t = "#5d2c28"   // trunk brown
+        let td = "#391f21"  // trunk dark
+        let e = "#8a4836"   // earth brown
+        let ed = "#5d2c28"  // earth dark
+        let fl = "#ffeb57"  // flower yellow
+        let fr = "#ea323c"  // flower red
+        let fm = "#f68187"  // flower pink
+        let mr = "#ea323c"  // mushroom red cap
+        let mw = "#ffffff"  // mushroom spots
+        let ms = "#e4a672"  // mushroom stem
         
         let grid: [String] = [
-      
             sk, sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk, sk,
             sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk,
             sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk,
             sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
-          
-            sb, sb, sb, sb, sb, sb, sb, gd, g, sb, sb, sb, sb, sb, sb, gd, g, sb, sb, sb, sb, sb, gd, g, sb, sb, sb, sb, sb, sb, sb, sb,
-            sb, sb, sb, sb, sb, sb, gd, g, gl, gd, sb, sb, sb, sb, gd, g, gl, gd, sb, sb, sb, gd, g, gl, gd, sb, sb, sb, sb, sb, sb, sb,
-            sb, sb, sb, sb, sb, gd, g, gl, gx, g, gd, sb, sb, gd, g, gl, gx, g, gd, sb, gd, g, gl, gx, g, gd, sb, sb, sb, sb, sb, sb,
-            sb, sb, sb, sb, gd, g, gl, gx, gx, gl, g, gd, gd, g, gl, gx, gx, gl, g, gd, g, gl, gx, gx, gl, g, gd, sb, sb, sb, sb, sb,
-        
-            sb, sb, sb, gd, g, gl, gx, gx, gx, gx, gl, g, g, gl, gx, gx, gx, gx, gl, g, gl, gx, gx, gx, gx, gl, g, gd, sb, sb, sb, sb,
-            sb, sb, gd, g, gl, gx, gx, gx, gx, gx, gx, gl, gl, gx, gx, gx, gx, gx, gx, gl, gx, gx, gx, gx, gx, gx, gl, g, gd, sb, sb, sb,
-            sb, gd, g, gl, gx, gx, gx, gl, gx, gx, gx, gx, gx, gx, gl, gx, gx, gx, gx, gx, gx, gl, gx, gx, gx, gx, gx, gl, g, gd, sb, sb,
-            gd, g, gl, gx, gx, gx, gl, g, gl, gx, gx, gx, gx, gl, g, gl, gx, gx, gx, gx, gl, g, gl, gx, gx, gx, gx, gx, gl, g, gd, sb,
-         
-            g, gl, gx, gx, gx, gl, g, t, g, gl, gx, gx, gl, g, gd, g, gl, gx, gx, gl, g, gd, g, gl, gx, gx, gx, gl, gx, gl, g, gd,
-            gd, g, gl, gx, gl, g, t, t, t, g, gl, gl, g, gd, gd, gd, g, gl, gl, g, gd, gd, gd, g, gl, gx, gl, g, gl, g, gd, gd,
-            gd, gd, g, gl, g, t, t, t, t, t, g, g, gd, gd, gd, gd, gd, g, g, gd, gd, gd, gd, gd, g, gl, g, gd, g, gd, gd, gd,
-            gd, gd, gd, g, g, g, t, t, t, g, g, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, g, gd, gd, gd, gd, gd, gd,
-         
-            gd, gd, g, g, gd, g, t, t, t, g, gd, gd, g, gd, g, gd, g, gd, gd, g, gd, gd, gd, g, gl, g, g, gd, gd, gd, gd, gd,
-            g, gd, g, gl, g, t, t, t, t, t, g, gd, g, gl, g, gd, g, gl, g, gl, g, gd, g, gl, gl, gl, g, gd, gd, g, gd, gd,
-            g, g, gl, gl, t, t, t, td, t, t, t, g, gl, gl, g, g, gl, gl, gl, gl, g, g, gl, gl, gx, gl, gl, g, g, gl, g, gd,
-            gl, gl, gx, t, t, td, td, td, td, t, t, gl, gx, gl, gl, gl, gx, gx, gx, gl, gl, gl, gx, gx, gx, gx, gx, gl, gl, gl, gl, g,
-    
-            gx, gx, gl, g, t, td, g, td, t, g, gl, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gx, gl, gl,
-            gl, gl, g, g, t, g, g, g, t, g, g, gl, gx, gx, gx, gl, gl, gx, gx, gx, gl, gl, gx, gx, gx, gx, gl, gx, gx, gl, g, g,
-            g, g, gd, g, t, g, gd, g, t, g, gd, g, gl, gl, g, g, g, gl, gl, g, g, g, g, gl, gl, g, g, g, gl, g, gd, gd,
-            gd, gd, gd, g, t, gd, gd, gd, t, gd, gd, g, g, g, gd, gd, g, g, g, gd, gd, gd, g, g, g, gd, gd, gd, g, gd, gd, gd,
-         
-            g, g, gl, gl, g, g, fl, g, g, gl, g, g, gl, g, g, g, g, gl, fr, g, g, g, gl, g, g, gl, fl, g, g, g, g, g,
-            gd, g, g, gl, gl, g, g, g, gl, gl, gd, g, g, gl, gd, gd, g, g, g, gl, gd, g, g, gl, gl, g, g, g, gl, gd, gd, gd,
-            e, gd, g, g, g, gd, gd, gd, g, g, e, gd, g, g, gd, e, gd, g, gd, g, e, gd, g, g, g, gd, gd, gd, g, gd, e, e,
-            e, e, gd, gd, gd, e, e, e, gd, gd, e, e, gd, gd, e, e, e, gd, e, gd, e, e, gd, gd, gd, e, e, e, gd, e, e, e,
-           
-            e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e,
-            e, e, e, ed, e, e, e, e, ed, e, e, e, e, e, ed, e, e, e, ed, e, e, e, e, ed, e, e, e, e, e, ed, e, e,
-            e, ed, ed, ed, e, e, ed, ed, ed, e, e, ed, e, ed, ed, e, ed, ed, ed, ed, e, e, ed, ed, ed, e, e, ed, ed, ed, e, e,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, gd, gd, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, gd, sb, sb, sb, sb, sb, sb, gd, g, g, gd, sb, sb, sb, sb, sb, sb, sb, sb, sb, gd, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, gd, gl, gd, sb, sb, sb, sb, gd, g, gl, gl, g, gd, sb, sb, sb, sb, sb, sb, sb, gd, gl, gd, sb, sb, sb,
+            sb, sb, sb, sb, sb, gd, gl, gx, gl, gd, sb, sb, gd, g, gl, gx, gx, gl, g, gd, sb, sb, sb, sb, sb, gd, gl, gx, gl, gd, sb, sb,
+            sb, sb, sb, sb, gd, gl, gx, gx, gx, gl, gd, gd, g, gl, gx, gx, gx, gx, gl, g, gd, sb, sb, sb, gd, gl, gx, gx, gx, gl, gd, sb,
+            sb, sb, sb, gd, gl, gx, gx, gx, gx, gx, gl, g, gl, gx, gx, gx, gx, gx, gx, gl, g, gd, sb, gd, gl, gx, gx, gx, gx, gx, gl, gd,
+            sb, sb, gd, gl, gx, gx, gx, gx, gx, gx, gx, gl, gx, gx, gl, gx, gx, gl, gx, gx, gl, g, gd, gl, gx, gx, gx, gx, gx, gx, gx, gl,
+            sb, gd, g, gx, gx, gl, gx, gx, gl, gx, gx, gx, gx, gl, g, gl, gl, g, gl, gx, gx, gl, gx, gx, gx, gl, gx, gx, gl, gx, gx, gx,
+            gd, g, gl, gx, gl, g, gd, gl, g, gl, gx, gx, gl, g, gd, t, t, gd, g, gl, gx, gx, gx, gx, gl, g, gd, gl, g, gl, gx, gx,
+            g, gd, g, gl, g, gd, gd, g, gd, g, gl, gl, g, gd, gd, t, t, gd, gd, g, gl, gx, gl, gl, g, gd, gd, g, gd, g, gl, gl,
+            gd, gd, gd, g, gd, gd, gd, gd, gd, gd, g, g, gd, gd, gd, t, t, gd, gd, gd, g, gl, g, g, gd, gd, gd, gd, gd, gd, g, g,
+            gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd, t, t, gd, gd, gd, gd, g, gd, gd, gd, gd, gd, gd, gd, gd, gd, gd,
+            gd, gd, g, gd, gd, gd, g, t, t, gd, gd, gd, gd, gd, gd, t, t, gd, gd, gd, gd, gd, gd, gd, t, t, gd, gd, g, gd, gd, gd,
+            gd, g, gl, g, gd, g, t, t, t, t, gd, gd, gd, gd, gd, t, t, gd, gd, gd, gd, gd, gd, t, t, t, t, gd, gl, g, gd, gd,
+            g, gl, gx, gl, g, t, t, td, td, t, t, gd, gd, gd, gd, t, t, gd, gd, gd, gd, gd, t, t, td, td, t, t, gx, gl, g, gd,
+            gl, gx, gx, gx, g, t, td, td, td, t, g, gd, gd, g, gd, t, t, gd, g, gd, gd, g, t, td, td, td, t, gx, gx, gx, gl, g,
+            gx, gx, gx, gl, g, t, td, g, td, t, g, gl, gl, g, gd, t, t, gd, g, gl, gl, g, t, td, g, td, t, gx, gx, gx, gx, gl,
+            gl, gx, gl, g, g, t, g, g, g, t, gd, g, g, gd, gd, t, t, gd, gd, g, g, gd, t, g, g, g, t, gl, gx, gl, gx, gx,
+            g, gl, g, gd, g, t, gd, gd, gd, t, gd, gd, gd, gd, gd, t, t, gd, gd, gd, gd, gd, t, gd, gd, gd, t, g, gl, g, gl, gl,
+            gd, g, gd, gd, gd, t, gd, gd, gd, t, gd, gd, gd, gd, gd, t, t, gd, gd, gd, gd, gd, t, gd, gd, gd, t, gd, g, gd, g, g,
+            g, gl, g, fl, g, g, gd, gd, g, g, gl, g, fr, g, g, gl, g, g, fm, g, gl, g, g, gd, gd, g, g, fl, gl, g, gd, gd,
+            gd, g, gl, g, gl, gd, gd, gd, gl, g, g, gl, g, gl, g, g, gl, g, g, gl, g, gl, gd, gd, gd, gl, g, g, g, gd, gd, gd,
+            e, gd, g, mr, g, gd, e, gd, g, gd, e, gd, g, g, gd, e, gd, g, gd, g, e, gd, mr, g, gd, g, gd, e, gd, gd, e, e,
+            e, e, gd, mw, mr, e, e, e, gd, gd, e, e, gd, gd, e, e, e, gd, e, gd, e, e, mw, mr, gd, gd, e, e, e, e, e, e,
+            e, e, e, ms, ms, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, e, ms, ms, e, e, e, e, e, e, e, e,
+            e, e, ed, e, e, e, e, ed, e, e, e, e, ed, e, e, e, ed, e, e, e, ed, e, e, e, e, ed, e, e, e, ed, e, e,
+            e, ed, ed, ed, e, ed, ed, ed, e, e, ed, ed, ed, e, ed, ed, ed, ed, e, ed, ed, ed, e, e, ed, ed, ed, e, ed, ed, ed, e,
             ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed, ed,
         ]
         
@@ -331,6 +328,204 @@ extension PremadeSprites {
         ]
         
         return PremadeSpriteData(id: "ocean", name: "Ocean", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 4)
+    }()
+    
+    // MARK: - Street at Night
+    
+    static let streetAtNight: PremadeSpriteData = {
+        let c = "clear"
+        let nk = "#0c2e44"  // night sky dark
+        let ns = "#00396d"  // night sky mid
+        let nl = "#0069aa"  // night sky light
+        let st = "#ffeb57"  // star yellow
+        let mn = "#f4d29c"  // moon cream
+        let md = "#e4a672"  // moon dark
+        let bk = "#391f21"  // building dark
+        let bm = "#5d2c28"  // building mid
+        let bl = "#3d3d3d"  // building gray
+        let yw = "#ffeb57"  // window yellow lit
+        let wd = "#edab50"  // window dim
+        let wf = "#131313"  // window off
+        let rd = "#424c6e"  // road dark
+        let rm = "#657392"  // road mid
+        let rl = "#c0cbdc"  // road line white
+        let sw = "#0098dc"  // sidewalk
+        let lp = "#e4a672"  // lamp post
+        let lg = "#ffeb57"  // lamp glow
+        let lr = "#ffa214"  // lamp glow ring
+        
+        let grid: [String] = [
+            nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk,
+            nk, nk, nk, nk, st, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, st, nk, nk, nk, nk, nk, nk, nk, nk,
+            nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, st, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, mn, mn, nk, nk, nk,
+            nk, nk, nk, nk, nk, nk, nk, nk, st, nk, nk, nk, nk, nk, nk, nk, nk, nk, st, nk, nk, nk, nk, nk, nk, nk, mn, mn, md, nk, nk, nk,
+            ns, ns, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, mn, nk, nk, ns, ns,
+            ns, ns, ns, nk, nk, nk, nk, nk, nk, nk, nk, bk, bk, bk, bk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, nk, ns, ns, ns,
+            ns, ns, ns, nk, nk, nk, bk, bk, bk, nk, bk, bm, bm, bm, bm, bk, nk, nk, nk, nk, bk, bk, bk, bk, bk, nk, nk, nk, ns, ns, ns, ns,
+            ns, ns, ns, nk, nk, bk, bm, bm, bm, bk, bk, bm, yw, bm, yw, bk, nk, nk, nk, bk, bm, bm, bm, bm, bm, bk, nk, nk, ns, ns, ns, ns,
+            nl, ns, ns, nk, bk, bm, yw, bm, yw, bk, bk, bm, bm, bm, bm, bk, nk, nk, bk, bm, yw, bm, wf, bm, yw, bm, bk, nk, ns, ns, ns, nl,
+            nl, ns, ns, nk, bk, bm, bm, bm, bm, bk, bk, bm, yw, bm, yw, bk, nk, nk, bk, bm, bm, bm, bm, bm, bm, bm, bk, nk, ns, ns, ns, nl,
+            nl, ns, ns, nk, bk, bm, yw, bm, wf, bk, bk, bm, bm, bm, bm, bk, lr, lr, bk, bm, yw, bm, yw, bm, wf, bm, bk, nk, ns, ns, ns, nl,
+            nl, nl, ns, bk, bk, bm, bm, bm, bm, bk, bk, bm, wf, bm, yw, bk, lg, lg, bk, bm, bm, bm, bm, bm, bm, bm, bk, nk, ns, ns, nl, nl,
+            nl, nl, ns, bk, bk, bm, yw, bm, yw, bk, bk, bm, bm, bm, bm, bk, lp, lp, bk, bm, wf, bm, yw, bm, yw, bm, bk, bk, ns, ns, nl, nl,
+            nl, nl, ns, bk, bk, bm, bm, bm, bm, bk, bk, bm, yw, bm, wf, bk, lp, lp, bk, bm, bm, bm, bm, bm, bm, bm, bk, bk, ns, ns, nl, nl,
+            nl, nl, ns, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, lp, lp, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, ns, nl, nl, nl,
+            nl, nl, nl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, lp, lp, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, nl, nl, nl, nl,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rl, rl, rl, rl, rd, rd, rd, rd, rl, rl, rl, rl, rd, rd, rd, rd, rl, rl, rl, rl, rd, rd, rd, rd, rl, rl, rl, rl, rd, rd, rd, rd,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm, rd, rd, rd, rd, rm, rm, rm, rm, rm,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd, rd,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl,
+            bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl, bl,
+        ]
+        
+        return PremadeSpriteData(id: "street_at_night", name: "Street at Night", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 5)
+    }()
+    
+    // MARK: - Study Room
+    
+    static let studyRoom: PremadeSpriteData = {
+        let c = "clear"
+        let wl = "#e8d4b8"  // wall light
+        let wd = "#d2b48c"  // wall dark/trim
+        let fl = "#8a4836"  // floor wood
+        let fd = "#5d2c28"  // floor dark
+        let dk = "#391f21"  // desk dark
+        let dm = "#5d2c28"  // desk mid
+        let dl = "#8a4836"  // desk light
+        let dt = "#bf6f4a"  // desk top
+        let bk = "#391f21"  // bookshelf dark
+        let bm = "#5d2c28"  // bookshelf mid
+        let br = "#ea323c"  // book red
+        let bg = "#33984b"  // book green
+        let bb = "#0098dc"  // book blue
+        let by = "#edab50"  // book yellow
+        let bp = "#c32454"  // book purple
+        let wn = "#94fdff"  // window sky
+        let wf = "#c0cbdc"  // window frame
+        let wg = "#657392"  // window frame dark
+        let lm = "#ffeb57"  // lamp glow
+        let lo = "#ffa214"  // lamp orange
+        let ls = "#e4a672"  // lamp shade
+        let lp = "#391f21"  // lamp post
+        let ch = "#bf6f4a"  // chair
+        let cd = "#8a4836"  // chair dark
+        let pp = "#ffffff"  // paper white
+        let pg = "#c0cbdc"  // paper lines
+        let pc = "#0e071b"  // pencil
+        let mg = "#f68187"  // mug pink
+        let md = "#c32454"  // mug dark
+        
+        let grid: [String] = [
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            wl, wl, bk, bk, bk, bk, bk, bk, wl, wl, wl, wl, wg, wg, wg, wg, wg, wg, wg, wg, wl, wl, wl, wl, wl, lm, lm, lm, wl, wl, wl, wl,
+            wl, wl, bk, br, bg, bb, by, bk, wl, wl, wl, wl, wg, wn, wn, wn, wf, wn, wn, wg, wl, wl, wl, wl, wl, ls, lo, ls, wl, wl, wl, wl,
+            wl, wl, bk, br, bg, bb, by, bk, wl, wl, wl, wl, wg, wn, wn, wn, wf, wn, wn, wg, wl, wl, wl, wl, wl, wl, ls, wl, wl, wl, wl, wl,
+            wl, wl, bk, bk, bk, bk, bk, bk, wl, wl, wl, wl, wg, wn, wn, wn, wf, wn, wn, wg, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, bp, br, bg, bb, bk, wl, wl, wl, wl, wg, wn, wn, wn, wf, wn, wn, wg, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, bp, br, bg, bb, bk, wl, wl, wl, wl, wg, wn, wn, wn, wf, wn, wn, wg, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, bk, bk, bk, bk, bk, wl, wl, wl, wl, wg, wg, wg, wg, wg, wg, wg, wg, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, by, bg, br, bp, bk, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, by, bg, br, bp, bk, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wl, wl, bk, bk, bk, bk, bk, bk, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, lp, wl, wl, wl, wl, wl,
+            wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd,
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, wl, wl, wl, wl,
+            wl, wl, wl, wl, dt, dt, dt, dt, pp, pp, pp, pp, dt, dt, pc, dt, dt, mg, md, dt, dt, dt, dt, dt, lp, lp, dt, dt, wl, wl, wl, wl,
+            wl, wl, wl, wl, dt, dt, dt, dt, pp, pg, pg, pp, dt, pc, pc, dt, dt, mg, mg, md, dt, dt, dt, dt, lp, lm, dt, dt, wl, wl, wl, wl,
+            wl, wl, wl, wl, dt, dt, dt, dt, pp, pp, pp, pp, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, dt, wl, wl, wl, wl,
+            wl, wl, wl, wl, dk, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dl, dk, wl, wl, wl, wl,
+            wl, wl, wl, wl, dk, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dm, dk, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, dk, dk, wl, wl, wl, wl, wl, dk, dk, dk, dk, dk, dk, dk, dk, wl, wl, wl, wl, wl, dk, dk, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, dk, dk, wl, wl, wl, ch, ch, ch, ch, ch, ch, ch, ch, ch, ch, ch, ch, wl, wl, wl, dk, dk, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, ch, ch, cd, ch, ch, ch, ch, ch, ch, cd, ch, ch, ch, ch, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, ch, cd, cd, ch, wl, wl, wl, wl, wl, cd, cd, ch, ch, ch, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            wl, wl, wl, wl, wl, wl, wl, wl, wl, cd, cd, wl, wl, wl, wl, wl, wl, wl, wl, cd, cd, wl, ch, wl, wl, wl, wl, wl, wl, wl, wl, wl,
+            fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd,
+            fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl,
+            fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl,
+            fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd,
+            fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl,
+            fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl, fd, fl, fl, fl,
+            fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd, fd,
+        ]
+        
+        return PremadeSpriteData(id: "study_room", name: "Study Room", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 6)
+    }()
+    
+    // MARK: - City Skyrises
+    
+    static let citySkyrises: PremadeSpriteData = {
+        let c = "clear"
+        let sk = "#0c2e44"  // night sky dark
+        let sm = "#00396d"  // sky mid
+        let sl = "#0069aa"  // sky lighter
+        let st = "#ffeb57"  // stars
+        let b1 = "#3d3d3d"  // building 1 dark gray
+        let b2 = "#424c6e"  // building 2 blue-gray
+        let b3 = "#657392"  // building 3 light gray
+        let b4 = "#391f21"  // building 4 dark brown
+        let b5 = "#5d2c28"  // building 5 brown
+        let yw = "#ffeb57"  // window lit yellow
+        let wd = "#edab50"  // window dim
+        let wf = "#131313"  // window off
+        let gl = "#c0cbdc"  // glass reflection
+        let gd = "#657392"  // glass dark
+        let rd = "#ea323c"  // rooftop light red
+        let rg = "#33984b"  // rooftop green (garden)
+        let an = "#0098dc"  // antenna blue light
+        let wh = "#ffffff"  // white light
+        let rd2 = "#424c6e" // road
+        let rl = "#c0cbdc"  // road line
+        let sw = "#3d3d3d"  // sidewalk
+        
+        let grid: [String] = [
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            sk, sk, sk, st, sk, sk, sk, sk, sk, sk, sk, sk, sk, st, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, st, sk, sk, sk, sk, sk,
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, rd, sk, sk, st, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            sm, sk, sk, sk, sk, sk, sk, sk, sk, sk, st, sk, sk, sk, sk, sk, sk, sk, sk, rd, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sm,
+            sm, sm, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, b2, b2, b2, sk, sk, sk, sk, sk, sk, an, sk, sk, sm, sm,
+            sm, sm, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, b2, b2, gl, b2, b2, sk, sk, sk, sk, sk, an, sk, sm, sm, sm,
+            sm, sm, sm, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, b2, yw, b2, yw, b2, sk, sk, sk, sk, b3, b3, b3, sm, sm, sm,
+            sm, sm, sm, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, b1, b1, b1, b2, b2, yw, b2, b2, sk, sk, sk, b3, b3, gl, b3, b3, sm, sm,
+            sl, sm, sm, sk, sk, sk, sk, sk, sk, sk, b4, b4, b4, sk, b1, gl, b1, b2, yw, b2, yw, b2, sk, sk, b3, b3, yw, b3, wf, b3, sm, sm,
+            sl, sm, sm, sk, sk, sk, sk, sk, sk, b4, b4, wf, b4, b4, b1, b1, b1, b2, b2, yw, b2, b2, sk, b3, b3, wf, b3, yw, b3, b3, sm, sm,
+            sl, sl, sm, b5, b5, b5, b5, sk, sk, b4, yw, b4, yw, b4, b1, yw, b1, b2, yw, b2, wf, b2, b3, b3, yw, b3, wf, b3, yw, b3, sm, sm,
+            sl, sl, sm, b5, yw, b5, b5, b5, sk, b4, b4, yw, b4, b4, b1, b1, b1, b2, b2, yw, b2, b2, b3, wf, b3, yw, b3, wf, b3, b3, sm, sl,
+            sl, sl, sm, b5, b5, yw, wf, b5, sk, b4, yw, b4, wf, b4, b1, yw, b1, b2, yw, b2, yw, b2, b3, yw, b3, b3, yw, b3, wf, b3, sl, sl,
+            sl, sl, sm, b5, yw, b5, yw, b5, b4, b4, b4, yw, b4, b4, b1, b1, b1, b2, b2, wf, b2, b2, b3, b3, wf, b3, b3, yw, b3, b3, sl, sl,
+            sl, sl, b5, b5, b5, wf, b5, b5, b4, wf, yw, b4, yw, b4, b1, yw, b1, b2, yw, b2, yw, b2, b3, yw, b3, yw, wf, b3, yw, b3, sl, sl,
+            sl, sl, b5, wf, yw, b5, yw, b5, b4, b4, b4, wf, b4, b4, b1, b1, b1, b2, wf, yw, b2, b2, b3, b3, wf, b3, yw, wf, b3, b3, sl, sl,
+            sl, sl, b5, yw, b5, yw, b5, b5, b4, yw, wf, b4, yw, b4, b1, yw, b1, b2, yw, b2, wf, b2, b3, yw, b3, wf, b3, yw, wf, b3, sl, sl,
+            sl, sl, b5, b5, wf, b5, wf, b5, b4, b4, b4, yw, b4, b4, b1, b1, b1, b2, b2, wf, b2, b2, b3, b3, yw, b3, wf, b3, yw, b3, sl, sl,
+            sl, sl, b5, yw, b5, wf, yw, b5, b4, wf, yw, b4, wf, b4, b1, yw, b1, b2, yw, b2, yw, b2, b3, wf, b3, yw, b3, wf, b3, b3, sl, sl,
+            sl, sl, b5, b5, yw, b5, b5, b5, b4, b4, b4, wf, b4, b4, b1, b1, b1, b2, wf, yw, b2, b2, b3, yw, wf, b3, yw, b3, wf, b3, sl, sl,
+            sl, sl, b5, wf, b5, yw, wf, b5, b4, yw, wf, b4, yw, b4, b1, yw, b1, b2, yw, b2, wf, b2, b3, b3, yw, wf, b3, yw, b3, b3, sl, sl,
+            rg, rg, b5, b5, b5, b5, b5, b5, b4, b4, b4, b4, b4, b4, b1, b1, b1, b2, b2, b2, b2, b2, b3, b3, b3, b3, b3, b3, b3, b3, sl, sl,
+            sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl, sl,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2,
+            rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2,
+            rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2,
+            rl, rl, rl, rl, rd2, rd2, rd2, rd2, rl, rl, rl, rl, rd2, rd2, rd2, rd2, rl, rl, rl, rl, rd2, rd2, rd2, rd2, rl, rl, rl, rl, rd2, rd2, rd2, rd2,
+            rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2,
+            rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2, rd2,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+            sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw, sw,
+        ]
+        
+        return PremadeSpriteData(id: "city_skyrises", name: "City Skyrises", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 7)
     }()
     
     // MARK: - Community Sprites (32x32)
