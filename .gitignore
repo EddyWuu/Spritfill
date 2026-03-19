@@ -37,3 +37,10 @@ fastlane/screenshots
 
 # Temporary files
 tmp/
+
+# Firebase config (contains API keys - do not push to public repos)
+GoogleService-Info.plist
+serviceAccountKey.json
+
+# Server temp files
+Server/temp/

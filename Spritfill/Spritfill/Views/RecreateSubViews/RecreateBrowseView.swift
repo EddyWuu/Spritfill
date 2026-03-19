@@ -68,6 +68,34 @@ struct RecreateBrowseView: View {
                 spriteGrid(section.sprites)
             }
             
+            // Community sprites status message
+            if viewModel.communityFetchFailed {
+                HStack(spacing: 8) {
+                    Image(systemName: "wifi.slash")
+                        .foregroundColor(.orange)
+                    Text("Connect to the internet to see community sprites")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+            } else if viewModel.isCommunityLoading {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text("Loading community sprites...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+            }
+            
             if !viewModel.userMadeSprites.isEmpty {
                 sectionHeader("Your Sprites")
                 spriteGrid(viewModel.userMadeSprites)

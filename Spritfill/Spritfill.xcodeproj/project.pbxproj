@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ADFB00052D89000000000005 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ADFB00012D89000000000001 /* FirebaseFirestore */; };
+		ADFB00072D89000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = ADFB00042D89000000000004 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AD3EF7B02D43362C00178E85 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +34,30 @@
 		AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AD26A2342F6B6B2800C1E413 /* Exceptions for "Spritfill" folder in "SpritfillTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AD3EF7AE2D43362C00178E85 /* SpritfillTests */;
+		};
+		AD26A2352F6B6B2800C1E413 /* Exceptions for "Spritfill" folder in "SpritfillUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"GoogleService-Info.plist",
+			);
+			target = AD3EF7B82D43362C00178E85 /* SpritfillUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AD3EF7A12D43362A00178E85 /* Spritfill */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AD26A2342F6B6B2800C1E413 /* Exceptions for "Spritfill" folder in "SpritfillTests" target */,
+				AD26A2352F6B6B2800C1E413 /* Exceptions for "Spritfill" folder in "SpritfillUITests" target */,
+			);
 			path = Spritfill;
 			sourceTree = "<group>";
 		};
@@ -52,6 +78,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADFB00052D89000000000005 /* FirebaseFirestore in Frameworks */,
+				ADFB00072D89000000000007 /* FirebaseCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +140,8 @@
 			);
 			name = Spritfill;
 			packageProductDependencies = (
+				ADFB00012D89000000000001 /* FirebaseFirestore */,
+				ADFB00042D89000000000004 /* FirebaseCore */,
 			);
 			productName = Spritfill;
 			productReference = AD3EF79F2D43362A00178E85 /* Spritfill.app */;
@@ -196,6 +226,7 @@
 			mainGroup = AD3EF7962D43362A00178E85;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				ADFB00032D89000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AD3EF7A02D43362A00178E85 /* Products */;
@@ -558,6 +589,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ADFB00032D89000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ADFB00012D89000000000001 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ADFB00032D89000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		ADFB00042D89000000000004 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ADFB00032D89000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AD3EF7972D43362A00178E85 /* Project object */;
 }

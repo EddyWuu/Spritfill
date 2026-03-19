@@ -6,22 +6,36 @@
 //
 
 import SwiftUI
+import Combine
 
 class CatalogViewModel: ObservableObject {
     
     @Published var showSavedAlert = false
     @Published var savedSpriteName = ""
     
+    private let communityService = CommunitySpritesService.shared
+    
+    /// All sprites: premade + community
+    private var allSprites: [PremadeSpriteData] {
+        PremadeSprites.all + communityService.communitySprites
+    }
+    
     var groupedSprites: [(name: String, sprites: [PremadeSpriteData])] {
         var groups: [(name: String, sprites: [PremadeSpriteData])] = []
         var ungrouped: [PremadeSpriteData] = []
+        var communitySprites: [PremadeSpriteData] = []
         var seen: Set<String> = []
         
-        for sprite in PremadeSprites.all {
+        for sprite in allSprites {
             if let group = sprite.group {
+                // Collect community sprites separately so they appear last
+                if group == "Community" {
+                    communitySprites.append(sprite)
+                    continue
+                }
                 if !seen.contains(group) {
                     seen.insert(group)
-                    let members = PremadeSprites.all
+                    let members = allSprites
                         .filter { $0.group == group }
                         .sorted { $0.groupOrder < $1.groupOrder }
                     groups.append((name: group, sprites: members))
@@ -35,8 +49,40 @@ class CatalogViewModel: ObservableObject {
             groups.append((name: "Individual Sprites", sprites: ungrouped))
         }
         
+        // Community sprites always last
+        if !communitySprites.isEmpty {
+            groups.append((name: "Community", sprites: communitySprites))
+        }
+        
         return groups
     }
+    
+    var communityFetchFailed: Bool {
+        communityService.fetchFailed
+    }
+    
+    var isCommunityLoading: Bool {
+        communityService.isLoading
+    }
+    
+    func loadCommunitySprites() {
+        communityService.fetchCommunitySprites()
+        // Observe changes from the community service
+        communityService.$communitySprites
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+        communityService.$fetchFailed
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private var cancellables = Set<AnyCancellable>()
     
     @MainActor
     func exportSprite(_ sprite: PremadeSpriteData) {

@@ -20,6 +20,7 @@ struct ProjectViewModeView: View {
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showSavedAlert = false
     @State private var showProjectDetails = false
+    @State private var showSubmitSheet = false
     
     @State private var zoomScale: CGFloat = 1.0
     @State private var panOffset: CGSize = .zero
@@ -72,6 +73,10 @@ struct ProjectViewModeView: View {
                             viewModel.exportAndGetShareImage { image in
                                 shareImage = image
                             }
+                        }
+                        
+                        actionButton(icon: "paperplane.fill", label: "Submit", color: .purple) {
+                            showSubmitSheet = true
                         }
                         
                         actionButton(icon: "pencil.circle", label: "Edit", color: .orange) {
@@ -143,6 +148,9 @@ struct ProjectViewModeView: View {
             ProjectDetailsPopupView(viewModel: viewModel)
                 .presentationDetents([.height(360)])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showSubmitSheet) {
+            SubmitArtView(viewModel: viewModel)
         }
     }
     

@@ -255,6 +255,11 @@ enum CanvasSizes: String, CaseIterable, Codable {
             
         }
     }
+    
+    // Find a matching CanvasSizes case from width and height, or nil if no match
+    static func from(width: Int, height: Int) -> CanvasSizes? {
+        return CanvasSizes.allCases.first { $0.dimensions.width == width && $0.dimensions.height == height }
+    }
 }
 
 // MARK: - Tile Sizes (Legacy — kept only for backward-compatible decoding)

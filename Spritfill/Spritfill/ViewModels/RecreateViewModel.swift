@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import Combine
 
 class RecreateViewModel: ObservableObject {
     
     // MARK: - Published state
     
-    // Browse tab: premade + user sprites available to recreate
+    // Browse tab: premade + community + user sprites available to recreate
     @Published var browseSprites: [RecreatableArtModel] = []
     
     // In Progress tab: saved sessions the user has started
@@ -22,15 +23,36 @@ class RecreateViewModel: ObservableObject {
     
     private let projectStorage = LocalStorageService.shared
     private let sessionStorage = RecreateStorageService.shared
+    private let communityService = CommunitySpritesService.shared
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Load everything
     
     func loadAll() {
-        loadBrowseSprites()
         loadSessions()
+        
+        // Clear previous subscriptions to prevent stacking
+        cancellables.removeAll()
+        
+        // Fetch community sprites (may already be cached from Catalog)
+        communityService.fetchCommunitySprites()
+        
+        // React to community sprite changes — rebuild browse list whenever they update
+        communityService.$communitySprites
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.loadBrowseSprites()
+            }
+            .store(in: &cancellables)
+        communityService.$fetchFailed
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
     
-    // MARK: - Browse tab: premade + user sprites
+    // MARK: - Browse tab: premade + community + user sprites
     
     private func loadBrowseSprites() {
         var sprites: [RecreatableArtModel] = []
@@ -44,6 +66,19 @@ class RecreateViewModel: ObservableObject {
                 palette: premade.palette,
                 pixelGrid: premade.pixelGrid,
                 colorNumberMap: buildColorNumberMap(from: premade.pixelGrid)
+            ))
+        }
+        
+        // Community sprites from Firebase
+        for community in communityService.communitySprites {
+            sprites.append(RecreatableArtModel(
+                id: community.id,
+                name: community.name,
+                sourceType: .community,
+                canvasSize: community.canvasSize,
+                palette: nil,
+                pixelGrid: community.pixelGrid,
+                colorNumberMap: buildColorNumberMap(from: community.pixelGrid)
             ))
         }
         
@@ -160,11 +195,25 @@ class RecreateViewModel: ObservableObject {
             groups.append((name: "Individual Sprites", sprites: ungrouped))
         }
         
+        // Community sprites from Firebase
+        let community = browseSprites.filter { $0.sourceType == .community }
+        if !community.isEmpty {
+            groups.append((name: "Community", sprites: community))
+        }
+        
         return groups
     }
     
     var userMadeSprites: [RecreatableArtModel] {
         browseSprites.filter { $0.sourceType == .userMade }
+    }
+    
+    var isCommunityLoading: Bool {
+        communityService.isLoading
+    }
+    
+    var communityFetchFailed: Bool {
+        communityService.fetchFailed
     }
     
     // MARK: - Helpers

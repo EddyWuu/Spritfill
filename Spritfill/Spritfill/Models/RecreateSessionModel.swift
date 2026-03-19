@@ -11,6 +11,7 @@ import Foundation
 enum RecreateSource: String, Codable {
     case premade   // from PremadeSprites
     case userMade  // from user's own saved projects
+    case community // from community submissions (Firebase)
 }
 
 // A saved in-progress recreate session

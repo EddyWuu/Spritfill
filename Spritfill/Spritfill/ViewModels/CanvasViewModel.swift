@@ -566,6 +566,43 @@ class CanvasViewModel: ObservableObject {
             completion(IdentifiableImage(image: image))
         }
     }
+    
+    // MARK: - Submit Artwork
+    
+    @Published var isSubmitting: Bool = false
+    @Published var submissionError: String? = nil
+    
+    @MainActor
+    func submitArtwork(artistName: String, completion: @escaping (Bool) -> Void) {
+        isSubmitting = true
+        submissionError = nil
+        
+        let dims = projectSettings.selectedCanvasSize.dimensions
+        let pixelGrid = pixels.map { $0.isClear ? "clear" : ($0.toHex() ?? "#000000") }
+        
+        let submission = ArtSubmission(
+            artistName: artistName.trimmingCharacters(in: .whitespaces),
+            projectName: projectName,
+            canvasWidth: dims.width,
+            canvasHeight: dims.height,
+            pixelGrid: pixelGrid
+        )
+        
+        let image = exportImage()
+        
+        FirebaseSubmissionService.shared.submitArtwork(submission: submission, image: image) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isSubmitting = false
+                switch result {
+                case .success:
+                    completion(true)
+                case .failure(let error):
+                    self?.submissionError = error.localizedDescription
+                    completion(false)
+                }
+            }
+        }
+    }
 }
 
 extension Comparable {
