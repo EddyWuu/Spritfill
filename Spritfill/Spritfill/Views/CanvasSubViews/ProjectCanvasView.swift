@@ -59,6 +59,7 @@ struct ProjectCanvasView: View {
             .frame(width: geo.size.width, height: geo.size.height)
             .clipped()
             .contentShape(Rectangle())
+            .overlay(TwoFingerDoubleTapView { viewModel.undo() })
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in

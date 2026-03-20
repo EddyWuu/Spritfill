@@ -23,17 +23,19 @@ class CanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
-    // MARK: - Undo history
+    // MARK: - Undo / Redo history (stored as hex strings for low memory usage)
     
-    private var undoHistory: [[Color]] = []
+    private var undoHistory: [[String]] = []
+    private var redoHistory: [[String]] = []
     @Published var canUndo: Bool = false
+    @Published var canRedo: Bool = false
     private var memoryObserver: Any?
     
     private var maxUndoSteps: Int {
         let pixelCount = pixels.count
-        if pixelCount > 4096 { return 5 }       // 64x64+: ~2.5 MB max
-        if pixelCount > 1024 { return 15 }       // 32x32+: ~0.5 MB max
-        return 30                                 // 16x16: ~0.25 MB max
+        if pixelCount > 4096 { return 50 }       // 64x64+
+        if pixelCount > 1024 { return 100 }      // 32x32+
+        return 150                                // 16x16
     }
     
     private func setupMemoryWarning() {
@@ -42,7 +44,9 @@ class CanvasViewModel: ObservableObject {
             object: nil, queue: .main
         ) { [weak self] _ in
             self?.undoHistory.removeAll()
+            self?.redoHistory.removeAll()
             self?.canUndo = false
+            self?.canRedo = false
         }
     }
     
@@ -52,20 +56,46 @@ class CanvasViewModel: ObservableObject {
         }
     }
     
+    /// Convert the current pixel array to hex strings for storage
+    private func pixelsToHex() -> [String] {
+        pixels.map { $0.isClear ? "clear" : ($0.toHex() ?? "#000000") }
+    }
+    
+    /// Restore pixels from a hex string snapshot
+    private func restorePixels(from hexes: [String]) {
+        pixels = hexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
+    }
+    
     // Save current pixel state before an action
     private func saveSnapshot() {
-        undoHistory.append(pixels)
+        undoHistory.append(pixelsToHex())
         if undoHistory.count > maxUndoSteps {
             undoHistory.removeFirst()
         }
+        // Any new action clears the redo stack
+        redoHistory.removeAll()
         canUndo = true
+        canRedo = false
     }
     
     // Undo the last action — restores the previous pixel state
     func undo() {
         guard let previous = undoHistory.popLast() else { return }
-        pixels = previous
+        // Push current state onto redo stack before restoring
+        redoHistory.append(pixelsToHex())
+        restorePixels(from: previous)
         canUndo = !undoHistory.isEmpty
+        canRedo = true
+    }
+    
+    // Redo — restores a previously undone state
+    func redo() {
+        guard let next = redoHistory.popLast() else { return }
+        // Push current state onto undo stack before restoring
+        undoHistory.append(pixelsToHex())
+        restorePixels(from: next)
+        canUndo = true
+        canRedo = !redoHistory.isEmpty
     }
     
     // Call once at the start of a drawing gesture to capture the "before" state

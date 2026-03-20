@@ -38,19 +38,21 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
-    // MARK: - Undo history
+    // MARK: - Undo / Redo history
     
     private var undoHistory: [[String]] = []
+    private var redoHistory: [[String]] = []
     private var memoryObserver: Any?
     
     private var maxUndoSteps: Int {
         let pixelCount = userPixels.count
-        if pixelCount > 4096 { return 5 }
-        if pixelCount > 1024 { return 15 }
-        return 30
+        if pixelCount > 4096 { return 50 }
+        if pixelCount > 1024 { return 100 }
+        return 150
     }
     
     @Published var canUndo: Bool = false
+    @Published var canRedo: Bool = false
     private var actionInProgress = false
     
     func beginAction() {
@@ -59,7 +61,10 @@ class RecreateCanvasViewModel: ObservableObject {
             if undoHistory.count > maxUndoSteps {
                 undoHistory.removeFirst()
             }
+            // Any new action clears the redo stack
+            redoHistory.removeAll()
             canUndo = true
+            canRedo = false
             actionInProgress = true
         }
     }
@@ -70,11 +75,27 @@ class RecreateCanvasViewModel: ObservableObject {
     
     func undo() {
         guard let snapshot = undoHistory.popLast() else { return }
+        // Push current state onto redo stack before restoring
+        redoHistory.append(userPixelHexes)
         userPixelHexes = snapshot
         userPixels = snapshot.map { hex in
             hex == "clear" ? Color.clear : Color(hex: hex)
         }
         canUndo = !undoHistory.isEmpty
+        canRedo = true
+        recalculateStats()
+    }
+    
+    func redo() {
+        guard let next = redoHistory.popLast() else { return }
+        // Push current state onto undo stack before restoring
+        undoHistory.append(userPixelHexes)
+        userPixelHexes = next
+        userPixels = next.map { hex in
+            hex == "clear" ? Color.clear : Color(hex: hex)
+        }
+        canUndo = true
+        canRedo = !redoHistory.isEmpty
         recalculateStats()
     }
     
@@ -181,7 +202,9 @@ class RecreateCanvasViewModel: ObservableObject {
             object: nil, queue: .main
         ) { [weak self] _ in
             self?.undoHistory.removeAll()
+            self?.redoHistory.removeAll()
             self?.canUndo = false
+            self?.canRedo = false
         }
         
         // Initial stats calculation

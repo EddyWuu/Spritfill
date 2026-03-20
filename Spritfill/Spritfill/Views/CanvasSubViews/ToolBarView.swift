@@ -71,6 +71,14 @@ struct ToolsBarView: View {
             
             // Pinned right-side actions
             HStack(spacing: 10) {
+                // Redo button
+                Button(action: { canvasVM.redo() }) {
+                    Image(systemName: "arrow.uturn.forward")
+                        .font(.title3)
+                        .foregroundColor(canvasVM.canRedo ? .primary : .gray.opacity(0.4))
+                }
+                .disabled(!canvasVM.canRedo)
+                
                 // Undo button
                 Button(action: { canvasVM.undo() }) {
                     Image(systemName: "arrow.uturn.backward")
