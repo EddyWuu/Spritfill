@@ -25,7 +25,10 @@ struct RecreateInProgressView: View {
     
     var body: some View {
         Group {
-            if viewModel.inProgressSessions.isEmpty {
+            if viewModel.inProgressSessions.isEmpty && viewModel.isLoadingSessions {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if viewModel.inProgressSessions.isEmpty {
                 emptyState
             } else {
                 sessionList

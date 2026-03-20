@@ -15,6 +15,7 @@ struct RecreateBrowseView: View {
     
     @State private var previewSprite: RecreatableArtModel? = nil
     @State private var showPreview = false
+    @State private var showCommunityInfo = false
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     private var columns: [GridItem] {
@@ -29,7 +30,10 @@ struct RecreateBrowseView: View {
     var body: some View {
         ZStack {
             Group {
-                if viewModel.browseSprites.isEmpty {
+                if viewModel.browseSprites.isEmpty && viewModel.isLoadingSessions {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.browseSprites.isEmpty {
                     emptyState
                 } else {
                     spriteList
@@ -42,6 +46,11 @@ struct RecreateBrowseView: View {
                     .allowsHitTesting(showPreview)
                     .animation(.easeInOut(duration: 0.2), value: showPreview)
             }
+        }
+        .sheet(isPresented: $showCommunityInfo) {
+            CommunityInfoSheetView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
     
@@ -108,6 +117,17 @@ struct RecreateBrowseView: View {
             Text(title)
                 .font(.headline)
                 .foregroundColor(.primary)
+            
+            if title == "Community" {
+                Button {
+                    showCommunityInfo = true
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
             Spacer()
         }
         .padding(.horizontal)

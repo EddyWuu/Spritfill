@@ -28,6 +28,7 @@ struct ProjectCreateView: View {
     @State private var showFinishAlert = false
     @State private var showFinishCongrats = false
     @State private var showColorAdder = false
+    @State private var showHelpSheet = false
     
     init(viewModel: CanvasViewModel, onFinish: (() -> Void)? = nil) {
         self.viewModel = viewModel
@@ -55,6 +56,12 @@ struct ProjectCreateView: View {
                             showDeleteAlert = true
                         } label: {
                             Image(systemName: "trash")
+                        }
+                        
+                        Button(action: {
+                            showHelpSheet = true
+                        }) {
+                            Image(systemName: "questionmark.circle")
                         }
                         
                         Button(action: {
@@ -199,6 +206,16 @@ struct ProjectCreateView: View {
         .sheet(isPresented: $showColorAdder) {
             ColorAdderSheetView(toolsVM: toolsVM)
                 .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showHelpSheet) {
+            CanvasHelpSheetView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showHelpSheet) {
+            CanvasHelpSheetView()
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .alert("Finish Project?", isPresented: $showFinishAlert) {

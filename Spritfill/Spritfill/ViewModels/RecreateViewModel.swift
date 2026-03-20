@@ -21,27 +21,106 @@ class RecreateViewModel: ObservableObject {
     // Finished tab: completed recreations
     @Published var finishedSessions: [RecreateSessionItem] = []
     
+    @Published var isLoadingSessions: Bool = false
+    
     private let projectStorage = LocalStorageService.shared
     private let sessionStorage = RecreateStorageService.shared
     private let communityService = CommunitySpritesService.shared
     private var cancellables = Set<AnyCancellable>()
     
+    // Static cache for premade sprite color maps — computed once, never changes.
+    private static var premadeColorMaps: [String: [String: Int]]?
+    
+    private static func cachedPremadeColorMaps() -> [String: [String: Int]] {
+        if let cached = premadeColorMaps { return cached }
+        var maps: [String: [String: Int]] = [:]
+        for premade in PremadeSprites.all {
+            maps[premade.id] = buildColorNumberMap(from: premade.pixelGrid)
+        }
+        premadeColorMaps = maps
+        return maps
+    }
+    
     // MARK: - Load everything
     
     func loadAll() {
-        loadSessions()
-        
         // Clear previous subscriptions to prevent stacking
         cancellables.removeAll()
         
-        // Fetch community sprites (may already be cached from Catalog)
+        isLoadingSessions = true
+        
+        // Heavy work: disk I/O + JSON decoding + color map building → background
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            // 1. Load sessions from disk
+            let sessions = self.sessionStorage.fetchAllSessions()
+            var inProgress: [RecreateSessionItem] = []
+            var finished: [RecreateSessionItem] = []
+            
+            for session in sessions {
+                let item = RecreateSessionItem(
+                    id: session.id,
+                    session: session,
+                    progressText: "\(session.completionCount)/\(session.totalColoredPixels)"
+                )
+                if session.isComplete {
+                    finished.append(item)
+                } else {
+                    inProgress.append(item)
+                }
+            }
+            
+            // 2. Build browse sprites (premade + user projects)
+            let premadeMaps = RecreateViewModel.cachedPremadeColorMaps()
+            
+            var sprites: [RecreatableArtModel] = []
+            for premade in PremadeSprites.all {
+                sprites.append(RecreatableArtModel(
+                    id: premade.id,
+                    name: premade.name,
+                    sourceType: .premade,
+                    canvasSize: premade.canvasSize,
+                    palette: premade.palette,
+                    pixelGrid: premade.pixelGrid,
+                    colorNumberMap: premadeMaps[premade.id] ?? [:]
+                ))
+            }
+            
+            // User-made sprites from saved projects
+            let projects = self.projectStorage.fetchAllProjects()
+            for project in projects {
+                let hasContent = project.pixelGrid.contains(where: { $0 != "clear" })
+                guard hasContent else { continue }
+                
+                sprites.append(RecreatableArtModel(
+                    id: project.id.uuidString,
+                    name: project.name,
+                    sourceType: .userMade,
+                    canvasSize: project.settings.selectedCanvasSize,
+                    palette: project.settings.selectedPalette,
+                    pixelGrid: project.pixelGrid,
+                    colorNumberMap: RecreateViewModel.buildColorNumberMap(from: project.pixelGrid)
+                ))
+            }
+            
+            // 3. Publish results on main thread
+            DispatchQueue.main.async {
+                self.inProgressSessions = inProgress
+                self.finishedSessions = finished
+                self.browseSprites = sprites
+                self.isLoadingSessions = false
+            }
+        }
+        
+        // Fetch community sprites (async network — already background)
         communityService.fetchCommunitySprites()
         
-        // React to community sprite changes — rebuild browse list whenever they update
+        // React to community sprite changes — append to browse list when they arrive
         communityService.$communitySprites
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.loadBrowseSprites()
+            .sink { [weak self] communitySprites in
+                self?.appendCommunitySprites(communitySprites)
             }
             .store(in: &cancellables)
         communityService.$fetchFailed
@@ -52,53 +131,29 @@ class RecreateViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    // MARK: - Browse tab: premade + community + user sprites
-    
-    private func loadBrowseSprites() {
-        var sprites: [RecreatableArtModel] = []
+    // Append community sprites to the existing browse list (called when Firebase returns).
+    private func appendCommunitySprites(_ communitySprites: [PremadeSpriteData]) {
+        // Remove any existing community sprites
+        browseSprites.removeAll { $0.sourceType == .community }
         
-        for premade in PremadeSprites.all {
-            sprites.append(RecreatableArtModel(
-                id: premade.id,
-                name: premade.name,
-                sourceType: .premade,
-                canvasSize: premade.canvasSize,
-                palette: premade.palette,
-                pixelGrid: premade.pixelGrid,
-                colorNumberMap: buildColorNumberMap(from: premade.pixelGrid)
-            ))
-        }
-        
-        // Community sprites from Firebase
-        for community in communityService.communitySprites {
-            sprites.append(RecreatableArtModel(
-                id: community.id,
-                name: community.name,
-                sourceType: .community,
-                canvasSize: community.canvasSize,
-                palette: nil,
-                pixelGrid: community.pixelGrid,
-                colorNumberMap: buildColorNumberMap(from: community.pixelGrid)
-            ))
-        }
-        
-        let projects = projectStorage.fetchAllProjects()
-        for project in projects {
-            let hasContent = project.pixelGrid.contains(where: { $0 != "clear" })
-            guard hasContent else { continue }
+        // Compute color maps on background then append on main
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let newSprites = communitySprites.map { community in
+                RecreatableArtModel(
+                    id: community.id,
+                    name: community.name,
+                    sourceType: .community,
+                    canvasSize: community.canvasSize,
+                    palette: nil,
+                    pixelGrid: community.pixelGrid,
+                    colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid)
+                )
+            }
             
-            sprites.append(RecreatableArtModel(
-                id: project.id.uuidString,
-                name: project.name,
-                sourceType: .userMade,
-                canvasSize: project.settings.selectedCanvasSize,
-                palette: project.settings.selectedPalette,
-                pixelGrid: project.pixelGrid,
-                colorNumberMap: buildColorNumberMap(from: project.pixelGrid)
-            ))
+            DispatchQueue.main.async {
+                self?.browseSprites.append(contentsOf: newSprites)
+            }
         }
-        
-        browseSprites = sprites
     }
     
     // MARK: - Load sessions (in progress + finished)
@@ -218,7 +273,7 @@ class RecreateViewModel: ObservableObject {
     
     // MARK: - Helpers
     
-    private func buildColorNumberMap(from pixelGrid: [String]) -> [String: Int] {
+    private static func buildColorNumberMap(from pixelGrid: [String]) -> [String: Int] {
         var map: [String: Int] = [:]
         var nextNumber = 1
         for hex in pixelGrid {

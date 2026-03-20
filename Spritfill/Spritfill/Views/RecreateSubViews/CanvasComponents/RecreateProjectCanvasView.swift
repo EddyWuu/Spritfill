@@ -24,10 +24,9 @@ struct RecreateProjectCanvasView: View {
 
             ZStack {
                 RecreateCanvasRenderer(
-                    userPixels: viewModel.userPixels,
                     userPixelHexes: viewModel.userPixelHexes,
                     referenceGrid: viewModel.referenceGrid,
-                    referenceColors: viewModel.referenceColors,
+                    referenceRGB: viewModel.referenceRGB,
                     colorNumberMap: viewModel.colorNumberMap,
                     pixelGeneration: viewModel.pixelGeneration,
                     gridWidth: gridWidth,
@@ -36,7 +35,6 @@ struct RecreateProjectCanvasView: View {
                 )
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
-                .drawingGroup()
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
             }
             .frame(width: geo.size.width, height: geo.size.height)
@@ -137,13 +135,15 @@ struct RecreateProjectCanvasView: View {
 
 // MARK: - Isolated recreate canvas renderer
 
-/// Only re-renders when pixelGeneration or zoomScale changes.
-/// Panning (canvasOffset) does NOT trigger a re-draw because offset is applied outside.
+// Two-layer renderer:
+// Layer 1: CGImage bitmap — checkerboard + user pixels + reference ghost colors.
+//          Eliminates ~32K SwiftUI Path fills per frame.
+// Layer 2: SwiftUI Canvas overlay — text labels, grid lines, error X markers.
+//          Only draws the lightweight vector/text elements.
 private struct RecreateCanvasRenderer: View, Equatable {
-    let userPixels: [Color]
     let userPixelHexes: [String]
     let referenceGrid: [String]
-    let referenceColors: [Color]
+    let referenceRGB: [(r: UInt8, g: UInt8, b: UInt8)?]
     let colorNumberMap: [String: Int]
     let pixelGeneration: UInt
     let gridWidth: Int
@@ -158,102 +158,186 @@ private struct RecreateCanvasRenderer: View, Equatable {
     }
     
     var body: some View {
-        Canvas { context, size in
+        let bitmapImage = renderBitmap()
+        
+        ZStack {
+            // Layer 1: Bitmap (checkerboard + pixels + reference ghost)
+            if let bitmapImage {
+                Image(uiImage: bitmapImage)
+                    .interpolation(.none)
+                    .resizable()
+            }
+            
+            // Layer 2: Text labels, grid lines, error markers
+            // Only rendered when zoomed in enough — at low zoom, text is illegible
+            // and the per-pixel loop is pure waste.
             let cellSize = zoomScale
+            let showNumbers = cellSize >= 14  // numbers unreadable below ~14pt
             let showGrid = cellSize > 8
             
-            // Pre-resolve all unique number labels ONCE (not per-pixel)
-            let fontSize = max(cellSize * 0.4, 6)
-            var resolvedLabels: [Int: GraphicsContext.ResolvedText] = [:]
-            
-            if cellSize >= 4 {
-                for (_, number) in colorNumberMap {
-                    let text = Text("\(number)")
-                        .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                        .foregroundColor(.gray.opacity(0.7))
-                    resolvedLabels[number] = context.resolve(text)
-                }
-            }
-            
-            var resolvedWrongLabels: [Int: GraphicsContext.ResolvedText] = [:]
-            if cellSize >= 4 {
-                for (_, number) in colorNumberMap {
-                    let text = Text("\(number)")
-                        .font(.system(size: fontSize, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                    resolvedWrongLabels[number] = context.resolve(text)
-                }
-            }
-            
-            let lightBg = Color.gray.opacity(0.1)
-            let darkBg = Color.gray.opacity(0.2)
-            let pixelCount = userPixelHexes.count
-            
-            for row in 0..<gridHeight {
-                for col in 0..<gridWidth {
-                    let index = row * gridWidth + col
-                    let rect = CGRect(
-                        x: CGFloat(col) * cellSize,
-                        y: CGFloat(row) * cellSize,
-                        width: cellSize,
-                        height: cellSize
-                    )
-                    
-                    let targetHex = referenceGrid[index]
-                    let userHex = index < pixelCount ? userPixelHexes[index] : "clear"
-                    
-                    // Checkerboard background
-                    let bg = (row + col) % 2 == 0 ? lightBg : darkBg
-                    context.fill(Path(rect), with: .color(bg))
-                    
-                    if userHex != "clear" {
-                        let userColor = index < userPixels.count ? userPixels[index] : Color.clear
-                        context.fill(Path(rect), with: .color(userColor))
+            if showNumbers || showGrid {
+                Canvas { context, size in
+                    if showNumbers {
+                        // Pre-resolve all unique number labels ONCE
+                        let fontSize = max(cellSize * 0.4, 8)
+                        var resolvedLabels: [Int: GraphicsContext.ResolvedText] = [:]
+                        var resolvedWrongLabels: [Int: GraphicsContext.ResolvedText] = [:]
                         
-                        if targetHex == "clear" {
-                            let inset = cellSize * 0.2
-                            var xPath = Path()
-                            xPath.move(to: CGPoint(x: rect.minX + inset, y: rect.minY + inset))
-                            xPath.addLine(to: CGPoint(x: rect.maxX - inset, y: rect.maxY - inset))
-                            xPath.move(to: CGPoint(x: rect.maxX - inset, y: rect.minY + inset))
-                            xPath.addLine(to: CGPoint(x: rect.minX + inset, y: rect.maxY - inset))
-                            context.stroke(xPath, with: .color(.red.opacity(0.4)),
-                                           lineWidth: max(cellSize * 0.08, 1))
-                        } else if userHex.lowercased() != targetHex.lowercased() {
-                            if let number = colorNumberMap[targetHex.lowercased()],
-                               let resolved = resolvedWrongLabels[number] {
-                                context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
+                        for (_, number) in colorNumberMap {
+                            let text = Text("\(number)")
+                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                .foregroundColor(.gray.opacity(0.7))
+                            resolvedLabels[number] = context.resolve(text)
+                            
+                            let wrongText = Text("\(number)")
+                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            resolvedWrongLabels[number] = context.resolve(wrongText)
+                        }
+                        
+                        let pixelCount = userPixelHexes.count
+                        
+                        for row in 0..<gridHeight {
+                            for col in 0..<gridWidth {
+                                let index = row * gridWidth + col
+                                let targetHex = referenceGrid[index]
+                                let userHex = index < pixelCount ? userPixelHexes[index] : "clear"
+                                
+                                if userHex != "clear" {
+                                    if targetHex == "clear" {
+                                        // Wrong placement — X marker
+                                        let rect = CGRect(
+                                            x: CGFloat(col) * cellSize,
+                                            y: CGFloat(row) * cellSize,
+                                            width: cellSize,
+                                            height: cellSize
+                                        )
+                                        let inset = cellSize * 0.2
+                                        var xPath = Path()
+                                        xPath.move(to: CGPoint(x: rect.minX + inset, y: rect.minY + inset))
+                                        xPath.addLine(to: CGPoint(x: rect.maxX - inset, y: rect.maxY - inset))
+                                        xPath.move(to: CGPoint(x: rect.maxX - inset, y: rect.minY + inset))
+                                        xPath.addLine(to: CGPoint(x: rect.minX + inset, y: rect.maxY - inset))
+                                        context.stroke(xPath, with: .color(.red.opacity(0.4)),
+                                                       lineWidth: max(cellSize * 0.08, 1))
+                                    } else if userHex.lowercased() != targetHex.lowercased() {
+                                        // Wrong color — show target number in white
+                                        if let number = colorNumberMap[targetHex.lowercased()],
+                                           let resolved = resolvedWrongLabels[number] {
+                                            let pt = CGPoint(x: (CGFloat(col) + 0.5) * cellSize,
+                                                             y: (CGFloat(row) + 0.5) * cellSize)
+                                            context.draw(resolved, at: pt)
+                                        }
+                                    }
+                                } else if targetHex != "clear" {
+                                    // Unpainted reference cell — show number label
+                                    if let number = colorNumberMap[targetHex.lowercased()],
+                                       let resolved = resolvedLabels[number] {
+                                        let pt = CGPoint(x: (CGFloat(col) + 0.5) * cellSize,
+                                                         y: (CGFloat(row) + 0.5) * cellSize)
+                                        context.draw(resolved, at: pt)
+                                    }
+                                }
                             }
                         }
-                    } else if targetHex != "clear" {
-                        // Use pre-cached reference color instead of Color(hex:)
-                        context.fill(Path(rect), with: .color(referenceColors[index].opacity(0.15)))
-                        
-                        if let number = colorNumberMap[targetHex.lowercased()],
-                           let resolved = resolvedLabels[number] {
-                            context.draw(resolved, at: CGPoint(x: rect.midX, y: rect.midY))
+                    }
+                    
+                    // Grid lines
+                    if showGrid {
+                        var gridPath = Path()
+                        let totalWidth = CGFloat(gridWidth) * cellSize
+                        let totalHeight = CGFloat(gridHeight) * cellSize
+                        for row in 0...gridHeight {
+                            let y = CGFloat(row) * cellSize
+                            gridPath.move(to: CGPoint(x: 0, y: y))
+                            gridPath.addLine(to: CGPoint(x: totalWidth, y: y))
                         }
+                        for col in 0...gridWidth {
+                            let x = CGFloat(col) * cellSize
+                            gridPath.move(to: CGPoint(x: x, y: 0))
+                            gridPath.addLine(to: CGPoint(x: x, y: totalHeight))
+                        }
+                        context.stroke(gridPath, with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
                     }
                 }
             }
-            
-            // Draw grid lines
-            if showGrid {
-                var gridPath = Path()
-                let totalWidth = CGFloat(gridWidth) * cellSize
-                let totalHeight = CGFloat(gridHeight) * cellSize
-                for row in 0...gridHeight {
-                    let y = CGFloat(row) * cellSize
-                    gridPath.move(to: CGPoint(x: 0, y: y))
-                    gridPath.addLine(to: CGPoint(x: totalWidth, y: y))
-                }
-                for col in 0...gridWidth {
-                    let x = CGFloat(col) * cellSize
-                    gridPath.move(to: CGPoint(x: x, y: 0))
-                    gridPath.addLine(to: CGPoint(x: x, y: totalHeight))
-                }
-                context.stroke(gridPath, with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
-            }
         }
+    }
+    
+    // MARK: - Bitmap rendering
+    
+    // Renders checkerboard + user pixels + reference ghost into a 1:1 CGImage.
+    // Pure byte-level operations — no UIColor, no SwiftUI Color, no Path fills.
+    private func renderBitmap() -> UIImage? {
+        let w = gridWidth
+        let h = gridHeight
+        guard w > 0, h > 0 else { return nil }
+        
+        // Checkerboard RGBA
+        let lightR: UInt8 = 240, lightG: UInt8 = 240, lightB: UInt8 = 240
+        let darkR:  UInt8 = 220, darkG:  UInt8 = 220, darkB:  UInt8 = 220
+        
+        var buffer = [UInt8](repeating: 255, count: w * h * 4)
+        let pixelCount = userPixelHexes.count
+        
+        for i in 0..<(w * h) {
+            let bi = i * 4
+            let row = i / w
+            let col = i % w
+            let isLight = (row + col) % 2 == 0
+            
+            let userHex = i < pixelCount ? userPixelHexes[i] : "clear"
+            let refRGB = referenceRGB[i]
+            
+            if userHex != "clear" {
+                // User-painted pixel
+                let rgb = hexToRGB(userHex)
+                buffer[bi]     = rgb.r
+                buffer[bi + 1] = rgb.g
+                buffer[bi + 2] = rgb.b
+            } else if let ref = refRGB {
+                // Unpainted reference cell — blend reference color at 15% over checkerboard
+                let bgR = isLight ? lightR : darkR
+                let bgG = isLight ? lightG : darkG
+                let bgB = isLight ? lightB : darkB
+                // alpha blend: out = src * 0.15 + bg * 0.85
+                buffer[bi]     = UInt8(Double(ref.r) * 0.15 + Double(bgR) * 0.85)
+                buffer[bi + 1] = UInt8(Double(ref.g) * 0.15 + Double(bgG) * 0.85)
+                buffer[bi + 2] = UInt8(Double(ref.b) * 0.15 + Double(bgB) * 0.85)
+            } else {
+                // Empty cell — checkerboard
+                buffer[bi]     = isLight ? lightR : darkR
+                buffer[bi + 1] = isLight ? lightG : darkG
+                buffer[bi + 2] = isLight ? lightB : darkB
+            }
+            buffer[bi + 3] = 255
+        }
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        guard let ctx = CGContext(
+            data: &buffer,
+            width: w,
+            height: h,
+            bitsPerComponent: 8,
+            bytesPerRow: w * 4,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let cgImage = ctx.makeImage() else { return nil }
+        
+        return UIImage(cgImage: cgImage)
+    }
+    
+    @inline(__always)
+    private func hexToRGB(_ hex: String) -> (r: UInt8, g: UInt8, b: UInt8) {
+        var str = hex
+        if str.hasPrefix("#") { str = String(str.dropFirst()) }
+        guard str.count == 6 else { return (0, 0, 0) }
+        var val: UInt64 = 0
+        Scanner(string: str).scanHexInt64(&val)
+        return (
+            r: UInt8((val >> 16) & 0xFF),
+            g: UInt8((val >> 8) & 0xFF),
+            b: UInt8(val & 0xFF)
+        )
     }
 }

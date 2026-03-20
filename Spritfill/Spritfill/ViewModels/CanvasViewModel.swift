@@ -17,14 +17,18 @@ class CanvasViewModel: ObservableObject {
     @Published var projectName: String
     @Published var pixels: [Color]
     
+    // Parallel hex array — always kept in sync with `pixels`.
+    // Avoids expensive Color→hex conversions during undo snapshots.
+    private(set) var pixelHexes: [String]
+    
     @Published var toolsVM: ToolsViewModel
     @Published var isFinished: Bool = false
     
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
-    /// Monotonically increasing counter — bumped whenever the pixel array changes.
-    /// Used by PixelCanvasRenderer's Equatable check instead of comparing [Color].
+    // Monotonically increasing counter — bumped whenever the pixel array changes.
+    // Used by PixelCanvasRenderer's Equatable check instead of comparing [Color].
     @Published private(set) var pixelGeneration: UInt = 0
     
     // MARK: - Undo / Redo history (stored as hex strings for low memory usage)
@@ -60,20 +64,16 @@ class CanvasViewModel: ObservableObject {
         }
     }
     
-    // Convert the current pixel array to hex strings for storage
-    private func pixelsToHex() -> [String] {
-        pixels.map { $0.isClear ? "clear" : ($0.toHex() ?? "#000000") }
-    }
-    
     // Restore pixels from a hex string snapshot
     private func restorePixels(from hexes: [String]) {
+        pixelHexes = hexes
         pixels = hexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
         pixelGeneration &+= 1
     }
     
-    // Save current pixel state before an action
+    // Save current pixel state before an action (just copies the hex array — O(1) COW)
     private func saveSnapshot() {
-        undoHistory.append(pixelsToHex())
+        undoHistory.append(pixelHexes)
         if undoHistory.count > maxUndoSteps {
             undoHistory.removeFirst()
         }
@@ -87,7 +87,7 @@ class CanvasViewModel: ObservableObject {
     func undo() {
         guard let previous = undoHistory.popLast() else { return }
         // Push current state onto redo stack before restoring
-        redoHistory.append(pixelsToHex())
+        redoHistory.append(pixelHexes)
         restorePixels(from: previous)
         canUndo = !undoHistory.isEmpty
         canRedo = true
@@ -97,7 +97,7 @@ class CanvasViewModel: ObservableObject {
     func redo() {
         guard let next = redoHistory.popLast() else { return }
         // Push current state onto undo stack before restoring
-        undoHistory.append(pixelsToHex())
+        undoHistory.append(pixelHexes)
         restorePixels(from: next)
         canUndo = true
         canRedo = !redoHistory.isEmpty
@@ -105,16 +105,48 @@ class CanvasViewModel: ObservableObject {
     
     // Call once at the start of a drawing gesture to capture the "before" state
     private var actionInProgress = false
+    private var actionDidChange = false
     
     func beginAction() {
         if !actionInProgress {
             saveSnapshot()
             actionInProgress = true
+            actionDidChange = false
         }
     }
     
     func endAction() {
+        // If no pixels actually changed, discard the phantom snapshot
+        if !actionDidChange {
+            _ = undoHistory.popLast()
+            canUndo = !undoHistory.isEmpty
+        }
         actionInProgress = false
+        actionDidChange = false
+    }
+    
+    // MARK: - Pixel mutation helpers
+    
+    // Set a single pixel to the current tool's effective color (pencil) or clear (eraser).
+    // Keeps pixels and pixelHexes in sync.
+    private func applyToolToPixel(at index: Int) {
+        guard index >= 0, index < pixels.count else { return }
+        let oldHex = pixelHexes[index]
+        switch toolsVM.selectedTool {
+        case .pencil:
+            let color = toolsVM.effectiveDrawingColor
+            let newHex = color.toHex() ?? "#000000"
+            guard oldHex != newHex else { return }
+            pixels[index] = color
+            pixelHexes[index] = newHex
+        case .eraser:
+            guard oldHex != "clear" else { return }
+            pixels[index] = .clear
+            pixelHexes[index] = "clear"
+        default:
+            return
+        }
+        actionDidChange = true
     }
     
     // MARK: - Init: New Project
@@ -130,7 +162,9 @@ class CanvasViewModel: ObservableObject {
         )
         
         let dimensions = selectedCanvasSize.dimensions
-        self.pixels = Array(repeating: Color.clear, count: dimensions.width * dimensions.height)
+        let totalPixels = dimensions.width * dimensions.height
+        self.pixels = Array(repeating: Color.clear, count: totalPixels)
+        self.pixelHexes = Array(repeating: "clear", count: totalPixels)
         
         self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0], palette: selectedPalette)
         self.toolsVM.canvasVM = self
@@ -152,6 +186,7 @@ class CanvasViewModel: ObservableObject {
         )
         
         // rebuild 2D array from 1D
+        self.pixelHexes = data.pixelGrid
         self.pixels = data.pixelGrid.map { hex in
             if hex == "clear" {
                 return Color.clear
@@ -218,16 +253,11 @@ class CanvasViewModel: ObservableObject {
     // MARK: - Convert to ProjectData
     
     func toProjectData() -> ProjectData {
-        
-        let flatHexGrid = pixels.map {
-            $0.isClear ? "clear" : ($0.toHex() ?? "#000000")
-        }
-
         return ProjectData(
             id: projectID,
             name: projectName,
             settings: projectSettings,
-            pixelGrid: flatHexGrid,
+            pixelGrid: pixelHexes,
             lastEdited: Date(),
             isFinished: isFinished
         )
@@ -244,7 +274,9 @@ class CanvasViewModel: ObservableObject {
 
         guard index >= 0, index < pixels.count else { return }
 
-        pixels[index] = toolsVM.selectedColor
+        let color = toolsVM.selectedColor
+        pixels[index] = color
+        pixelHexes[index] = color.isClear ? "clear" : (color.toHex() ?? "#000000")
         pixelGeneration &+= 1
     }
     
@@ -273,7 +305,7 @@ class CanvasViewModel: ObservableObject {
         if toolsVM.selectedTool == .fill {
             floodFill(at: index, with: toolsVM.effectiveDrawingColor)
         } else {
-            toolsVM.applyTool(to: &pixels[index])
+            applyToolToPixel(at: index)
         }
         pixelGeneration &+= 1
     }
@@ -294,7 +326,7 @@ class CanvasViewModel: ObservableObject {
         if toolsVM.selectedTool == .fill {
             floodFill(at: index, with: toolsVM.effectiveDrawingColor)
         } else {
-            toolsVM.applyTool(to: &pixels[index])
+            applyToolToPixel(at: index)
         }
         
         // Apply symmetry mirrors
@@ -308,7 +340,7 @@ class CanvasViewModel: ObservableObject {
                 if toolsVM.selectedTool == .fill {
                     floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                    applyToolToPixel(at: mirrorIndex)
                 }
             }
         }
@@ -320,7 +352,7 @@ class CanvasViewModel: ObservableObject {
                 if toolsVM.selectedTool == .fill {
                     floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                    applyToolToPixel(at: mirrorIndex)
                 }
             }
         }
@@ -334,7 +366,7 @@ class CanvasViewModel: ObservableObject {
                 if toolsVM.selectedTool == .fill {
                     floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    toolsVM.applyTool(to: &pixels[mirrorIndex])
+                    applyToolToPixel(at: mirrorIndex)
                 }
             }
         }
@@ -421,6 +453,7 @@ class CanvasViewModel: ObservableObject {
         saveSnapshot()
         
         var newPixels = Array(repeating: Color.clear, count: width * height)
+        var newHexes = Array(repeating: "clear", count: width * height)
         
         for row in 0..<height {
             for col in 0..<width {
@@ -442,11 +475,15 @@ class CanvasViewModel: ObservableObject {
                     sourceCol = (col - 1 + width) % width
                 }
                 
-                newPixels[row * width + col] = pixels[sourceRow * width + sourceCol]
+                let destIdx = row * width + col
+                let srcIdx = sourceRow * width + sourceCol
+                newPixels[destIdx] = pixels[srcIdx]
+                newHexes[destIdx] = pixelHexes[srcIdx]
             }
         }
         
         pixels = newPixels
+        pixelHexes = newHexes
         pixelGeneration &+= 1
     }
     
@@ -463,6 +500,7 @@ class CanvasViewModel: ObservableObject {
         saveSnapshot()
         
         var newPixels = Array(repeating: Color.clear, count: width * height)
+        var newHexes = Array(repeating: "clear", count: width * height)
         
         for row in 0..<height {
             for col in 0..<width {
@@ -478,11 +516,15 @@ class CanvasViewModel: ObservableObject {
                     sourceCol = col
                 }
                 
-                newPixels[row * width + col] = pixels[sourceRow * width + sourceCol]
+                let destIdx = row * width + col
+                let srcIdx = sourceRow * width + sourceCol
+                newPixels[destIdx] = pixels[srcIdx]
+                newHexes[destIdx] = pixelHexes[srcIdx]
             }
         }
         
         pixels = newPixels
+        pixelHexes = newHexes
         pixelGeneration &+= 1
     }
     
@@ -500,6 +542,9 @@ class CanvasViewModel: ObservableObject {
         // Don't fill if the color is the same
         if colorsMatch(targetColor, newColor) { return }
         
+        let newHex = newColor.isClear ? "clear" : (newColor.toHex() ?? "#000000")
+        actionDidChange = true
+        
         var queue: [Int] = [startIndex]
         var visited = Set<Int>()
         visited.insert(startIndex)
@@ -507,6 +552,7 @@ class CanvasViewModel: ObservableObject {
         while !queue.isEmpty {
             let current = queue.removeFirst()
             pixels[current] = newColor
+            pixelHexes[current] = newHex
             
             let row = current / width
             let col = current % width
@@ -630,14 +676,13 @@ class CanvasViewModel: ObservableObject {
         submissionError = nil
         
         let dims = projectSettings.selectedCanvasSize.dimensions
-        let pixelGrid = pixels.map { $0.isClear ? "clear" : ($0.toHex() ?? "#000000") }
         
         let submission = ArtSubmission(
             artistName: artistName.trimmingCharacters(in: .whitespaces),
             projectName: projectName,
             canvasWidth: dims.width,
             canvasHeight: dims.height,
-            pixelGrid: pixelGrid
+            pixelGrid: pixelHexes
         )
         
         let image = exportImage()

@@ -29,7 +29,10 @@ struct RecreateFinishedView: View {
     var body: some View {
         ZStack {
             Group {
-                if viewModel.finishedSessions.isEmpty {
+                if viewModel.finishedSessions.isEmpty && viewModel.isLoadingSessions {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.finishedSessions.isEmpty {
                     emptyState
                 } else {
                     finishedList

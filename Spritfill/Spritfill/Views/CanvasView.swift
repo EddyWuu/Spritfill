@@ -13,6 +13,7 @@ struct CanvasView: View {
     @State private var path: [CanvasRoute] = []
     @State private var canvasViewModels: [UUID: CanvasViewModel] = [:]
     @State private var selectedTab: CanvasTab = .inProgress
+    @State private var showDailyPrompt: Bool = true
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     enum CanvasTab: String, CaseIterable {
@@ -108,6 +109,7 @@ struct CanvasView: View {
             }
             .onAppear {
                 projectManager.loadAllProjects()
+                showDailyPrompt = !UserDefaults.standard.bool(forKey: DailyPromptService.todaysKey())
             }
             .onChange(of: path) { _, newPath in
                 // Evict cached ViewModels that are no longer on the navigation stack
@@ -128,6 +130,15 @@ struct CanvasView: View {
     
     private var inProgressTab: some View {
         ScrollView {
+            
+            // MARK: - Daily Prompt
+            if showDailyPrompt {
+                dailyPromptCard
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+            
             LazyVGrid(columns: columns, spacing: gridSpacing) {
                 
                 // New project button
@@ -254,5 +265,54 @@ struct CanvasView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(radius: 2)
+    }
+    
+    // MARK: - Daily Prompt Card
+    
+    private var dailyPromptCard: some View {
+        let prompt = DailyPromptService.todaysPrompt()
+        
+        return HStack(spacing: 12) {
+            // Lightbulb icon
+            Image(systemName: "lightbulb.fill")
+                .font(.title3)
+                .foregroundColor(.yellow)
+                .frame(width: 32)
+            
+            // Prompt text
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Today's Prompt")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                
+                Text(prompt)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer(minLength: 4)
+            
+            // Dismiss button
+            Button {
+                withAnimation(.easeOut(duration: 0.25)) {
+                    showDailyPrompt = false
+                }
+                UserDefaults.standard.set(true, forKey: DailyPromptService.todaysKey())
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.secondary)
+                    .frame(width: 24, height: 24)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.08), radius: 3, y: 1)
     }
 }

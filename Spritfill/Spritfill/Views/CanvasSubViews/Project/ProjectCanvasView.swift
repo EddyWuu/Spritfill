@@ -39,7 +39,7 @@ struct ProjectCanvasView: View {
 
             ZStack {
                 PixelCanvasRenderer(
-                    pixels: viewModel.pixels,
+                    pixelHexes: viewModel.pixelHexes,
                     pixelGeneration: viewModel.pixelGeneration,
                     gridWidth: gridWidth,
                     gridHeight: gridHeight,
@@ -49,7 +49,6 @@ struct ProjectCanvasView: View {
                 )
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
-                .drawingGroup()
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
                 
                 // Eyedropper magnifier overlay
@@ -220,7 +219,7 @@ struct ProjectCanvasView: View {
 // Because it takes value types (not ObservedObject), changes to unrelated @Published
 // properties like drawingOpacity do NOT cause a re-draw.
 private struct PixelCanvasRenderer: View, Equatable {
-    let pixels: [Color]
+    let pixelHexes: [String]
     let pixelGeneration: UInt
     let gridWidth: Int
     let gridHeight: Int
@@ -238,48 +237,101 @@ private struct PixelCanvasRenderer: View, Equatable {
     }
 
     var body: some View {
-        Canvas { context, size in
-            let cellSize = zoomScale
-            for row in 0..<gridHeight {
-                for col in 0..<gridWidth {
-                    let color = pixels[row * gridWidth + col]
-                    let rect = CGRect(
-                        x: CGFloat(col) * cellSize,
-                        y: CGFloat(row) * cellSize,
-                        width: cellSize,
-                        height: cellSize
-                    )
+        let image = renderBitmap()
 
-                    let isLight = (row + col) % 2 == 0
-                    let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
+        ZStack {
+            if let image {
+                Image(uiImage: image)
+                    .interpolation(.none)
+                    .resizable()
+            }
 
-                    context.fill(Path(rect), with: .color(background))
-                    if color != .clear {
-                        context.fill(Path(rect), with: .color(color))
+            if hSymmetry || vSymmetry {
+                Canvas { context, size in
+                    let cellSize = zoomScale
+                    let canvasWidth = CGFloat(gridWidth) * cellSize
+                    let canvasHeight = CGFloat(gridHeight) * cellSize
+
+                    if vSymmetry {
+                        var hLine = Path()
+                        let midY = canvasHeight / 2
+                        hLine.move(to: CGPoint(x: 0, y: midY))
+                        hLine.addLine(to: CGPoint(x: canvasWidth, y: midY))
+                        context.stroke(hLine, with: .color(Color.orange.opacity(0.7)),
+                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
+                    }
+                    if hSymmetry {
+                        var vLine = Path()
+                        let midX = canvasWidth / 2
+                        vLine.move(to: CGPoint(x: midX, y: 0))
+                        vLine.addLine(to: CGPoint(x: midX, y: canvasHeight))
+                        context.stroke(vLine, with: .color(Color.orange.opacity(0.7)),
+                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
                     }
                 }
             }
-
-            let canvasWidth = CGFloat(gridWidth) * cellSize
-            let canvasHeight = CGFloat(gridHeight) * cellSize
-
-            if vSymmetry {
-                var hLine = Path()
-                let midY = canvasHeight / 2
-                hLine.move(to: CGPoint(x: 0, y: midY))
-                hLine.addLine(to: CGPoint(x: canvasWidth, y: midY))
-                context.stroke(hLine, with: .color(Color.orange.opacity(0.7)),
-                               style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
-            }
-
-            if hSymmetry {
-                var vLine = Path()
-                let midX = canvasWidth / 2
-                vLine.move(to: CGPoint(x: midX, y: 0))
-                vLine.addLine(to: CGPoint(x: midX, y: canvasHeight))
-                context.stroke(vLine, with: .color(Color.orange.opacity(0.7)),
-                               style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
-            }
         }
+    }
+
+    // Render the pixel grid + checkerboard into a 1:1 bitmap.
+    // Parses hex strings directly to RGB bytes — no UIColor/Color conversion needed.
+    private func renderBitmap() -> UIImage? {
+        let w = gridWidth
+        let h = gridHeight
+        guard w > 0, h > 0 else { return nil }
+
+        let lightR: UInt8 = 230, lightG: UInt8 = 230, lightB: UInt8 = 230
+        let darkR:  UInt8 = 204, darkG:  UInt8 = 204, darkB:  UInt8 = 204
+
+        var buffer = [UInt8](repeating: 255, count: w * h * 4)
+
+        for i in 0..<(w * h) {
+            let bi = i * 4
+            let hex = pixelHexes[i]
+
+            if hex == "clear" {
+                let row = i / w
+                let col = i % w
+                let isLight = (row + col) % 2 == 0
+                buffer[bi]     = isLight ? lightR : darkR
+                buffer[bi + 1] = isLight ? lightG : darkG
+                buffer[bi + 2] = isLight ? lightB : darkB
+            } else {
+                // Parse "#RRGGBB" directly to bytes
+                let rgb = hexToRGB(hex)
+                buffer[bi]     = rgb.r
+                buffer[bi + 1] = rgb.g
+                buffer[bi + 2] = rgb.b
+            }
+            buffer[bi + 3] = 255
+        }
+
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        guard let ctx = CGContext(
+            data: &buffer,
+            width: w,
+            height: h,
+            bitsPerComponent: 8,
+            bytesPerRow: w * 4,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ), let cgImage = ctx.makeImage() else { return nil }
+
+        return UIImage(cgImage: cgImage)
+    }
+
+    // Fast hex string to RGB bytes — pure integer math, no UIColor.
+    @inline(__always)
+    private func hexToRGB(_ hex: String) -> (r: UInt8, g: UInt8, b: UInt8) {
+        var str = hex
+        if str.hasPrefix("#") { str = String(str.dropFirst()) }
+        guard str.count == 6 else { return (0, 0, 0) }
+        var val: UInt64 = 0
+        Scanner(string: str).scanHexInt64(&val)
+        return (
+            r: UInt8((val >> 16) & 0xFF),
+            g: UInt8((val >> 8) & 0xFF),
+            b: UInt8(val & 0xFF)
+        )
     }
 }

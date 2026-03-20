@@ -15,6 +15,7 @@ struct CatalogView: View {
     @State private var showDetail = false
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
+    @State private var showCommunityInfo = false
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     private var columns: [GridItem] {
@@ -37,6 +38,17 @@ struct CatalogView: View {
                             Text(section.name)
                                 .font(.headline)
                                 .foregroundColor(.primary)
+                            
+                            if section.name == "Community" {
+                                Button {
+                                    showCommunityInfo = true
+                                } label: {
+                                    Image(systemName: "questionmark.circle")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            
                             Spacer()
                         }
                         .padding(.horizontal)
@@ -123,6 +135,11 @@ struct CatalogView: View {
             }
             .sheet(item: $shareImage) { item in
                 ShareSheet(activityItems: [item.image])
+            }
+            .sheet(isPresented: $showCommunityInfo) {
+                CommunityInfoSheetView()
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         }
     }

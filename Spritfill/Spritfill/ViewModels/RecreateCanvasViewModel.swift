@@ -38,8 +38,8 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
-    /// Monotonically increasing counter — bumped when user pixels change.
-    /// Used by RecreateCanvasRenderer's Equatable check instead of comparing arrays.
+    // Monotonically increasing counter — bumped when user pixels change.
+    // Used by RecreateCanvasRenderer's Equatable check instead of comparing arrays.
     @Published private(set) var pixelGeneration: UInt = 0
     
     // MARK: - Undo / Redo history
@@ -58,6 +58,7 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published var canUndo: Bool = false
     @Published var canRedo: Bool = false
     private var actionInProgress = false
+    private var actionDidChange = false   // tracks whether any pixel actually changed
     
     func beginAction() {
         if !actionInProgress {
@@ -70,11 +71,18 @@ class RecreateCanvasViewModel: ObservableObject {
             canUndo = true
             canRedo = false
             actionInProgress = true
+            actionDidChange = false
         }
     }
     
     func endAction() {
+        // If no pixels actually changed, discard the phantom snapshot
+        if !actionDidChange {
+            _ = undoHistory.popLast()
+            canUndo = !undoHistory.isEmpty
+        }
         actionInProgress = false
+        actionDidChange = false
         recalculateStats()
     }
     
@@ -86,6 +94,7 @@ class RecreateCanvasViewModel: ObservableObject {
         userPixels = snapshot.map { hex in
             hex == "clear" ? Color.clear : Color(hex: hex)
         }
+        pixelGeneration &+= 1
         canUndo = !undoHistory.isEmpty
         canRedo = true
         recalculateStats()
@@ -99,6 +108,7 @@ class RecreateCanvasViewModel: ObservableObject {
         userPixels = next.map { hex in
             hex == "clear" ? Color.clear : Color(hex: hex)
         }
+        pixelGeneration &+= 1
         canUndo = true
         canRedo = !redoHistory.isEmpty
         recalculateStats()
@@ -116,9 +126,14 @@ class RecreateCanvasViewModel: ObservableObject {
     let colorNumberMap: [String: Int]
     let numberedColors: [(number: Int, hex: String, color: Color)]
     
-    /// Pre-cached Color values for the reference grid (computed once).
-    /// Index-parallel to referenceGrid. "clear" entries are Color.clear.
+    // Pre-cached Color values for the reference grid (computed once).
+    // Index-parallel to referenceGrid. "clear" entries are Color.clear.
     let referenceColors: [Color]
+    
+    // Pre-cached RGB bytes for the reference grid (computed once).
+    // Used by the bitmap renderer to avoid hex parsing every frame.
+    // Each entry is (r, g, b) or nil for "clear" cells.
+    let referenceRGB: [(r: UInt8, g: UInt8, b: UInt8)?]
     
     // Cached stats — updated only when pixels change via recalculateStats()
     @Published private(set) var completionCount: Int = 0
@@ -195,6 +210,19 @@ class RecreateCanvasViewModel: ObservableObject {
             hex == "clear" ? Color.clear : Color(hex: hex)
         }
         
+        // Pre-cache reference RGB bytes for the bitmap renderer
+        self.referenceRGB = session.referenceGrid.map { hex -> (r: UInt8, g: UInt8, b: UInt8)? in
+            guard hex != "clear" else { return nil }
+            var str = hex
+            if str.hasPrefix("#") { str = String(str.dropFirst()) }
+            guard str.count == 6 else { return nil }
+            var val: UInt64 = 0
+            Scanner(string: str).scanHexInt64(&val)
+            return (r: UInt8((val >> 16) & 0xFF),
+                    g: UInt8((val >> 8) & 0xFF),
+                    b: UInt8(val & 0xFF))
+        }
+        
         // Load saved user pixels from session
         let totalPixels = session.canvasSize.dimensions.width * session.canvasSize.dimensions.height
         let hexes = Array(session.userPixels.prefix(totalPixels))
@@ -250,17 +278,22 @@ class RecreateCanvasViewModel: ObservableObject {
     func applyToolAtIndex(_ index: Int) {
         guard index >= 0, index < userPixels.count else { return }
         
+        let oldHex = userPixelHexes[index]
+        
         switch selectedTool {
         case .paint:
             guard selectedColorHex != "clear" else { return }
+            guard oldHex != selectedColorHex else { return }
             userPixels[index] = selectedColor
             userPixelHexes[index] = selectedColorHex
         case .eraser:
+            guard oldHex != "clear" else { return }
             userPixels[index] = .clear
             userPixelHexes[index] = "clear"
         case .pan:
-            break
+            return
         }
+        actionDidChange = true
         pixelGeneration &+= 1
     }
     
