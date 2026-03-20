@@ -89,9 +89,9 @@ struct ToolsBarView: View {
                         .foregroundColor(.primary)
                 }
                 
-                // Show currently selected color swatch
+                // Show currently selected color swatch (reflects opacity)
                 Circle()
-                    .fill(toolsVM.selectedColor)
+                    .fill(toolsVM.effectiveDrawingColor)
                     .frame(width: 28, height: 28)
                     .overlay(Circle().stroke(Color.primary, lineWidth: 2))
             }

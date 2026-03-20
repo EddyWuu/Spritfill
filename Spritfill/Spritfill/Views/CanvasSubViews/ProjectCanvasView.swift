@@ -38,51 +38,15 @@ struct ProjectCanvasView: View {
             let vSymmetry = toolsVM.verticalSymmetry
 
             ZStack {
-                Canvas { context, size in
-                    let cellSize = zoomScale
-                    for row in 0..<gridHeight {
-                        for col in 0..<gridWidth {
-                            let color = viewModel.pixels[row * gridWidth + col]
-                            let rect = CGRect(
-                                x: CGFloat(col) * cellSize,
-                                y: CGFloat(row) * cellSize,
-                                width: cellSize,
-                                height: cellSize
-                            )
-
-                            // checkerboard background color
-                            let isLight = (row + col) % 2 == 0
-                            let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
-
-                            context.fill(Path(rect), with: .color(background))
-                            if color != .clear {
-                                context.fill(Path(rect), with: .color(color))
-                            }
-                        }
-                    }
-                    
-                    // Symmetry guide lines
-                    let canvasWidth = CGFloat(gridWidth) * cellSize
-                    let canvasHeight = CGFloat(gridHeight) * cellSize
-                    
-                    if vSymmetry {
-                        var hLine = Path()
-                        let midY = canvasHeight / 2
-                        hLine.move(to: CGPoint(x: 0, y: midY))
-                        hLine.addLine(to: CGPoint(x: canvasWidth, y: midY))
-                        context.stroke(hLine, with: .color(Color.orange.opacity(0.7)),
-                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
-                    }
-                    
-                    if hSymmetry {
-                        var vLine = Path()
-                        let midX = canvasWidth / 2
-                        vLine.move(to: CGPoint(x: midX, y: 0))
-                        vLine.addLine(to: CGPoint(x: midX, y: canvasHeight))
-                        context.stroke(vLine, with: .color(Color.orange.opacity(0.7)),
-                                       style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
-                    }
-                }
+                PixelCanvasRenderer(
+                    pixels: viewModel.pixels,
+                    gridWidth: gridWidth,
+                    gridHeight: gridHeight,
+                    zoomScale: zoomScale,
+                    hSymmetry: hSymmetry,
+                    vSymmetry: vSymmetry
+                )
+                .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
                 
@@ -228,5 +192,72 @@ struct ProjectCanvasView: View {
             }
         }
         .allowsHitTesting(false)
+    }
+}
+
+/// Isolated canvas renderer — only re-renders when pixels, zoom, or symmetry change.
+/// Because it takes value types (not ObservedObject), changes to unrelated @Published
+/// properties like drawingOpacity do NOT cause a re-draw.
+private struct PixelCanvasRenderer: View, Equatable {
+    let pixels: [Color]
+    let gridWidth: Int
+    let gridHeight: Int
+    let zoomScale: CGFloat
+    let hSymmetry: Bool
+    let vSymmetry: Bool
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.gridWidth == rhs.gridWidth &&
+        lhs.gridHeight == rhs.gridHeight &&
+        lhs.zoomScale == rhs.zoomScale &&
+        lhs.hSymmetry == rhs.hSymmetry &&
+        lhs.vSymmetry == rhs.vSymmetry &&
+        lhs.pixels == rhs.pixels
+    }
+
+    var body: some View {
+        Canvas { context, size in
+            let cellSize = zoomScale
+            for row in 0..<gridHeight {
+                for col in 0..<gridWidth {
+                    let color = pixels[row * gridWidth + col]
+                    let rect = CGRect(
+                        x: CGFloat(col) * cellSize,
+                        y: CGFloat(row) * cellSize,
+                        width: cellSize,
+                        height: cellSize
+                    )
+
+                    let isLight = (row + col) % 2 == 0
+                    let background = isLight ? Color.gray.opacity(0.15) : Color.gray.opacity(0.3)
+
+                    context.fill(Path(rect), with: .color(background))
+                    if color != .clear {
+                        context.fill(Path(rect), with: .color(color))
+                    }
+                }
+            }
+
+            let canvasWidth = CGFloat(gridWidth) * cellSize
+            let canvasHeight = CGFloat(gridHeight) * cellSize
+
+            if vSymmetry {
+                var hLine = Path()
+                let midY = canvasHeight / 2
+                hLine.move(to: CGPoint(x: 0, y: midY))
+                hLine.addLine(to: CGPoint(x: canvasWidth, y: midY))
+                context.stroke(hLine, with: .color(Color.orange.opacity(0.7)),
+                               style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
+            }
+
+            if hSymmetry {
+                var vLine = Path()
+                let midX = canvasWidth / 2
+                vLine.move(to: CGPoint(x: midX, y: 0))
+                vLine.addLine(to: CGPoint(x: midX, y: canvasHeight))
+                context.stroke(vLine, with: .color(Color.orange.opacity(0.7)),
+                               style: StrokeStyle(lineWidth: max(1, cellSize * 0.06), dash: [cellSize * 0.3, cellSize * 0.3]))
+            }
+        }
     }
 }

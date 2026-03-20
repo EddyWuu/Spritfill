@@ -236,7 +236,7 @@ class CanvasViewModel: ObservableObject {
         guard row >= 0, row < height, col >= 0, col < width, index < pixels.count else { return }
 
         if toolsVM.selectedTool == .fill {
-            floodFill(at: index, with: toolsVM.selectedColor)
+            floodFill(at: index, with: toolsVM.effectiveDrawingColor)
         } else {
             toolsVM.applyTool(to: &pixels[index])
         }
@@ -257,7 +257,7 @@ class CanvasViewModel: ObservableObject {
         if toolsVM.selectedTool == .eyedropper { return }
         
         if toolsVM.selectedTool == .fill {
-            floodFill(at: index, with: toolsVM.selectedColor)
+            floodFill(at: index, with: toolsVM.effectiveDrawingColor)
         } else {
             toolsVM.applyTool(to: &pixels[index])
         }
@@ -271,7 +271,7 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndex = row * width + mirrorCol
             if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
                 if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
                     toolsVM.applyTool(to: &pixels[mirrorIndex])
                 }
@@ -283,7 +283,7 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndex = mirrorRow * width + col
             if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
                 if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
                     toolsVM.applyTool(to: &pixels[mirrorIndex])
                 }
@@ -297,7 +297,7 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndex = mirrorRow * width + mirrorCol
             if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
                 if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.selectedColor)
+                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
                 } else {
                     toolsVM.applyTool(to: &pixels[mirrorIndex])
                 }

@@ -122,6 +122,9 @@ struct ProjectCreateView: View {
                 ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder)
                     .background(Color(.secondarySystemBackground))
                 
+                // MARK: - Opacity slider
+                OpacitySliderView(toolsVM: toolsVM)
+                
                 Divider()
                 
                 // MARK: - Bottom panel

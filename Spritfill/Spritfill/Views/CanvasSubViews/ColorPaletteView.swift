@@ -14,6 +14,34 @@ struct ColorPaletteView: View {
 
     var body: some View {
         ScrollView {
+            // Dynamic opacity color — shown when opacity is less than 100%
+            if toolsVM.drawingOpacity < 1.0 {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(toolsVM.effectiveDrawingColor)
+                        .frame(width: 32, height: 32)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white, lineWidth: 2.5)
+                        )
+                        .overlay(
+                            Circle()
+                                .stroke(Color.black, lineWidth: 1)
+                                .padding(1)
+                        )
+                        .shadow(color: .black.opacity(0.3), radius: 2)
+                    
+                    Text("\(Int(toolsVM.drawingOpacity * 100))%")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+                .padding(.bottom, 2)
+            }
+            
             LazyVGrid(columns: columns, spacing: 8) {
                 // Base palette colors
                 ForEach(0..<toolsVM.basePaletteCount, id: \.self) { index in

@@ -31,6 +31,7 @@ class ToolsViewModel: ObservableObject {
     @Published var selectedColor: Color
     @Published var selectedColorIndex: Int = 0
     @Published var extraColors: [String] = []
+    @Published var drawingOpacity: Double = 1.0
     
     // Symmetry toggles — can be active alongside pencil/eraser/fill
     @Published var horizontalSymmetry: Bool = false
@@ -61,6 +62,24 @@ class ToolsViewModel: ObservableObject {
         baseColors.count
     }
     
+    /// The selected color with drawingOpacity applied, pre-composited onto white.
+    /// This produces a fully opaque color so the checkerboard background never
+    /// bleeds through on the canvas.
+    var effectiveDrawingColor: Color {
+        guard drawingOpacity < 1.0 else { return selectedColor }
+        
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(selectedColor).getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        let alpha = CGFloat(drawingOpacity)
+        // Blend: result = src * alpha + white * (1 - alpha)
+        let blendedR = r * alpha + 1.0 * (1.0 - alpha)
+        let blendedG = g * alpha + 1.0 * (1.0 - alpha)
+        let blendedB = b * alpha + 1.0 * (1.0 - alpha)
+        
+        return Color(red: Double(blendedR), green: Double(blendedG), blue: Double(blendedB))
+    }
+    
     // Add a user-picked color to the extra colors list
     func addColor(_ hex: String) {
         let normalized = hex.uppercased()
@@ -89,7 +108,7 @@ class ToolsViewModel: ObservableObject {
     func applyTool(to pixel: inout Color) {
         switch selectedTool {
         case .pencil:
-            pixel = selectedColor
+            pixel = effectiveDrawingColor
         case .eraser:
             pixel = .clear
         case .fill:
