@@ -138,7 +138,25 @@ struct RecreateProjectCanvasView: View {
             .frame(width: geo.size.width, height: geo.size.height)
             .clipped()
             .contentShape(Rectangle())
-            .overlay(TwoFingerDoubleTapView { viewModel.undo() })
+            .overlay(
+                TwoFingerDoubleTapView(
+                    doubleTapAction: { viewModel.undo() },
+                    onPan: { delta in
+                        let proposed = CGSize(
+                            width: canvasOffset.width + delta.width,
+                            height: canvasOffset.height + delta.height
+                        )
+                        canvasOffset = viewModel.clampedOffset(
+                            for: proposed,
+                            geoSize: geo.size,
+                            canvasSize: scaledCanvasSize
+                        )
+                    },
+                    onPanEnd: {
+                        dragStart = canvasOffset
+                    }
+                )
+            )
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
