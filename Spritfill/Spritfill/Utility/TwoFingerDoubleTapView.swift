@@ -8,23 +8,23 @@
 import SwiftUI
 import UIKit
 
-/// Transparent overlay that detects two-finger gestures:
-/// - Two-finger double-tap (e.g. undo)
-/// - Two-finger pan (always pans regardless of selected tool)
-/// Single-finger touches pass through to SwiftUI views underneath.
+// Transparent overlay that detects two-finger gestures:
+// - Two-finger double-tap (e.g. undo)
+// - Two-finger pan (always pans regardless of selected tool)
+// Single-finger touches pass through to SwiftUI views underneath.
 struct TwoFingerDoubleTapView: UIViewRepresentable {
     var doubleTapAction: () -> Void
     var onPan: ((CGSize) -> Void)?
     var onPanEnd: (() -> Void)?
 
-    /// Convenience init for just the double-tap (backward compatible)
+    // Convenience init for just the double-tap (backward compatible)
     init(action: @escaping () -> Void) {
         self.doubleTapAction = action
         self.onPan = nil
         self.onPanEnd = nil
     }
 
-    /// Full init with double-tap + pan
+    // Full init with double-tap + pan
     init(doubleTapAction: @escaping () -> Void,
          onPan: @escaping (CGSize) -> Void,
          onPanEnd: @escaping () -> Void) {
@@ -103,9 +103,9 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
     }
 }
 
-/// UIView that returns self for hitTest so gesture recognizers always receive touches.
-/// cancelsTouchesInView = false on the recognizers ensures SwiftUI's single-finger
-/// DragGesture still works normally.
+// UIView that returns self for hitTest so gesture recognizers always receive touches.
+// cancelsTouchesInView = false on the recognizers ensures SwiftUI's single-finger
+// DragGesture still works normally.
 private class TwoFingerPassthroughView: UIView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         return self

@@ -111,17 +111,7 @@ struct ProjectDetailsPopupView: View {
     }
     
     private func exportProjectJSON() {
-        let projectData = viewModel.toProjectData()
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        
-        guard let data = try? encoder.encode(projectData) else { return }
-        
-        let fileName = "\(viewModel.projectName.replacingOccurrences(of: " ", with: "_")).json"
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-        
-        try? data.write(to: tempURL)
-        jsonShareItem = IdentifiableURL(url: tempURL)
+        guard let url = viewModel.exportProjectJSON() else { return }
+        jsonShareItem = IdentifiableURL(url: url)
     }
 }

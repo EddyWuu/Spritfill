@@ -256,7 +256,7 @@ class GalleryViewModel: ObservableObject {
         showExpandedImage = true
     }
     
-    /// Sorted visible items so the selected one is drawn last (on top)
+    // Sorted visible items so the selected one is drawn last (on top)
     var sortedVisibleItems: [GalleryBoardItem] {
         let items = visibleItems
         guard let selectedID = selectedItemID else { return items }

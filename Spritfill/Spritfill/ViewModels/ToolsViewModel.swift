@@ -62,9 +62,9 @@ class ToolsViewModel: ObservableObject {
         baseColors.count
     }
     
-    /// The selected color with drawingOpacity applied, pre-composited onto white.
-    /// This produces a fully opaque color so the checkerboard background never
-    /// bleeds through on the canvas.
+    // The selected color with drawingOpacity applied, pre-composited onto white.
+    // This produces a fully opaque color so the checkerboard background never
+    // bleeds through on the canvas.
     var effectiveDrawingColor: Color {
         guard drawingOpacity < 1.0 else { return selectedColor }
         

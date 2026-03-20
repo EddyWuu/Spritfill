@@ -38,6 +38,10 @@ class RecreateCanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
+    /// Monotonically increasing counter — bumped when user pixels change.
+    /// Used by RecreateCanvasRenderer's Equatable check instead of comparing arrays.
+    @Published private(set) var pixelGeneration: UInt = 0
+    
     // MARK: - Undo / Redo history
     
     private var undoHistory: [[String]] = []
@@ -71,6 +75,7 @@ class RecreateCanvasViewModel: ObservableObject {
     
     func endAction() {
         actionInProgress = false
+        recalculateStats()
     }
     
     func undo() {
@@ -110,6 +115,10 @@ class RecreateCanvasViewModel: ObservableObject {
     
     let colorNumberMap: [String: Int]
     let numberedColors: [(number: Int, hex: String, color: Color)]
+    
+    /// Pre-cached Color values for the reference grid (computed once).
+    /// Index-parallel to referenceGrid. "clear" entries are Color.clear.
+    let referenceColors: [Color]
     
     // Cached stats — updated only when pixels change via recalculateStats()
     @Published private(set) var completionCount: Int = 0
@@ -181,6 +190,11 @@ class RecreateCanvasViewModel: ObservableObject {
             .sorted { $0.value < $1.value }
             .map { (number: $0.value, hex: $0.key, color: Color(hex: $0.key)) }
         
+        // Pre-cache reference colors so the render loop never calls Color(hex:)
+        self.referenceColors = session.referenceGrid.map { hex in
+            hex == "clear" ? Color.clear : Color(hex: hex)
+        }
+        
         // Load saved user pixels from session
         let totalPixels = session.canvasSize.dimensions.width * session.canvasSize.dimensions.height
         let hexes = Array(session.userPixels.prefix(totalPixels))
@@ -247,8 +261,7 @@ class RecreateCanvasViewModel: ObservableObject {
         case .pan:
             break
         }
-        recalculateStats()
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
     func gridIndex(from screenPoint: CGPoint, geoSize: CGSize, canvasOffset: CGSize) -> Int? {

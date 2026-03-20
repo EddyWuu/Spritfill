@@ -23,6 +23,10 @@ class CanvasViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var viewSize: CGSize = .zero
     
+    /// Monotonically increasing counter — bumped whenever the pixel array changes.
+    /// Used by PixelCanvasRenderer's Equatable check instead of comparing [Color].
+    @Published private(set) var pixelGeneration: UInt = 0
+    
     // MARK: - Undo / Redo history (stored as hex strings for low memory usage)
     
     private var undoHistory: [[String]] = []
@@ -56,14 +60,15 @@ class CanvasViewModel: ObservableObject {
         }
     }
     
-    /// Convert the current pixel array to hex strings for storage
+    // Convert the current pixel array to hex strings for storage
     private func pixelsToHex() -> [String] {
         pixels.map { $0.isClear ? "clear" : ($0.toHex() ?? "#000000") }
     }
     
-    /// Restore pixels from a hex string snapshot
+    // Restore pixels from a hex string snapshot
     private func restorePixels(from hexes: [String]) {
         pixels = hexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
+        pixelGeneration &+= 1
     }
     
     // Save current pixel state before an action
@@ -240,7 +245,7 @@ class CanvasViewModel: ObservableObject {
         guard index >= 0, index < pixels.count else { return }
 
         pixels[index] = toolsVM.selectedColor
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
     // Clamp to screen bounds
@@ -270,7 +275,7 @@ class CanvasViewModel: ObservableObject {
         } else {
             toolsVM.applyTool(to: &pixels[index])
         }
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
     // Apply tool at a grid index (used for drag drawing to avoid duplicate coordinate math)
@@ -334,10 +339,10 @@ class CanvasViewModel: ObservableObject {
             }
         }
         
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
-    /// Eyedropper: pick the color at a grid index, set it as selected, and switch to pencil
+    // Eyedropper: pick the color at a grid index, set it as selected, and switch to pencil
     func eyedropperPickColor(at index: Int) {
         guard index >= 0, index < pixels.count else { return }
         let color = pixels[index]
@@ -372,7 +377,7 @@ class CanvasViewModel: ObservableObject {
         toolsVM.selectedTool = .pencil
     }
     
-    /// Returns the color at a grid index (for eyedropper preview)
+    // Returns the color at a grid index (for eyedropper preview)
     func colorAtIndex(_ index: Int) -> Color? {
         guard index >= 0, index < pixels.count else { return nil }
         let color = pixels[index]
@@ -442,7 +447,7 @@ class CanvasViewModel: ObservableObject {
         }
         
         pixels = newPixels
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
     // MARK: - Flip
@@ -478,7 +483,7 @@ class CanvasViewModel: ObservableObject {
         }
         
         pixels = newPixels
-        objectWillChange.send()
+        pixelGeneration &+= 1
     }
     
     // MARK: - Flood Fill (BFS)
@@ -598,6 +603,23 @@ class CanvasViewModel: ObservableObject {
     }
     
     // MARK: - Submit Artwork
+    
+    // MARK: - Export Project JSON
+    
+    func exportProjectJSON() -> URL? {
+        let projectData = toProjectData()
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        
+        guard let data = try? encoder.encode(projectData) else { return nil }
+        
+        let fileName = "\(projectName.replacingOccurrences(of: " ", with: "_")).json"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        
+        try? data.write(to: tempURL)
+        return tempURL
+    }
     
     @Published var isSubmitting: Bool = false
     @Published var submissionError: String? = nil

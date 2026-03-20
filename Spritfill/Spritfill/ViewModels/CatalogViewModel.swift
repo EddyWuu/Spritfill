@@ -15,7 +15,7 @@ class CatalogViewModel: ObservableObject {
     
     private let communityService = CommunitySpritesService.shared
     
-    /// All sprites: premade + community
+    // All sprites: premade + community
     private var allSprites: [PremadeSpriteData] {
         PremadeSprites.all + communityService.communitySprites
     }

@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-/// Fetches approved community sprites from the Firestore `community_sprites` collection.
+// Fetches approved community sprites from the Firestore `community_sprites` collection.
 class CommunitySpritesService: ObservableObject {
     
     static let shared = CommunitySpritesService()
@@ -21,7 +21,7 @@ class CommunitySpritesService: ObservableObject {
     
     private init() {}
     
-    /// Fetch all community sprites from Firestore
+    // Fetch all community sprites from Firestore
     func fetchCommunitySprites() {
         isLoading = true
         

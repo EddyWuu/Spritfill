@@ -9,8 +9,8 @@ import UIKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Activity item provider that vends PNG data so shared images always stay PNG (not JPEG).
-/// Avoids file-URL–based sharing which causes LaunchServices errors on dev-signed apps.
+// Activity item provider that vends PNG data so shared images always stay PNG (not JPEG).
+// Avoids file-URL–based sharing which causes LaunchServices errors on dev-signed apps.
 class PNGImageItemProvider: UIActivityItemProvider, @unchecked Sendable {
     
     let image: UIImage

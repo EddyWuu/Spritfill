@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-/// A self-contained opacity slider that uses local @State to avoid re-rendering
-/// the entire view hierarchy on every slider tick. It only writes to the
-/// ToolsViewModel when the drag ends or on discrete taps.
+// A self-contained opacity slider that uses local @State to avoid re-rendering
+// the entire view hierarchy on every slider tick. It only writes to the
+// ToolsViewModel when the drag ends or on discrete taps.
 struct OpacitySliderView: View {
     @ObservedObject var toolsVM: ToolsViewModel
     @State private var localOpacity: Double = 1.0
 
-    /// Pre-composite the selected color onto white at the local opacity,
-    /// matching the canvas behaviour so the slider preview is accurate.
+    // Pre-composite the selected color onto white at the local opacity,
+    // matching the canvas behaviour so the slider preview is accurate.
     private var blendedTint: Color {
         guard localOpacity < 1.0 else { return toolsVM.selectedColor }
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0

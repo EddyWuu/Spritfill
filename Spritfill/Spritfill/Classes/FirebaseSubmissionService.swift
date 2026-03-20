@@ -17,11 +17,11 @@ class FirebaseSubmissionService {
     
     private init() {}
     
-    /// Submits artwork for review
-    /// - Parameters:
-    ///   - submission: The submission metadata
-    ///   - image: The rendered PNG image of the artwork
-    ///   - completion: Returns success or error
+    // Submits artwork for review
+    // - Parameters:
+    //   - submission: The submission metadata
+    //   - image: The rendered PNG image of the artwork
+    //   - completion: Returns success or error
     func submitArtwork(submission: ArtSubmission, image: UIImage, completion: @escaping (Result<Void, Error>) -> Void) {
         
         guard let pngData = image.pngData() else {

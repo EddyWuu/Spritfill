@@ -40,6 +40,7 @@ struct ProjectCanvasView: View {
             ZStack {
                 PixelCanvasRenderer(
                     pixels: viewModel.pixels,
+                    pixelGeneration: viewModel.pixelGeneration,
                     gridWidth: gridWidth,
                     gridHeight: gridHeight,
                     zoomScale: zoomScale,
@@ -48,6 +49,7 @@ struct ProjectCanvasView: View {
                 )
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
+                .drawingGroup()
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
                 
                 // Eyedropper magnifier overlay
@@ -214,11 +216,12 @@ struct ProjectCanvasView: View {
     }
 }
 
-/// Isolated canvas renderer — only re-renders when pixels, zoom, or symmetry change.
-/// Because it takes value types (not ObservedObject), changes to unrelated @Published
-/// properties like drawingOpacity do NOT cause a re-draw.
+// Isolated canvas renderer — only re-renders when pixels, zoom, or symmetry change.
+// Because it takes value types (not ObservedObject), changes to unrelated @Published
+// properties like drawingOpacity do NOT cause a re-draw.
 private struct PixelCanvasRenderer: View, Equatable {
     let pixels: [Color]
+    let pixelGeneration: UInt
     let gridWidth: Int
     let gridHeight: Int
     let zoomScale: CGFloat
@@ -226,12 +229,12 @@ private struct PixelCanvasRenderer: View, Equatable {
     let vSymmetry: Bool
 
     static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.pixelGeneration == rhs.pixelGeneration &&
         lhs.gridWidth == rhs.gridWidth &&
         lhs.gridHeight == rhs.gridHeight &&
         lhs.zoomScale == rhs.zoomScale &&
         lhs.hSymmetry == rhs.hSymmetry &&
-        lhs.vSymmetry == rhs.vSymmetry &&
-        lhs.pixels == rhs.pixels
+        lhs.vSymmetry == rhs.vSymmetry
     }
 
     var body: some View {
