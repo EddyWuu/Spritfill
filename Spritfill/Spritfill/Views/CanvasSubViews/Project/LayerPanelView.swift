@@ -9,7 +9,10 @@ import SwiftUI
 
 struct LayerPanelView: View {
     @ObservedObject var viewModel: CanvasViewModel
+    @ObservedObject var layerManager: LayerManagerViewModel
     var onClose: (() -> Void)? = nil
+    
+    @Environment(\.horizontalSizeClass) private var sizeClass
     
     @State private var showRenameAlert = false
     @State private var renameText = ""
@@ -21,15 +24,28 @@ struct LayerPanelView: View {
     @State private var draggingLayerID: UUID? = nil
     @State private var dragOffset: CGFloat = 0
     
-    // Height of each layer row for calculating swap thresholds
-    private let rowHeight: CGFloat = 46
+    // Adaptive sizing
+    private var isCompact: Bool { sizeClass != .regular }
+    private var rowHeight: CGFloat { isCompact ? 50 : 60 }
+    private var thumbnailSize: CGFloat { isCompact ? 30 : 36 }
+    private var rowSpacing: CGFloat { isCompact ? 8 : 10 }
+    private var rowVPadding: CGFloat { isCompact ? 6 : 8 }
+    
+    // Dynamic panel height: header (~44) + front/back labels (~36) + rows + padding
+    private var dynamicHeight: CGFloat {
+        let headerHeight: CGFloat = isCompact ? 38 : 44
+        let indicatorHeight: CGFloat = isCompact ? 28 : 36
+        let rowsHeight = CGFloat(viewModel.layers.count) * (rowHeight + 4)
+        let padding: CGFloat = 12
+        return headerHeight + indicatorHeight + rowsHeight + padding
+    }
     
     var body: some View {
         VStack(spacing: 0) {
             // Header
             HStack {
                 Text("Layers")
-                    .font(.caption)
+                    .font(isCompact ? .caption : .subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.secondary)
                 
@@ -41,28 +57,28 @@ struct LayerPanelView: View {
                 
                 Button(action: { viewModel.addLayer() }) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.caption)
+                        .font(isCompact ? .subheadline : .body)
                         .foregroundColor(viewModel.layers.count < CanvasViewModel.maxLayers ? .blue : .gray)
                 }
                 .disabled(viewModel.layers.count >= CanvasViewModel.maxLayers)
                 
                 Button(action: { onClose?() }) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.caption)
+                        .font(isCompact ? .subheadline : .body)
                         .foregroundColor(.secondary)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, isCompact ? 10 : 14)
+            .padding(.vertical, isCompact ? 6 : 10)
             
             Divider()
             
             // Layer list (top = frontmost = highest index, bottom = background = index 0)
             ScrollView {
-                VStack(spacing: 2) {
+                VStack(spacing: 4) {
                     // Front indicator
                     Text("▲ Front")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.bottom, 2)
@@ -74,22 +90,24 @@ struct LayerPanelView: View {
                         layerRow(layer: layer, index: index)
                             .zIndex(isDragging ? 1 : 0)
                             .offset(y: isDragging ? dragOffset : 0)
-                            .scaleEffect(isDragging ? 1.03 : 1.0)
-                            .opacity(isDragging ? 0.9 : 1.0)
-                            .animation(.easeInOut(duration: 0.15), value: isDragging)
+                            .scaleEffect(isDragging ? 1.05 : 1.0)
+                            .opacity(isDragging ? 0.85 : 1.0)
+                            .animation(.interactiveSpring(response: 0.25, dampingFraction: 0.8), value: isDragging)
                     }
                     
                     // Back indicator
                     Text("▼ Back")
-                        .font(.system(size: 9, weight: .medium))
+                        .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.secondary.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 2)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
             }
+            .scrollDisabled(draggingLayerID != nil)
         }
+        .frame(height: dynamicHeight)
         .background(Color(.secondarySystemBackground))
         .cornerRadius(12)
         .alert("Rename Layer", isPresented: $showRenameAlert) {
@@ -115,82 +133,92 @@ struct LayerPanelView: View {
     
     // MARK: - Layer Row
     
-    private func layerRow(layer: CanvasViewModel.Layer, index: Int) -> some View {
+    private func layerRow(layer: LayerManagerViewModel.Layer, index: Int) -> some View {
         let isActive = index == viewModel.activeLayerIndex
         
-        return HStack(spacing: 6) {
+        return HStack(spacing: rowSpacing) {
             // Drag handle
             Image(systemName: "line.3.horizontal")
-                .font(.system(size: 10))
-                .foregroundColor(.gray)
-                .frame(width: 14)
-                .gesture(
-                    DragGesture()
+                .font(.system(size: isCompact ? 14 : 16, weight: .medium))
+                .foregroundColor(draggingLayerID == layer.id ? .blue : .gray)
+                .frame(width: isCompact ? 22 : 28, height: 44)
+                .contentShape(Rectangle())
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 4)
                         .onChanged { value in
                             if draggingLayerID == nil {
                                 draggingLayerID = layer.id
-                                let impact = UIImpactFeedbackGenerator(style: .light)
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
                                 impact.impactOccurred()
                             }
+                            // Only track vertical movement
                             dragOffset = value.translation.height
                             
-                            // Look up the current index of the dragged layer dynamically
-                            // to avoid stale captured index after a swap.
                             guard let currentIndex = viewModel.layers.firstIndex(where: { $0.id == layer.id }) else { return }
                             
-                            // The visual list is reversed: top of screen = highest index.
-                            // Dragging UP (negative Y) in the visual list means moving to a HIGHER index.
-                            // Dragging DOWN (positive Y) means moving to a LOWER index.
                             let threshold = rowHeight * 0.6
                             
                             if dragOffset < -threshold, currentIndex < viewModel.layers.count - 1 {
-                                // Dragged up visually → move to higher index (toward front)
                                 viewModel.moveLayer(from: currentIndex, to: currentIndex + 1)
                                 dragOffset = 0
+                                let swap = UIImpactFeedbackGenerator(style: .light)
+                                swap.impactOccurred()
                             } else if dragOffset > threshold, currentIndex > 0 {
-                                // Dragged down visually → move to lower index (toward back)
                                 viewModel.moveLayer(from: currentIndex, to: currentIndex - 1)
                                 dragOffset = 0
+                                let swap = UIImpactFeedbackGenerator(style: .light)
+                                swap.impactOccurred()
                             }
                         }
                         .onEnded { _ in
-                            draggingLayerID = nil
-                            dragOffset = 0
+                            withAnimation(.interactiveSpring(response: 0.25, dampingFraction: 0.8)) {
+                                draggingLayerID = nil
+                                dragOffset = 0
+                            }
                         }
                 )
             
             // Visibility toggle
             Button(action: { viewModel.toggleLayerVisibility(at: index) }) {
                 Image(systemName: layer.isVisible ? "eye.fill" : "eye.slash")
-                    .font(.caption2)
+                    .font(isCompact ? .caption : .subheadline)
                     .foregroundColor(layer.isVisible ? .blue : .gray)
-                    .frame(width: 18)
+                    .frame(width: isCompact ? 20 : 24, height: 44)
             }
             .buttonStyle(.plain)
             
-            // Layer thumbnail (tiny bitmap preview)
+            // Layer thumbnail
             layerThumbnail(hexes: layer.pixelHexes)
-                .frame(width: 28, height: 28)
-                .cornerRadius(4)
+                .frame(width: thumbnailSize, height: thumbnailSize)
+                .cornerRadius(isCompact ? 4 : 5)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: isCompact ? 4 : 5)
                         .stroke(isActive ? Color.blue : Color.clear, lineWidth: 2)
                 )
             
-            // Name + opacity
-            VStack(alignment: .leading, spacing: 1) {
+            // Name + opacity — compact on iPhone, full on iPad
+            if isCompact {
                 Text(layer.name)
                     .font(.caption2)
                     .fontWeight(isActive ? .semibold : .regular)
                     .lineLimit(1)
-                
-                if layer.opacity < 1.0 {
-                    Text("\(Int(layer.opacity * 100))%")
-                        .font(.system(size: 9))
-                        .foregroundColor(.secondary)
+                    .foregroundColor(isActive ? .primary : .secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(layer.name)
+                        .font(.caption)
+                        .fontWeight(isActive ? .semibold : .regular)
+                        .lineLimit(1)
+                    
+                    if layer.opacity < 1.0 {
+                        Text("\(Int(layer.opacity * 100))%")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             
             // Context menu actions
             Menu {
@@ -243,28 +271,28 @@ struct LayerPanelView: View {
                 .disabled(viewModel.layers.count <= 1)
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.caption2)
+                    .font(isCompact ? .caption : .subheadline)
                     .foregroundColor(.secondary)
-                    .frame(width: 20, height: 20)
+                    .frame(width: isCompact ? 24 : 28, height: isCompact ? 24 : 28)
             }
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 6)
+        .padding(.horizontal, isCompact ? 6 : 10)
+        .padding(.vertical, rowVPadding)
         .frame(height: rowHeight)
         .background(isActive ? Color.blue.opacity(0.1) : Color.clear)
-        .cornerRadius(8)
+        .cornerRadius(10)
         .contentShape(Rectangle())
         .onTapGesture {
             viewModel.switchToLayer(at: index)
         }
     }
     
-    // MARK: - Tiny Layer Thumbnail (bitmap-based for speed)
+    // MARK: - Tiny Layer Thumbnail (delegated to LayerManagerViewModel)
     
     private func layerThumbnail(hexes: [String]) -> some View {
         let gridWidth = viewModel.projectSettings.selectedCanvasSize.dimensions.width
         let gridHeight = viewModel.projectSettings.selectedCanvasSize.dimensions.height
-        let image = renderLayerThumbnail(hexes: hexes, gridWidth: gridWidth, gridHeight: gridHeight)
+        let image = layerManager.renderLayerThumbnail(hexes: hexes, gridWidth: gridWidth, gridHeight: gridHeight)
         
         return Group {
             if let image {
@@ -275,59 +303,5 @@ struct LayerPanelView: View {
                 Color(.systemGray5)
             }
         }
-    }
-    
-    // Renders a layer's pixel data + checkerboard into a tiny CGImage bitmap.
-    // Pure byte-level operations — no SwiftUI Path fills, no Color conversions.
-    private func renderLayerThumbnail(hexes: [String], gridWidth: Int, gridHeight: Int) -> UIImage? {
-        let w = gridWidth, h = gridHeight
-        guard w > 0, h > 0 else { return nil }
-        
-        let lightGray: UInt8 = 235
-        let darkGray: UInt8 = 215
-        
-        var buffer = [UInt8](repeating: 255, count: w * h * 4)
-        
-        for i in 0..<min(hexes.count, w * h) {
-            let bi = i * 4
-            let hex = hexes[i]
-            
-            if hex != "clear" {
-                // Parse hex directly to RGB bytes
-                var str = hex
-                if str.hasPrefix("#") { str = String(str.dropFirst()) }
-                if str.count >= 6 {
-                    var val: UInt32 = 0
-                    for byte in str.utf8.prefix(6) {
-                        val <<= 4
-                        switch byte {
-                        case 0x30...0x39: val |= UInt32(byte - 0x30)
-                        case 0x41...0x46: val |= UInt32(byte - 0x41 + 10)
-                        case 0x61...0x66: val |= UInt32(byte - 0x61 + 10)
-                        default: break
-                        }
-                    }
-                    buffer[bi]     = UInt8((val >> 16) & 0xFF)
-                    buffer[bi + 1] = UInt8((val >> 8) & 0xFF)
-                    buffer[bi + 2] = UInt8(val & 0xFF)
-                }
-            } else {
-                // Checkerboard
-                let row = i / w, col = i % w
-                let gray = (row + col) % 2 == 0 ? lightGray : darkGray
-                buffer[bi] = gray; buffer[bi + 1] = gray; buffer[bi + 2] = gray
-            }
-            buffer[bi + 3] = 255
-        }
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        guard let ctx = CGContext(
-            data: &buffer, width: w, height: h,
-            bitsPerComponent: 8, bytesPerRow: w * 4,
-            space: colorSpace,
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ), let cgImage = ctx.makeImage() else { return nil }
-        
-        return UIImage(cgImage: cgImage)
     }
 }

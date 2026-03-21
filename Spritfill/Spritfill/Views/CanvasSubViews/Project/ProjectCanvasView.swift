@@ -15,6 +15,7 @@ struct ProjectCanvasView: View {
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var dragVisitedIndices: Set<Int> = []
+    @State private var panStartLocation: CGPoint = .zero
     
     // Eyedropper magnifier state
     @State private var magnifierPosition: CGPoint = .zero
@@ -54,14 +55,27 @@ struct ProjectCanvasView: View {
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
                 .offset(x: canvasOffset.width, y: canvasOffset.height)
-                
-                // Eyedropper magnifier overlay
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
+            .contentShape(Rectangle())
+            .overlay {
+                // Eyedropper magnifier overlay — in geo.size coordinate space
                 if showMagnifier {
+                    let magnifierOffset: CGFloat = 80
+                    // Flip below finger if too close to top edge
+                    let yPos = magnifierPosition.y < magnifierOffset + 40
+                        ? magnifierPosition.y + magnifierOffset
+                        : magnifierPosition.y - magnifierOffset
+                    // Clamp horizontally so it doesn't go off-screen
+                    let xPos = max(40, min(magnifierPosition.x, geo.size.width - 40))
+                    
                     magnifierView
-                        .position(x: magnifierPosition.x, y: magnifierPosition.y - 80)
+                        .position(x: xPos, y: yPos)
                 }
-                
-                // Eraser brush area preview overlay
+            }
+            .overlay {
+                // Eraser brush area preview overlay — in geo.size coordinate space
                 if showEraserPreview, let idx = eraserPreviewIndex {
                     eraserPreviewOverlay(
                         index: idx,
@@ -73,9 +87,6 @@ struct ProjectCanvasView: View {
                     )
                 }
             }
-            .frame(width: geo.size.width, height: geo.size.height)
-            .clipped()
-            .contentShape(Rectangle())
             .overlay(
                 TwoFingerDoubleTapView(
                     doubleTapAction: { viewModel.undo() },
@@ -100,17 +111,41 @@ struct ProjectCanvasView: View {
                     },
                     onPinchEnd: {
                         dragStart = canvasOffset
-                    }
-                )
-            )
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
+                    },
+                    onSingleTouchBegan: { location in
                         let tool = toolsVM.selectedTool
                         if tool == .eyedropper {
-                            // Show magnifier and track color under finger
-                            magnifierPosition = value.location
-                            if let index = viewModel.gridIndex(from: value.location,
+                            magnifierPosition = location
+                            if let index = viewModel.gridIndex(from: location,
+                                                                geoSize: geo.size,
+                                                                canvasOffset: canvasOffset,
+                                                                zoomScale: zoomScale) {
+                                magnifierIndex = index
+                                magnifierColor = viewModel.colorAtIndex(index)
+                            }
+                            showMagnifier = true
+                        } else if tool == .pan {
+                            panStartLocation = location
+                        } else if tool != .shift && tool != .flip {
+                            viewModel.beginAction()
+                            if let index = viewModel.gridIndex(from: location,
+                                                                geoSize: geo.size,
+                                                                canvasOffset: canvasOffset,
+                                                                zoomScale: zoomScale) {
+                                if tool == .eraser {
+                                    eraserPreviewIndex = index
+                                    showEraserPreview = true
+                                }
+                                dragVisitedIndices.insert(index)
+                                viewModel.applyToolAtIndex(index)
+                            }
+                        }
+                    },
+                    onSingleTouchMoved: { location in
+                        let tool = toolsVM.selectedTool
+                        if tool == .eyedropper {
+                            magnifierPosition = location
+                            if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset,
                                                                 zoomScale: zoomScale) {
@@ -120,11 +155,12 @@ struct ProjectCanvasView: View {
                                 magnifierIndex = nil
                                 magnifierColor = nil
                             }
-                            showMagnifier = true
                         } else if tool == .pan {
+                            let dx = location.x - panStartLocation.x
+                            let dy = location.y - panStartLocation.y
                             let proposed = CGSize(
-                                width: dragStart.width + value.translation.width,
-                                height: dragStart.height + value.translation.height
+                                width: dragStart.width + dx,
+                                height: dragStart.height + dy
                             )
                             canvasOffset = viewModel.clampedOffset(
                                 for: proposed,
@@ -132,13 +168,10 @@ struct ProjectCanvasView: View {
                                 canvasSize: scaledCanvasSize
                             )
                         } else if tool != .shift && tool != .flip {
-                            // Draw on drag for pencil/eraser/fill
-                            viewModel.beginAction()
-                            if let index = viewModel.gridIndex(from: value.location,
+                            if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset,
                                                                 zoomScale: zoomScale) {
-                                // Show eraser brush preview
                                 if tool == .eraser {
                                     eraserPreviewIndex = index
                                     showEraserPreview = true
@@ -149,12 +182,11 @@ struct ProjectCanvasView: View {
                                 }
                             }
                         }
-                    }
-                    .onEnded { value in
+                    },
+                    onSingleTouchEnded: { location in
                         let tool = toolsVM.selectedTool
                         if tool == .eyedropper {
-                            // Pick the color under the finger
-                            if let index = magnifierIndex ?? viewModel.gridIndex(from: value.location,
+                            if let index = magnifierIndex ?? viewModel.gridIndex(from: location,
                                                                                    geoSize: geo.size,
                                                                                    canvasOffset: canvasOffset,
                                                                                    zoomScale: zoomScale) {
@@ -168,7 +200,7 @@ struct ProjectCanvasView: View {
                         } else if tool != .shift && tool != .flip {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
-                                if let index = viewModel.gridIndex(from: value.location,
+                                if let index = viewModel.gridIndex(from: location,
                                                                     geoSize: geo.size,
                                                                     canvasOffset: canvasOffset,
                                                                     zoomScale: zoomScale) {
@@ -181,6 +213,7 @@ struct ProjectCanvasView: View {
                             eraserPreviewIndex = nil
                         }
                     }
+                )
             )
             .onAppear {
                 viewModel.updateViewSize(geo.size)

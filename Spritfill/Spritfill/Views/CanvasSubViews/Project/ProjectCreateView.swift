@@ -189,13 +189,13 @@ struct ProjectCreateView: View {
                 // Layer panel — overlays the full view so the slide animation isn't clipped
                 if showLayerPanel {
                     let isRegular = sizeClass == .regular
-                    LayerPanelView(viewModel: viewModel, onClose: {
+                    LayerPanelView(viewModel: viewModel, layerManager: viewModel.layerManager, onClose: {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             showLayerPanel = false
                         }
                     })
-                    .frame(width: isRegular ? 240 : 160)
-                    .frame(maxHeight: geo.size.height * (isRegular ? 0.65 : 0.55))
+                    .frame(width: isRegular ? 280 : 190)
+                    .frame(maxHeight: geo.size.height * (isRegular ? 0.7 : 0.55))
                     .shadow(color: .black.opacity(0.15), radius: 8, x: -2, y: 2)
                     .padding(.trailing, 6)
                     .padding(.top, 50)
