@@ -126,7 +126,7 @@ struct ProjectViewModeView: View {
         .alert("Edit this project?", isPresented: $showEditAlert) {
             Button("Edit") {
                 viewModel.isFinished = false
-                projectManager.save(viewModel)
+                viewModel.flushSave()
                 dismiss()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     onEdit?()
@@ -184,19 +184,21 @@ struct ProjectViewModeView: View {
         let displayWidth = CGFloat(gridWidth) * fitScale * zoomScale
         let displayHeight = CGFloat(gridHeight) * fitScale * zoomScale
         let cellSize = fitScale * zoomScale
+        let compositeHexes = viewModel.compositePixelHexes()
         
         return Canvas { context, size in
             for row in 0..<gridHeight {
                 for col in 0..<gridWidth {
-                    let color = viewModel.pixels[row * gridWidth + col]
-                    guard color != .clear else { continue }
-                    let rect = CGRect(
-                        x: CGFloat(col) * cellSize,
-                        y: CGFloat(row) * cellSize,
-                        width: cellSize,
-                        height: cellSize
-                    )
-                    context.fill(Path(rect), with: .color(color))
+                    let index = row * gridWidth + col
+                    let hex = index < compositeHexes.count ? compositeHexes[index] : "clear"
+                    guard hex != "clear" else { continue }
+                    // Use floor/ceil to snap to pixel boundaries and avoid subpixel gaps
+                    let x = floor(CGFloat(col) * cellSize)
+                    let y = floor(CGFloat(row) * cellSize)
+                    let nextX = floor(CGFloat(col + 1) * cellSize)
+                    let nextY = floor(CGFloat(row + 1) * cellSize)
+                    let rect = CGRect(x: x, y: y, width: nextX - x, height: nextY - y)
+                    context.fill(Path(rect), with: .color(Color(hex: hex)))
                 }
             }
         }

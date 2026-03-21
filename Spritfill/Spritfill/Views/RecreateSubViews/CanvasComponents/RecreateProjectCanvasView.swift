@@ -56,6 +56,14 @@ struct RecreateProjectCanvasView: View {
                     },
                     onPanEnd: {
                         dragStart = canvasOffset
+                    },
+                    onPinch: { scale in
+                        let newZoom = (viewModel.zoomScale * scale)
+                            .clamped(to: viewModel.minimumZoomScale...viewModel.maximumZoomScale)
+                        viewModel.zoomScale = newZoom
+                    },
+                    onPinchEnd: {
+                        dragStart = canvasOffset
                     }
                 )
             )
@@ -172,12 +180,19 @@ private struct RecreateCanvasRenderer: View, Equatable {
             // Only rendered when zoomed in enough — at low zoom, text is illegible
             // and the per-pixel loop is pure waste.
             let cellSize = zoomScale
-            let showNumbers = cellSize >= 14  // numbers unreadable below ~14pt
+            let showNumbers = cellSize >= 18  // numbers unreadable below ~18pt
             let showGrid = cellSize > 8
             
             if showNumbers || showGrid {
                 Canvas { context, size in
                     if showNumbers {
+                        // Only render numbers for pixels visible in the current viewport.
+                        // This avoids iterating all 16K+ pixels for large canvases.
+                        let visMinCol = max(0, Int(floor(0 / cellSize)))
+                        let visMaxCol = min(gridWidth - 1, Int(ceil(size.width / cellSize)))
+                        let visMinRow = max(0, Int(floor(0 / cellSize)))
+                        let visMaxRow = min(gridHeight - 1, Int(ceil(size.height / cellSize)))
+                        
                         // Pre-resolve all unique number labels ONCE
                         let fontSize = max(cellSize * 0.4, 8)
                         var resolvedLabels: [Int: GraphicsContext.ResolvedText] = [:]
@@ -197,8 +212,8 @@ private struct RecreateCanvasRenderer: View, Equatable {
                         
                         let pixelCount = userPixelHexes.count
                         
-                        for row in 0..<gridHeight {
-                            for col in 0..<gridWidth {
+                        for row in visMinRow...visMaxRow {
+                            for col in visMinCol...visMaxCol {
                                 let index = row * gridWidth + col
                                 let targetHex = referenceGrid[index]
                                 let userHex = index < pixelCount ? userPixelHexes[index] : "clear"

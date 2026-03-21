@@ -80,6 +80,8 @@ class RecreateCanvasViewModel: ObservableObject {
         if !actionDidChange {
             _ = undoHistory.popLast()
             canUndo = !undoHistory.isEmpty
+        } else {
+            debouncedSave()
         }
         actionInProgress = false
         actionDidChange = false
@@ -98,6 +100,7 @@ class RecreateCanvasViewModel: ObservableObject {
         canUndo = !undoHistory.isEmpty
         canRedo = true
         recalculateStats()
+        debouncedSave()
     }
     
     func redo() {
@@ -112,6 +115,7 @@ class RecreateCanvasViewModel: ObservableObject {
         canUndo = true
         canRedo = !redoHistory.isEmpty
         recalculateStats()
+        debouncedSave()
     }
     
     // MARK: - Computed properties
@@ -350,12 +354,15 @@ class RecreateCanvasViewModel: ObservableObject {
         isDeleted = true
     }
     
-    // Save current progress to disk
+    // Save current progress to disk (background thread)
     func saveProgress() {
         guard !isDeleted else { return }
         session.userPixels = userPixelHexes
         session.lastEdited = Date()
-        storage.saveSession(session)
+        let sessionCopy = session
+        DispatchQueue.global(qos: .utility).async { [storage] in
+            storage.saveSession(sessionCopy)
+        }
     }
 
     // Debounced save — coalesces rapid paint actions into a single disk write
@@ -364,6 +371,13 @@ class RecreateCanvasViewModel: ObservableObject {
         saveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
             self?.saveProgress()
         }
+    }
+    
+    // Immediately flush any pending auto-save (e.g. on back / dismiss).
+    func flushSave() {
+        saveTimer?.invalidate()
+        saveTimer = nil
+        saveProgress()
     }
     // MARK: - Export
     

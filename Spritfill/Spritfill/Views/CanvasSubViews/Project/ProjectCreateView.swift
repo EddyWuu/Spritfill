@@ -13,6 +13,7 @@ struct ProjectCreateView: View {
     @ObservedObject private var toolsVM: ToolsViewModel
     @StateObject private var projectManager = ProjectManagerViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var sizeClass
     
     var onFinish: (() -> Void)? = nil
     
@@ -21,14 +22,15 @@ struct ProjectCreateView: View {
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showProjectDetails = false
     
-    @State private var showSavedAlert = false
-    @State private var savedAlertMessage = ""
-    
     @State private var showDeleteAlert = false
+    @State private var showClearLayerAlert = false
+    @State private var showExportedAlert = false
     @State private var showFinishAlert = false
     @State private var showFinishCongrats = false
     @State private var showColorAdder = false
     @State private var showHelpSheet = false
+    @State private var showLayerPanel = false
+    @State private var bottomPanelCollapsed = false
     
     init(viewModel: CanvasViewModel, onFinish: (() -> Void)? = nil) {
         self.viewModel = viewModel
@@ -43,7 +45,7 @@ struct ProjectCreateView: View {
                 // MARK: - Top nav bar
                 HStack {
                     Button(action: {
-                        projectManager.save(viewModel)
+                        viewModel.flushSave()
                         dismiss()
                     }) {
                         Image(systemName: "chevron.left")
@@ -59,6 +61,13 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
+                            showClearLayerAlert = true
+                        }) {
+                            Image(systemName: "xmark.rectangle")
+                                .foregroundColor(.orange)
+                        }
+                        
+                        Button(action: {
                             showHelpSheet = true
                         }) {
                             Image(systemName: "questionmark.circle")
@@ -71,6 +80,15 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showLayerPanel.toggle()
+                            }
+                        }) {
+                            Image(systemName: "square.3.layers.3d")
+                                .foregroundColor(showLayerPanel ? .primary : .blue)
+                        }
+                        
+                        Button(action: {
                             newProjectName = viewModel.projectName
                             showRenameAlert = true
                         }) {
@@ -78,17 +96,8 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            projectManager.save(viewModel)
-                            savedAlertMessage = "Project saved!"
-                            showSavedAlert = true
-                        }) {
-                            Image(systemName: "externaldrive")
-                        }
-                        
-                        Button(action: {
                             viewModel.exportAndSaveToPhotos {
-                                savedAlertMessage = "Image saved to Photos!"
-                                showSavedAlert = true
+                                showExportedAlert = true
                             }
                         }) {
                             Image(systemName: "square.and.arrow.down")
@@ -116,40 +125,83 @@ struct ProjectCreateView: View {
                 
                 // MARK: - Canvas
                 ProjectCanvasView(viewModel: viewModel, toolsVM: toolsVM)
-                    .frame(height: geo.size.height * 0.48)
                     .clipped()
+                    .frame(maxHeight: .infinity)
                 
-                // MARK: - Zoom slider
-                ZoomSliderView(canvasVM: viewModel)
+                // MARK: - Collapse/expand handle
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        bottomPanelCollapsed.toggle()
+                    }
+                }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: bottomPanelCollapsed ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.secondary)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(.systemGray3))
+                            .frame(width: 36, height: 4)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
                     .background(Color(.secondarySystemBackground))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
                 
-                Divider()
-                
-                // MARK: - Tool buttons
+                // MARK: - Tool buttons (always visible)
                 ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder)
                     .background(Color(.secondarySystemBackground))
                 
-                // MARK: - Opacity slider
-                OpacitySliderView(toolsVM: toolsVM)
-                
-                Divider()
-                
-                // MARK: - Bottom panel
-                ZStack {
-                    ColorPaletteView(toolsVM: toolsVM)
-                    
-                    if toolsVM.selectedTool == .shift {
-                        ShiftControlView(canvasVM: viewModel)
+                // MARK: - Collapsible bottom panel
+                if !bottomPanelCollapsed {
+                    VStack(spacing: 0) {
+                        // Zoom slider (disabled — pinch-to-zoom is used instead)
+                        // ZoomSliderView(canvasVM: viewModel)
+                        //     .background(Color(.secondarySystemBackground))
+                        
+                        // Opacity slider
+                        OpacitySliderView(toolsVM: toolsVM)
+                        
+                        Divider()
+                        
+                        // Bottom panel (palette / shift / flip)
+                        ZStack {
+                            ColorPaletteView(toolsVM: toolsVM)
+                            
+                            if toolsVM.selectedTool == .shift {
+                                ShiftControlView(canvasVM: viewModel)
+                            }
+                            
+                            if toolsVM.selectedTool == .flip {
+                                FlipControlView(canvasVM: viewModel)
+                            }
+                        }
+                        .frame(maxHeight: .infinity)
+                        .background(Color(.secondarySystemBackground))
                     }
-                    
-                    if toolsVM.selectedTool == .flip {
-                        FlipControlView(canvasVM: viewModel)
-                    }
+                    .clipped()
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-                .frame(maxHeight: .infinity)
-                .background(Color(.secondarySystemBackground))
             }
             .frame(width: geo.size.width, height: geo.size.height)
+            .overlay(alignment: .trailing) {
+                // Layer panel — overlays the full view so the slide animation isn't clipped
+                if showLayerPanel {
+                    let isRegular = sizeClass == .regular
+                    LayerPanelView(viewModel: viewModel, onClose: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showLayerPanel = false
+                        }
+                    })
+                    .frame(width: isRegular ? 240 : 160)
+                    .frame(maxHeight: geo.size.height * (isRegular ? 0.65 : 0.55))
+                    .shadow(color: .black.opacity(0.15), radius: 8, x: -2, y: 2)
+                    .padding(.trailing, 6)
+                    .padding(.top, 50)
+                    .transition(.move(edge: .trailing))
+                }
+            }
             
             // Export loading overlay
             if viewModel.isExporting {
@@ -181,6 +233,14 @@ struct ProjectCreateView: View {
             }
             Button("Cancel", role: .cancel) { }
         }
+        .alert("Clear Current Layer?", isPresented: $showClearLayerAlert) {
+            Button("Clear", role: .destructive) {
+                viewModel.clearCurrentLayer()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will erase all pixels on \"\(viewModel.activeLayer.name)\". This can be undone.")
+        }
         .alert("Rename Project", isPresented: $showRenameAlert) {
             TextField("New name", text: $newProjectName)
             Button("Save") {
@@ -190,10 +250,10 @@ struct ProjectCreateView: View {
             }
             Button("Cancel", role: .cancel) { }
         }
-        .alert("Saved", isPresented: $showSavedAlert) {
+        .alert("Saved", isPresented: $showExportedAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(savedAlertMessage)
+            Text("Image saved to Photos!")
         }
         .sheet(isPresented: $showProjectDetails) {
             ProjectDetailsPopupView(viewModel: viewModel)
@@ -213,15 +273,10 @@ struct ProjectCreateView: View {
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showHelpSheet) {
-            CanvasHelpSheetView()
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
-        }
         .alert("Finish Project?", isPresented: $showFinishAlert) {
             Button("Finish", role: .destructive) {
                 viewModel.isFinished = true
-                projectManager.save(viewModel)
+                viewModel.flushSave()
                 showFinishCongrats = true
             }
             Button("Cancel", role: .cancel) { }

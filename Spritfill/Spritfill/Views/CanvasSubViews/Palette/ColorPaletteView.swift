@@ -37,9 +37,11 @@ struct ColorPaletteView: View {
                     
                     Spacer()
                 }
-                .padding(.horizontal, 12)
                 .padding(.top, 8)
                 .padding(.bottom, 2)
+                // Match the grid's horizontal inset so the circle sits
+                // directly above the first palette column.
+                .padding(.horizontal, 14)
             }
             
             LazyVGrid(columns: columns, spacing: 8) {

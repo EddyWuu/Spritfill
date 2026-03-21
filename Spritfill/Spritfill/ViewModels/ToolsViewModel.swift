@@ -37,6 +37,37 @@ class ToolsViewModel: ObservableObject {
     @Published var horizontalSymmetry: Bool = false
     @Published var verticalSymmetry: Bool = false
     
+    // Brush size for pencil and eraser — independent per tool (1 = 1x1, ..., 5 = 5x5)
+    @Published var pencilBrushSize: Int = 1
+    @Published var eraserBrushSize: Int = 1
+    
+    // The brush size for the currently selected tool.
+    var brushSize: Int {
+        get {
+            switch selectedTool {
+            case .pencil: return pencilBrushSize
+            case .eraser: return eraserBrushSize
+            default: return 1
+            }
+        }
+        set {
+            switch selectedTool {
+            case .pencil: pencilBrushSize = newValue
+            case .eraser: eraserBrushSize = newValue
+            default: break
+            }
+        }
+    }
+    
+    // Brush size for a specific tool (used by badge display).
+    func brushSize(for tool: ToolType) -> Int {
+        switch tool {
+        case .pencil: return pencilBrushSize
+        case .eraser: return eraserBrushSize
+        default: return 1
+        }
+    }
+    
     private var palette: ColorPalettes
     private var embeddedPaletteColors: [String]?
 

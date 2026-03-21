@@ -146,9 +146,7 @@ struct RecreateBrowseView: View {
                 } label: {
                     VStack(spacing: 4) {
                         let maxDim = CGFloat(max(sprite.gridWidth, sprite.gridHeight))
-                        let tile = max(1, 100 / maxDim)
-                        let renderedW = CGFloat(sprite.gridWidth) * tile
-                        let renderedH = CGFloat(sprite.gridHeight) * tile
+                        let tile = 100.0 / maxDim
                         
                         PixelGridThumbnailView(
                             pixelGrid: sprite.pixelGrid,
@@ -156,7 +154,6 @@ struct RecreateBrowseView: View {
                             gridHeight: sprite.gridHeight,
                             tileSize: tile
                         )
-                        .frame(width: renderedW, height: renderedH)
                         .frame(width: 100, height: 100)
                         .background(Color(.secondarySystemBackground))
                         .cornerRadius(10)
@@ -219,7 +216,7 @@ struct RecreateBrowseView: View {
                     pixelGrid: sprite.pixelGrid,
                     gridWidth: sprite.gridWidth,
                     gridHeight: sprite.gridHeight,
-                    tileSize: max(1, 250 / CGFloat(max(sprite.gridWidth, sprite.gridHeight)))
+                    tileSize: 250.0 / CGFloat(max(sprite.gridWidth, sprite.gridHeight))
                 )
                 .frame(width: 250, height: 250)
                 .padding(.horizontal, 20)

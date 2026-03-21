@@ -21,6 +21,10 @@ struct ProjectCanvasView: View {
     @State private var showMagnifier: Bool = false
     @State private var magnifierColor: Color? = nil
     @State private var magnifierIndex: Int? = nil
+    
+    // Eraser brush preview state
+    @State private var eraserPreviewIndex: Int? = nil
+    @State private var showEraserPreview: Bool = false
 
     var body: some View {
         
@@ -39,7 +43,7 @@ struct ProjectCanvasView: View {
 
             ZStack {
                 PixelCanvasRenderer(
-                    pixelHexes: viewModel.pixelHexes,
+                    pixelHexes: viewModel.compositePixelHexes(),
                     pixelGeneration: viewModel.pixelGeneration,
                     gridWidth: gridWidth,
                     gridHeight: gridHeight,
@@ -55,6 +59,18 @@ struct ProjectCanvasView: View {
                 if showMagnifier {
                     magnifierView
                         .position(x: magnifierPosition.x, y: magnifierPosition.y - 80)
+                }
+                
+                // Eraser brush area preview overlay
+                if showEraserPreview, let idx = eraserPreviewIndex {
+                    eraserPreviewOverlay(
+                        index: idx,
+                        gridWidth: gridWidth,
+                        gridHeight: gridHeight,
+                        zoomScale: zoomScale,
+                        canvasOffset: canvasOffset,
+                        geoSize: geo.size
+                    )
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
@@ -75,6 +91,14 @@ struct ProjectCanvasView: View {
                         )
                     },
                     onPanEnd: {
+                        dragStart = canvasOffset
+                    },
+                    onPinch: { scale in
+                        let newZoom = (viewModel.zoomScale * scale)
+                            .clamped(to: viewModel.minimumZoomScale...viewModel.maximumZoomScale)
+                        viewModel.zoomScale = newZoom
+                    },
+                    onPinchEnd: {
                         dragStart = canvasOffset
                     }
                 )
@@ -114,6 +138,11 @@ struct ProjectCanvasView: View {
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset,
                                                                 zoomScale: zoomScale) {
+                                // Show eraser brush preview
+                                if tool == .eraser {
+                                    eraserPreviewIndex = index
+                                    showEraserPreview = true
+                                }
                                 if !dragVisitedIndices.contains(index) {
                                     dragVisitedIndices.insert(index)
                                     viewModel.applyToolAtIndex(index)
@@ -148,6 +177,8 @@ struct ProjectCanvasView: View {
                             }
                             viewModel.endAction()
                             dragVisitedIndices.removeAll()
+                            showEraserPreview = false
+                            eraserPreviewIndex = nil
                         }
                     }
             )
@@ -212,6 +243,50 @@ struct ProjectCanvasView: View {
             }
         }
         .allowsHitTesting(false)
+    }
+    
+    // MARK: - Eraser brush area preview
+    
+    private func eraserPreviewOverlay(
+        index: Int,
+        gridWidth: Int,
+        gridHeight: Int,
+        zoomScale: CGFloat,
+        canvasOffset: CGSize,
+        geoSize: CGSize
+    ) -> some View {
+        let brushSize = toolsVM.eraserBrushSize
+        let row = index / gridWidth
+        let col = index % gridWidth
+        let half = brushSize / 2
+        
+        // Top-left grid coordinate of the brush area (clamped)
+        let minRow = max(0, row - half)
+        let minCol = max(0, col - half)
+        let maxRow = min(gridHeight - 1, row + brushSize - 1 - half)
+        let maxCol = min(gridWidth - 1, col + brushSize - 1 - half)
+        
+        // Canvas origin in screen space
+        let scaledCanvasWidth = CGFloat(gridWidth) * zoomScale
+        let scaledCanvasHeight = CGFloat(gridHeight) * zoomScale
+        let canvasOriginX = geoSize.width / 2 + canvasOffset.width - scaledCanvasWidth / 2
+        let canvasOriginY = geoSize.height / 2 + canvasOffset.height - scaledCanvasHeight / 2
+        
+        // Screen-space rect for the brush area
+        let rectX = canvasOriginX + CGFloat(minCol) * zoomScale
+        let rectY = canvasOriginY + CGFloat(minRow) * zoomScale
+        let rectW = CGFloat(maxCol - minCol + 1) * zoomScale
+        let rectH = CGFloat(maxRow - minRow + 1) * zoomScale
+        
+        return Rectangle()
+            .fill(Color.red.opacity(0.15))
+            .overlay(
+                Rectangle()
+                    .stroke(Color.red.opacity(0.6), lineWidth: max(1, zoomScale * 0.08))
+            )
+            .frame(width: rectW, height: rectH)
+            .position(x: rectX + rectW / 2, y: rectY + rectH / 2)
+            .allowsHitTesting(false)
     }
 }
 

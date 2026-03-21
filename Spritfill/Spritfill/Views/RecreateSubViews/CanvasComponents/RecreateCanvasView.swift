@@ -14,7 +14,6 @@ struct RecreateCanvasView: View {
     @StateObject private var viewModel: RecreateCanvasViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var showCompletionAlert = false
-    @State private var showSavedAlert = false
     @State private var showDeleteAlert = false
     
     init(session: RecreateSession, selectedTab: Binding<RecreateView.RecreateTab>) {
@@ -50,13 +49,6 @@ struct RecreateCanvasView: View {
                             .foregroundColor(.green)
                     }
                     
-                    Button(action: {
-                        viewModel.saveProgress()
-                        showSavedAlert = true
-                    }) {
-                        Image(systemName: "externaldrive")
-                    }
-                    
                     Button(action: { showDeleteAlert = true }) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
@@ -71,9 +63,9 @@ struct RecreateCanvasView: View {
                     .frame(height: geo.size.height * 0.48)
                     .clipped()
                 
-                // MARK: - Zoom slider
-                RecreateZoomSliderView(viewModel: viewModel)
-                    .background(Color(.secondarySystemBackground))
+                // MARK: - Zoom slider (disabled — pinch-to-zoom is used instead)
+                // RecreateZoomSliderView(viewModel: viewModel)
+                //     .background(Color(.secondarySystemBackground))
                 
                 Divider()
                 
@@ -94,11 +86,11 @@ struct RecreateCanvasView: View {
         .toolbar(.hidden, for: .tabBar)
         .edgesIgnoringSafeArea(.bottom)
         .onDisappear {
-            viewModel.saveProgress()
+            viewModel.flushSave()
         }
         .onChange(of: viewModel.isComplete) { _, isComplete in
             if isComplete {
-                viewModel.saveProgress()
+                viewModel.flushSave()
                 showCompletionAlert = true
             }
         }
@@ -109,11 +101,6 @@ struct RecreateCanvasView: View {
             }
         } message: {
             Text("You've completed recreating \(session.spriteName)!")
-        }
-        .alert("Saved!", isPresented: $showSavedAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Your progress has been saved.")
         }
         .alert("Delete Session?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {

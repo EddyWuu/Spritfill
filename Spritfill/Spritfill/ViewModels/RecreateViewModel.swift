@@ -118,12 +118,14 @@ class RecreateViewModel: ObservableObject {
         
         // React to community sprite changes — append to browse list when they arrive
         communityService.$communitySprites
+            .dropFirst()  // Skip initial empty value to avoid double-load
             .receive(on: DispatchQueue.main)
             .sink { [weak self] communitySprites in
                 self?.appendCommunitySprites(communitySprites)
             }
             .store(in: &cancellables)
         communityService.$fetchFailed
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
@@ -133,10 +135,9 @@ class RecreateViewModel: ObservableObject {
     
     // Append community sprites to the existing browse list (called when Firebase returns).
     private func appendCommunitySprites(_ communitySprites: [PremadeSpriteData]) {
-        // Remove any existing community sprites
-        browseSprites.removeAll { $0.sourceType == .community }
+        guard !communitySprites.isEmpty else { return }
         
-        // Compute color maps on background then append on main
+        // Compute color maps on background then do a single atomic update on main
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let newSprites = communitySprites.map { community in
                 RecreatableArtModel(
@@ -151,7 +152,11 @@ class RecreateViewModel: ObservableObject {
             }
             
             DispatchQueue.main.async {
-                self?.browseSprites.append(contentsOf: newSprites)
+                guard let self = self else { return }
+                // Single atomic update: remove old community sprites and add new ones
+                var updated = self.browseSprites.filter { $0.sourceType != .community }
+                updated.append(contentsOf: newSprites)
+                self.browseSprites = updated
             }
         }
     }

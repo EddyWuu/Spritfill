@@ -92,7 +92,7 @@ struct ToolsBarView: View {
                 
                 // Add colors to palette
                 Button(action: { showColorAdder = true }) {
-                    Image(systemName: "paintpalette")
+                    Image(systemName: "plus.circle")
                         .font(.title3)
                         .foregroundColor(.primary)
                 }

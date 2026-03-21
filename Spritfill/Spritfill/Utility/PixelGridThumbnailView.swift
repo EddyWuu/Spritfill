@@ -18,6 +18,12 @@ struct PixelGridThumbnailView: View {
     
     var body: some View {
         Canvas { context, size in
+            // Center the grid within the canvas for non-square grids
+            let drawnWidth = CGFloat(gridWidth) * tileSize
+            let drawnHeight = CGFloat(gridHeight) * tileSize
+            let offsetX = (size.width - drawnWidth) / 2.0
+            let offsetY = (size.height - drawnHeight) / 2.0
+            
             for row in 0..<gridHeight {
                 for col in 0..<gridWidth {
                     let index = row * gridWidth + col
@@ -26,8 +32,8 @@ struct PixelGridThumbnailView: View {
                     guard hex != "clear" else { continue }
                     
                     let rect = CGRect(
-                        x: CGFloat(col) * tileSize,
-                        y: CGFloat(row) * tileSize,
+                        x: offsetX + CGFloat(col) * tileSize,
+                        y: offsetY + CGFloat(row) * tileSize,
                         width: tileSize,
                         height: tileSize
                     )

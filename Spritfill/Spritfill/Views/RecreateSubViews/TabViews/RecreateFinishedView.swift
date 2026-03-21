@@ -91,7 +91,7 @@ struct RecreateFinishedView: View {
                                 pixelGrid: item.session.referenceGrid,
                                 gridWidth: item.gridWidth,
                                 gridHeight: item.gridHeight,
-                                tileSize: max(1, 100 / CGFloat(max(item.gridWidth, item.gridHeight)))
+                                tileSize: 100.0 / CGFloat(max(item.gridWidth, item.gridHeight))
                             )
                             .frame(width: 100, height: 100)
                             .cornerRadius(10)
@@ -170,7 +170,7 @@ struct RecreateFinishedView: View {
                     pixelGrid: item.session.userPixels,
                     gridWidth: item.gridWidth,
                     gridHeight: item.gridHeight,
-                    tileSize: max(1, 250 / CGFloat(max(item.gridWidth, item.gridHeight)))
+                    tileSize: 250.0 / CGFloat(max(item.gridWidth, item.gridHeight))
                 )
                 .frame(width: 250, height: 250)
                 .padding(.horizontal, 20)

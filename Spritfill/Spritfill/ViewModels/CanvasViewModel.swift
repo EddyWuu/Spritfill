@@ -9,17 +9,69 @@ import SwiftUI
 
 class CanvasViewModel: ObservableObject {
     
-    // MARK: - properties
+    // MARK: - Layer
+    
+    class Layer: Identifiable, ObservableObject {
+        let id: UUID
+        @Published var name: String
+        @Published var pixels: [Color]
+        var pixelHexes: [String]
+        @Published var isVisible: Bool
+        @Published var opacity: Double
+        
+        // Per-layer undo / redo
+        var undoHistory: [[String]] = []
+        var redoHistory: [[String]] = []
+        
+        init(id: UUID = UUID(), name: String, pixels: [Color], pixelHexes: [String], isVisible: Bool = true, opacity: Double = 1.0) {
+            self.id = id
+            self.name = name
+            self.pixels = pixels
+            self.pixelHexes = pixelHexes
+            self.isVisible = isVisible
+            self.opacity = opacity
+        }
+        
+        // Create from a LayerData (persisted model)
+        convenience init(from data: LayerData) {
+            let colors = data.pixelGrid.map { hex in
+                hex == "clear" ? Color.clear : Color(hex: hex)
+            }
+            self.init(id: data.id, name: data.name, pixels: colors, pixelHexes: data.pixelGrid,
+                      isVisible: data.isVisible, opacity: data.opacity)
+        }
+        
+        func toLayerData() -> LayerData {
+            LayerData(id: id, name: name, pixelGrid: pixelHexes, isVisible: isVisible, opacity: opacity)
+        }
+    }
+    
+    static let maxLayers = 8
+    
+    // MARK: - Properties
  
     @Published var projectSettings: ProjectSettings
     
     let projectID: UUID
     @Published var projectName: String
-    @Published var pixels: [Color]
     
-    // Parallel hex array — always kept in sync with `pixels`.
-    // Avoids expensive Color→hex conversions during undo snapshots.
-    private(set) var pixelHexes: [String]
+    @Published var layers: [Layer] = []
+    @Published var activeLayerIndex: Int = 0
+    
+    var activeLayer: Layer {
+        layers[activeLayerIndex]
+    }
+    
+    // Proxy properties — reads/writes the active layer so existing code works unchanged.
+    var pixels: [Color] {
+        get { activeLayer.pixels }
+        set { activeLayer.pixels = newValue }
+    }
+    
+    var pixelHexes: [String] {
+        get { activeLayer.pixelHexes }
+        set { activeLayer.pixelHexes = newValue }
+    }
     
     @Published var toolsVM: ToolsViewModel
     @Published var isFinished: Bool = false
@@ -31,19 +83,20 @@ class CanvasViewModel: ObservableObject {
     // Used by PixelCanvasRenderer's Equatable check instead of comparing [Color].
     @Published private(set) var pixelGeneration: UInt = 0
     
-    // MARK: - Undo / Redo history (stored as hex strings for low memory usage)
+    // MARK: - Undo / Redo (per-layer)
     
-    private var undoHistory: [[String]] = []
-    private var redoHistory: [[String]] = []
     @Published var canUndo: Bool = false
     @Published var canRedo: Bool = false
     private var memoryObserver: Any?
     
     private var maxUndoSteps: Int {
         let pixelCount = pixels.count
-        if pixelCount > 4096 { return 50 }       // 64x64+
-        if pixelCount > 1024 { return 100 }      // 32x32+
-        return 150                                // 16x16
+        let layerDivisor = max(1, layers.count)
+        let base: Int
+        if pixelCount > 4096 { base = 50 }
+        else if pixelCount > 1024 { base = 100 }
+        else { base = 150 }
+        return max(10, base / layerDivisor)
     }
     
     private func setupMemoryWarning() {
@@ -51,56 +104,96 @@ class CanvasViewModel: ObservableObject {
             forName: UIApplication.didReceiveMemoryWarningNotification,
             object: nil, queue: .main
         ) { [weak self] _ in
-            self?.undoHistory.removeAll()
-            self?.redoHistory.removeAll()
-            self?.canUndo = false
-            self?.canRedo = false
+            guard let self else { return }
+            for layer in self.layers {
+                layer.undoHistory.removeAll()
+                layer.redoHistory.removeAll()
+            }
+            self.canUndo = false
+            self.canRedo = false
         }
     }
     
+    // MARK: - Auto-save
+    
+    private var autoSaveTimer: Timer?
+    private let storage = LocalStorageService.shared
+    
+    // Debounced auto-save — coalesces rapid pixel changes into a single background disk write.
+    private func debouncedAutoSave() {
+        autoSaveTimer?.invalidate()
+        autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+            self?.saveInBackground()
+        }
+    }
+    
+    // Performs the actual save on a background queue so the main thread stays responsive.
+    private func saveInBackground() {
+        let projectData = toProjectData()
+        DispatchQueue.global(qos: .utility).async { [storage] in
+            storage.saveProject(projectData)
+        }
+    }
+    
+    // Immediately flush any pending auto-save (e.g. on back / dismiss).
+    func flushSave() {
+        autoSaveTimer?.invalidate()
+        autoSaveTimer = nil
+        saveInBackground()
+    }
+    
     deinit {
+        autoSaveTimer?.invalidate()
         if let observer = memoryObserver {
             NotificationCenter.default.removeObserver(observer)
         }
     }
     
-    // Restore pixels from a hex string snapshot
+    // Restore active layer pixels from a hex string snapshot
     private func restorePixels(from hexes: [String]) {
-        pixelHexes = hexes
-        pixels = hexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
+        activeLayer.pixelHexes = hexes
+        activeLayer.pixels = hexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
         pixelGeneration &+= 1
     }
     
-    // Save current pixel state before an action (just copies the hex array — O(1) COW)
+    // Save current pixel state before an action (per-layer, O(1) COW copy)
     private func saveSnapshot() {
-        undoHistory.append(pixelHexes)
-        if undoHistory.count > maxUndoSteps {
-            undoHistory.removeFirst()
+        let layer = activeLayer
+        layer.undoHistory.append(layer.pixelHexes)
+        if layer.undoHistory.count > maxUndoSteps {
+            layer.undoHistory.removeFirst()
         }
-        // Any new action clears the redo stack
-        redoHistory.removeAll()
+        layer.redoHistory.removeAll()
         canUndo = true
         canRedo = false
     }
     
-    // Undo the last action — restores the previous pixel state
+    // Undo the last action on the active layer
     func undo() {
-        guard let previous = undoHistory.popLast() else { return }
-        // Push current state onto redo stack before restoring
-        redoHistory.append(pixelHexes)
+        let layer = activeLayer
+        guard let previous = layer.undoHistory.popLast() else { return }
+        layer.redoHistory.append(layer.pixelHexes)
         restorePixels(from: previous)
-        canUndo = !undoHistory.isEmpty
+        canUndo = !layer.undoHistory.isEmpty
         canRedo = true
+        debouncedAutoSave()
     }
     
-    // Redo — restores a previously undone state
+    // Redo on the active layer
     func redo() {
-        guard let next = redoHistory.popLast() else { return }
-        // Push current state onto undo stack before restoring
-        undoHistory.append(pixelHexes)
+        let layer = activeLayer
+        guard let next = layer.redoHistory.popLast() else { return }
+        layer.undoHistory.append(layer.pixelHexes)
         restorePixels(from: next)
         canUndo = true
-        canRedo = !redoHistory.isEmpty
+        canRedo = !layer.redoHistory.isEmpty
+        debouncedAutoSave()
+    }
+    
+    // Sync canUndo / canRedo with the active layer's stacks (call on layer switch)
+    private func syncUndoRedoState() {
+        canUndo = !activeLayer.undoHistory.isEmpty
+        canRedo = !activeLayer.redoHistory.isEmpty
     }
     
     // Call once at the start of a drawing gesture to capture the "before" state
@@ -118,8 +211,10 @@ class CanvasViewModel: ObservableObject {
     func endAction() {
         // If no pixels actually changed, discard the phantom snapshot
         if !actionDidChange {
-            _ = undoHistory.popLast()
-            canUndo = !undoHistory.isEmpty
+            _ = activeLayer.undoHistory.popLast()
+            canUndo = !activeLayer.undoHistory.isEmpty
+        } else {
+            debouncedAutoSave()
         }
         actionInProgress = false
         actionDidChange = false
@@ -163,8 +258,11 @@ class CanvasViewModel: ObservableObject {
         
         let dimensions = selectedCanvasSize.dimensions
         let totalPixels = dimensions.width * dimensions.height
-        self.pixels = Array(repeating: Color.clear, count: totalPixels)
-        self.pixelHexes = Array(repeating: "clear", count: totalPixels)
+        let clearPixels = Array(repeating: Color.clear, count: totalPixels)
+        let clearHexes = Array(repeating: "clear", count: totalPixels)
+        
+        self.layers = [Layer(name: "Background", pixels: clearPixels, pixelHexes: clearHexes)]
+        self.activeLayerIndex = 0
         
         self.toolsVM = ToolsViewModel(defaultColor: selectedPalette.colors[0], palette: selectedPalette)
         self.toolsVM.canvasVM = self
@@ -185,15 +283,17 @@ class CanvasViewModel: ObservableObject {
             extraColors: data.settings.extraColors
         )
         
-        // rebuild 2D array from 1D
-        self.pixelHexes = data.pixelGrid
-        self.pixels = data.pixelGrid.map { hex in
-            if hex == "clear" {
-                return Color.clear
-            } else {
-                return Color(hex: hex)
+        // Load layers — backward compatible with single-layer projects
+        if let savedLayers = data.layers, !savedLayers.isEmpty {
+            self.layers = savedLayers.map { Layer(from: $0) }
+        } else {
+            // Legacy project — wrap pixelGrid into a single "Background" layer
+            let colors = data.pixelGrid.map { hex in
+                hex == "clear" ? Color.clear : Color(hex: hex)
             }
+            self.layers = [Layer(name: "Background", pixels: colors, pixelHexes: data.pixelGrid)]
         }
+        self.activeLayerIndex = 0
         
         self.isFinished = data.isFinished
         self.toolsVM.canvasVM = self
@@ -252,12 +352,106 @@ class CanvasViewModel: ObservableObject {
 
     // MARK: - Convert to ProjectData
     
+    // Cache for compositePixelHexes — invalidated when pixelGeneration changes.
+    private var cachedComposite: [String] = []
+    private var cachedCompositeGeneration: UInt = UInt.max  // force initial compute
+    
+    // Flatten all visible layers into a single composite hex array (bottom → top).
+    // Cached per pixelGeneration — fast for repeated calls within the same frame.
+    func compositePixelHexes() -> [String] {
+        if cachedCompositeGeneration == pixelGeneration { return cachedComposite }
+        
+        guard !layers.isEmpty else { return [] }
+        
+        // Fast path: single layer with full opacity
+        if layers.count == 1, layers[0].isVisible, layers[0].opacity >= 1.0 {
+            cachedComposite = layers[0].pixelHexes
+            cachedCompositeGeneration = pixelGeneration
+            return cachedComposite
+        }
+        
+        let count = layers[0].pixelHexes.count
+        var result = Array(repeating: "clear", count: count)
+        
+        // Collect only visible layers with content to avoid iterating hidden/empty ones
+        let visibleLayers = layers.filter { $0.isVisible }
+        guard !visibleLayers.isEmpty else {
+            cachedComposite = result
+            cachedCompositeGeneration = pixelGeneration
+            return result
+        }
+        
+        for layer in visibleLayers {
+            let opacity = layer.opacity
+            let hexes = layer.pixelHexes
+            if opacity >= 1.0 {
+                // Full opacity fast path — direct copy, no blending needed
+                for i in 0..<count {
+                    let hex = hexes[i]
+                    if hex != "clear" {
+                        result[i] = hex
+                    }
+                }
+            } else if opacity > 0 {
+                for i in 0..<count {
+                    let hex = hexes[i]
+                    if hex != "clear" {
+                        result[i] = blendHex(src: hex, dst: result[i], srcAlpha: opacity)
+                    }
+                }
+            }
+        }
+        cachedComposite = result
+        cachedCompositeGeneration = pixelGeneration
+        return result
+    }
+    
+    // Simple hex color alpha blend: src over dst.
+    // Uses direct integer parsing instead of Scanner for speed.
+    private func blendHex(src: String, dst: String, srcAlpha: Double) -> String {
+        guard let sRGB = fastParseHex(src) else { return dst }
+        let a = srcAlpha
+        if dst == "clear" {
+            let r = UInt8((Double(sRGB.r) / 255.0 * a + 1.0 * (1.0 - a)) * 255.0)
+            let g = UInt8((Double(sRGB.g) / 255.0 * a + 1.0 * (1.0 - a)) * 255.0)
+            let b = UInt8((Double(sRGB.b) / 255.0 * a + 1.0 * (1.0 - a)) * 255.0)
+            return String(format: "#%02X%02X%02X", r, g, b)
+        }
+        guard let dRGB = fastParseHex(dst) else { return src }
+        let r = UInt8((Double(sRGB.r) / 255.0 * a + Double(dRGB.r) / 255.0 * (1.0 - a)) * 255.0)
+        let g = UInt8((Double(sRGB.g) / 255.0 * a + Double(dRGB.g) / 255.0 * (1.0 - a)) * 255.0)
+        let b = UInt8((Double(sRGB.b) / 255.0 * a + Double(dRGB.b) / 255.0 * (1.0 - a)) * 255.0)
+        return String(format: "#%02X%02X%02X", r, g, b)
+    }
+    
+    // Fast hex parsing without Scanner — pure integer math.
+    @inline(__always)
+    private func fastParseHex(_ hex: String) -> (r: UInt8, g: UInt8, b: UInt8)? {
+        let chars = hex.utf8
+        let start = hex.hasPrefix("#") ? hex.utf8.index(after: hex.utf8.startIndex) : hex.utf8.startIndex
+        let hexChars = hex.utf8[start...]
+        guard hexChars.count >= 6 else { return nil }
+        
+        var val: UInt32 = 0
+        for byte in hexChars.prefix(6) {
+            val <<= 4
+            switch byte {
+            case 0x30...0x39: val |= UInt32(byte - 0x30)       // 0-9
+            case 0x41...0x46: val |= UInt32(byte - 0x41 + 10)  // A-F
+            case 0x61...0x66: val |= UInt32(byte - 0x61 + 10)  // a-f
+            default: return nil
+            }
+        }
+        return (r: UInt8((val >> 16) & 0xFF), g: UInt8((val >> 8) & 0xFF), b: UInt8(val & 0xFF))
+    }
+    
     func toProjectData() -> ProjectData {
         return ProjectData(
             id: projectID,
             name: projectName,
             settings: projectSettings,
-            pixelGrid: pixelHexes,
+            pixelGrid: compositePixelHexes(),
+            layers: layers.map { $0.toLayerData() },
             lastEdited: Date(),
             isFinished: isFinished
         )
@@ -266,6 +460,140 @@ class CanvasViewModel: ObservableObject {
     // Sync extra colors from ToolsViewModel back to project settings for persistence
     func syncExtraColors(_ colors: [String]) {
         projectSettings.extraColors = colors
+    }
+    
+    // MARK: - Layer Management
+    
+    func switchToLayer(at index: Int) {
+        guard index >= 0, index < layers.count else { return }
+        activeLayerIndex = index
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+    }
+    
+    func addLayer() {
+        guard layers.count < Self.maxLayers else { return }
+        let totalPixels = projectSettings.selectedCanvasSize.dimensions.width *
+                          projectSettings.selectedCanvasSize.dimensions.height
+        let newLayer = Layer(
+            name: "Layer \(layers.count + 1)",
+            pixels: Array(repeating: .clear, count: totalPixels),
+            pixelHexes: Array(repeating: "clear", count: totalPixels)
+        )
+        let insertIndex = activeLayerIndex + 1
+        layers.insert(newLayer, at: insertIndex)
+        activeLayerIndex = insertIndex
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func deleteLayer(at index: Int) {
+        guard layers.count > 1, index >= 0, index < layers.count else { return }
+        layers.remove(at: index)
+        if activeLayerIndex >= layers.count {
+            activeLayerIndex = layers.count - 1
+        } else if activeLayerIndex > index {
+            activeLayerIndex -= 1
+        }
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func duplicateLayer(at index: Int) {
+        guard layers.count < Self.maxLayers, index >= 0, index < layers.count else { return }
+        let source = layers[index]
+        let copy = Layer(
+            name: "\(source.name) copy",
+            pixels: source.pixels,
+            pixelHexes: source.pixelHexes,
+            isVisible: source.isVisible,
+            opacity: source.opacity
+        )
+        layers.insert(copy, at: index + 1)
+        activeLayerIndex = index + 1
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func moveLayer(from source: Int, to destination: Int) {
+        guard source != destination,
+              source >= 0, source < layers.count,
+              destination >= 0, destination < layers.count else { return }
+        let layer = layers.remove(at: source)
+        layers.insert(layer, at: destination)
+        // Keep active layer tracking the same layer object
+        if activeLayerIndex == source {
+            activeLayerIndex = destination
+        } else if source < activeLayerIndex && destination >= activeLayerIndex {
+            activeLayerIndex -= 1
+        } else if source > activeLayerIndex && destination <= activeLayerIndex {
+            activeLayerIndex += 1
+        }
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func toggleLayerVisibility(at index: Int) {
+        guard index >= 0, index < layers.count else { return }
+        layers[index].isVisible.toggle()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func setLayerOpacity(at index: Int, _ opacity: Double) {
+        guard index >= 0, index < layers.count else { return }
+        layers[index].opacity = opacity.clamped(to: 0...1)
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    func renameLayer(at index: Int, to name: String) {
+        guard index >= 0, index < layers.count else { return }
+        layers[index].name = name
+        debouncedAutoSave()
+    }
+    
+    func mergeDown(at index: Int) {
+        guard index > 0, index < layers.count else { return }
+        let upper = layers[index]
+        let lower = layers[index - 1]
+        
+        // Merge upper onto lower
+        for i in 0..<lower.pixelHexes.count {
+            let hex = upper.pixelHexes[i]
+            if hex != "clear" {
+                if upper.opacity >= 1.0 {
+                    lower.pixels[i] = upper.pixels[i]
+                    lower.pixelHexes[i] = hex
+                } else if upper.opacity > 0 {
+                    let blended = blendHex(src: hex, dst: lower.pixelHexes[i], srcAlpha: upper.opacity)
+                    lower.pixelHexes[i] = blended
+                    lower.pixels[i] = Color(hex: blended)
+                }
+            }
+        }
+        
+        layers.remove(at: index)
+        if activeLayerIndex >= index {
+            activeLayerIndex = max(0, activeLayerIndex - 1)
+        }
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+    }
+    
+    // Clear all pixels on the active layer (resets to transparent).
+    func clearCurrentLayer() {
+        saveSnapshot()
+        let count = activeLayer.pixels.count
+        activeLayer.pixels = Array(repeating: .clear, count: count)
+        activeLayer.pixelHexes = Array(repeating: "clear", count: count)
+        actionDidChange = true
+        pixelGeneration &+= 1
+        debouncedAutoSave()
     }
     
     func updatePixel(row: Int, col: Int) {
@@ -323,10 +651,19 @@ class CanvasViewModel: ObservableObject {
         // Eyedropper is handled separately via eyedropperPickColor
         if toolsVM.selectedTool == .eyedropper { return }
         
-        if toolsVM.selectedTool == .fill {
-            floodFill(at: index, with: toolsVM.effectiveDrawingColor)
-        } else {
-            applyToolToPixel(at: index)
+        let tool = toolsVM.selectedTool
+        let isBrushTool = (tool == .pencil || tool == .eraser)
+        let brushSize = isBrushTool ? toolsVM.brushSize : 1
+        
+        // Compute the set of pixel indices for this brush stroke (NxN centered)
+        let indices = brushIndices(centerRow: row, centerCol: col, brushSize: brushSize, width: width, height: height)
+        
+        for idx in indices {
+            if tool == .fill {
+                floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
+            } else {
+                applyToolToPixel(at: idx)
+            }
         }
         
         // Apply symmetry mirrors
@@ -335,24 +672,24 @@ class CanvasViewModel: ObservableObject {
         
         if hSym {
             let mirrorCol = width - 1 - col
-            let mirrorIndex = row * width + mirrorCol
-            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
-                if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
+            let mirrorIndices = brushIndices(centerRow: row, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
+            for idx in mirrorIndices where idx != index {
+                if tool == .fill {
+                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    applyToolToPixel(at: mirrorIndex)
+                    applyToolToPixel(at: idx)
                 }
             }
         }
         
         if vSym {
             let mirrorRow = height - 1 - row
-            let mirrorIndex = mirrorRow * width + col
-            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
-                if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
+            let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: col, brushSize: brushSize, width: width, height: height)
+            for idx in mirrorIndices where idx != index {
+                if tool == .fill {
+                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    applyToolToPixel(at: mirrorIndex)
+                    applyToolToPixel(at: idx)
                 }
             }
         }
@@ -361,12 +698,12 @@ class CanvasViewModel: ObservableObject {
         if hSym && vSym {
             let mirrorRow = height - 1 - row
             let mirrorCol = width - 1 - col
-            let mirrorIndex = mirrorRow * width + mirrorCol
-            if mirrorIndex != index, mirrorIndex >= 0, mirrorIndex < pixels.count {
-                if toolsVM.selectedTool == .fill {
-                    floodFill(at: mirrorIndex, with: toolsVM.effectiveDrawingColor)
+            let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
+            for idx in mirrorIndices where idx != index {
+                if tool == .fill {
+                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
                 } else {
-                    applyToolToPixel(at: mirrorIndex)
+                    applyToolToPixel(at: idx)
                 }
             }
         }
@@ -374,11 +711,36 @@ class CanvasViewModel: ObservableObject {
         pixelGeneration &+= 1
     }
     
-    // Eyedropper: pick the color at a grid index, set it as selected, and switch to pencil
+    // Returns all grid indices for an NxN brush centered on (centerRow, centerCol).
+    // Clamps to grid boundaries.
+    private func brushIndices(centerRow: Int, centerCol: Int, brushSize: Int, width: Int, height: Int) -> [Int] {
+        if brushSize <= 1 {
+            return [centerRow * width + centerCol]
+        }
+        let half = brushSize / 2
+        var result: [Int] = []
+        result.reserveCapacity(brushSize * brushSize)
+        for dr in -half...(brushSize - 1 - half) {
+            for dc in -half...(brushSize - 1 - half) {
+                let r = centerRow + dr
+                let c = centerCol + dc
+                guard r >= 0, r < height, c >= 0, c < width else { continue }
+                result.append(r * width + c)
+            }
+        }
+        return result
+    }
+    
+    // Eyedropper: pick the color at a grid index from the composite (visible) result
     func eyedropperPickColor(at index: Int) {
-        guard index >= 0, index < pixels.count else { return }
-        let color = pixels[index]
-        guard !color.isClear else { return }
+        guard index >= 0, index < activeLayer.pixels.count else { return }
+        
+        // Sample composite so the eyedropper picks what the user actually sees
+        let compositeHex = compositePixelHexes()
+        guard index < compositeHex.count else { return }
+        let hex = compositeHex[index]
+        guard hex != "clear" else { return }
+        let color = Color(hex: hex)
         
         // Convert picked pixel to RGBA for comparison
         var pr: CGFloat = 0, pg: CGFloat = 0, pb: CGFloat = 0, pa: CGFloat = 0
@@ -409,11 +771,13 @@ class CanvasViewModel: ObservableObject {
         toolsVM.selectedTool = .pencil
     }
     
-    // Returns the color at a grid index (for eyedropper preview)
+    // Returns the composite color at a grid index (for eyedropper preview)
     func colorAtIndex(_ index: Int) -> Color? {
-        guard index >= 0, index < pixels.count else { return nil }
-        let color = pixels[index]
-        return color.isClear ? nil : color
+        guard index >= 0, index < activeLayer.pixels.count else { return nil }
+        let compositeHex = compositePixelHexes()
+        guard index < compositeHex.count else { return nil }
+        let hex = compositeHex[index]
+        return hex == "clear" ? nil : Color(hex: hex)
     }
     
     // Convert a screen-space point to a grid index, given the geo size, canvas offset, and zoom scale
@@ -653,12 +1017,15 @@ class CanvasViewModel: ObservableObject {
     // MARK: - Export Project JSON
     
     func exportProjectJSON() -> URL? {
-        let projectData = toProjectData()
+        // Export uses composite-only (no layer data) — keeps exports lightweight and legacy-compatible
+        var exportData = toProjectData()
+        exportData.layers = nil
+        
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         
-        guard let data = try? encoder.encode(projectData) else { return nil }
+        guard let data = try? encoder.encode(exportData) else { return nil }
         
         let fileName = "\(projectName.replacingOccurrences(of: " ", with: "_")).json"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
@@ -682,7 +1049,7 @@ class CanvasViewModel: ObservableObject {
             projectName: projectName,
             canvasWidth: dims.width,
             canvasHeight: dims.height,
-            pixelGrid: pixelHexes
+            pixelGrid: compositePixelHexes()
         )
         
         let image = exportImage()

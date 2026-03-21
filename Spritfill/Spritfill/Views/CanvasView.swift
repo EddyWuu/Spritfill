@@ -240,7 +240,7 @@ struct CanvasView: View {
                 pixelGrid: project.pixelGrid,
                 gridWidth: dims.width,
                 gridHeight: dims.height,
-                tileSize: max(1, 100 / CGFloat(maxDim))
+                tileSize: 100.0 / CGFloat(maxDim)
             )
             .frame(width: 100, height: 100)
             .cornerRadius(10)

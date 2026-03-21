@@ -16,12 +16,16 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
     var doubleTapAction: () -> Void
     var onPan: ((CGSize) -> Void)?
     var onPanEnd: (() -> Void)?
+    var onPinch: ((CGFloat) -> Void)?   // scale multiplier (relative to start)
+    var onPinchEnd: (() -> Void)?
 
     // Convenience init for just the double-tap (backward compatible)
     init(action: @escaping () -> Void) {
         self.doubleTapAction = action
         self.onPan = nil
         self.onPanEnd = nil
+        self.onPinch = nil
+        self.onPinchEnd = nil
     }
 
     // Full init with double-tap + pan
@@ -31,10 +35,26 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
         self.doubleTapAction = doubleTapAction
         self.onPan = onPan
         self.onPanEnd = onPanEnd
+        self.onPinch = nil
+        self.onPinchEnd = nil
+    }
+    
+    // Full init with double-tap + pan + pinch-to-zoom
+    init(doubleTapAction: @escaping () -> Void,
+         onPan: @escaping (CGSize) -> Void,
+         onPanEnd: @escaping () -> Void,
+         onPinch: @escaping (CGFloat) -> Void,
+         onPinchEnd: @escaping () -> Void) {
+        self.doubleTapAction = doubleTapAction
+        self.onPan = onPan
+        self.onPanEnd = onPanEnd
+        self.onPinch = onPinch
+        self.onPinchEnd = onPinchEnd
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(doubleTapAction: doubleTapAction, onPan: onPan, onPanEnd: onPanEnd)
+        Coordinator(doubleTapAction: doubleTapAction, onPan: onPan, onPanEnd: onPanEnd,
+                    onPinch: onPinch, onPinchEnd: onPinchEnd)
     }
 
     func makeUIView(context: Context) -> UIView {
@@ -59,6 +79,13 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
         pan.delegate = context.coordinator
         view.addGestureRecognizer(pan)
 
+        // Pinch-to-zoom
+        let pinch = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePinch(_:)))
+        pinch.cancelsTouchesInView = false
+        pinch.delaysTouchesBegan = false
+        pinch.delegate = context.coordinator
+        view.addGestureRecognizer(pinch)
+
         return view
     }
 
@@ -66,19 +93,30 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
         context.coordinator.doubleTapAction = doubleTapAction
         context.coordinator.onPan = onPan
         context.coordinator.onPanEnd = onPanEnd
+        context.coordinator.onPinch = onPinch
+        context.coordinator.onPinchEnd = onPinchEnd
     }
 
     class Coordinator: NSObject, UIGestureRecognizerDelegate {
         var doubleTapAction: () -> Void
         var onPan: ((CGSize) -> Void)?
         var onPanEnd: (() -> Void)?
+        var onPinch: ((CGFloat) -> Void)?
+        var onPinchEnd: (() -> Void)?
+        
+        // Zoom scale when the pinch gesture started — used to compute absolute scale from relative gesture scale.
+        private var pinchStartScale: CGFloat = 1.0
 
         init(doubleTapAction: @escaping () -> Void,
              onPan: ((CGSize) -> Void)?,
-             onPanEnd: (() -> Void)?) {
+             onPanEnd: (() -> Void)?,
+             onPinch: ((CGFloat) -> Void)?,
+             onPinchEnd: (() -> Void)?) {
             self.doubleTapAction = doubleTapAction
             self.onPan = onPan
             self.onPanEnd = onPanEnd
+            self.onPinch = onPinch
+            self.onPinchEnd = onPinchEnd
         }
 
         @objc func handleTap() { doubleTapAction() }
@@ -94,8 +132,23 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
             default: break
             }
         }
+        
+        @objc func handlePinch(_ g: UIPinchGestureRecognizer) {
+            switch g.state {
+            case .began:
+                pinchStartScale = 1.0
+            case .changed:
+                // Send the incremental scale factor (relative to last callback)
+                let delta = g.scale / pinchStartScale
+                pinchStartScale = g.scale
+                onPinch?(delta)
+            case .ended, .cancelled:
+                onPinchEnd?()
+            default: break
+            }
+        }
 
-        // Allow pan + tap to coexist with each other and with SwiftUI gestures
+        // Allow pan + tap + pinch to coexist with each other and with SwiftUI gestures
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                                shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
             return true

@@ -17,13 +17,14 @@ struct CanvasHelpSheetView: View {
                     
                     // MARK: - Tools
                     helpSection(title: "Tools", icon: "paintbrush") {
-                        toolRow(icon: "pencil", name: "Pencil", description: "Draw pixels with the selected color")
-                        toolRow(icon: "eraser", name: "Eraser", description: "Clear pixels back to empty")
+                        toolRow(icon: "pencil", name: "Pencil", description: "Draw pixels with the selected color. Long-press to choose a brush size (1×1 up to 5×5)")
+                        toolRow(icon: "eraser", name: "Eraser", description: "Clear pixels back to empty. Long-press to choose a brush size (1×1 up to 5×5). Pencil and eraser sizes are independent")
                         toolRow(icon: "drop.halffull", name: "Fill", description: "Flood-fill a connected area with the selected color")
                         toolRow(icon: "eyedropper", name: "Eyedropper", description: "Pick a color from the canvas and set it as the active color")
                         toolRow(icon: "arrow.up.and.down.and.arrow.left.and.right", name: "Shift", description: "Move the entire artwork up, down, left, or right")
                         toolRow(icon: "arrow.left.and.right.righttriangle.left.righttriangle.right", name: "Flip", description: "Mirror the artwork horizontally or vertically")
                         toolRow(icon: "hand.draw", name: "Pan", description: "Drag to move around the canvas without drawing")
+                        toolRow(icon: "plus.circle", name: "Add Colors", description: "Tap the + button in the toolbar to add custom colors to your palette. Added colors appear in a separate section below the base palette")
                     }
                     
                     // MARK: - Symmetry
@@ -47,6 +48,7 @@ struct CanvasHelpSheetView: View {
                     // MARK: - Gestures & Shortcuts
                     helpSection(title: "Gestures & Shortcuts", icon: "hand.tap") {
                         gestureRow(icon: "hand.draw", name: "Two-Finger Pan", description: "Drag with two fingers to pan around the canvas, no matter which tool is selected")
+                        gestureRow(icon: "arrow.up.left.and.arrow.down.right", name: "Pinch to Zoom", description: "Pinch with two fingers to zoom in and out of the canvas")
                         gestureRow(icon: "arrow.uturn.backward", name: "Two-Finger Double-Tap", description: "Double-tap with two fingers to undo the last action")
                         gestureRow(icon: "arrow.uturn.forward", name: "Redo / Undo Buttons", description: "Use the arrow buttons in the toolbar to redo or undo actions")
                     }
@@ -56,8 +58,8 @@ struct CanvasHelpSheetView: View {
                         toolRow(icon: "questionmark.circle", name: "Help", description: "You're here!")
                         toolRow(icon: "trash", name: "Delete", description: "Permanently delete this project")
                         toolRow(icon: "info.circle", name: "Details", description: "View project info — canvas size, palette, pixel count")
+                        toolRow(icon: "square.3.layers.3d", name: "Layers", description: "Toggle the layer panel — add, reorder, and manage drawing layers")
                         toolRow(icon: "pencil", name: "Rename", description: "Change the project name")
-                        toolRow(icon: "externaldrive", name: "Save", description: "Save your project to device storage")
                         toolRow(icon: "square.and.arrow.down", name: "Export to Photos", description: "Save the artwork as a PNG image to your photo library")
                         toolRow(icon: "square.and.arrow.up", name: "Share", description: "Share the artwork via AirDrop, Messages, and more")
                         toolRow(icon: "checkmark.seal", name: "Finish", description: "Mark the project as finished and move it to the Finished tab")
@@ -65,8 +67,8 @@ struct CanvasHelpSheetView: View {
                     
                     // MARK: - Tips
                     helpSection(title: "Tips", icon: "lightbulb") {
-                        tipRow("Pinch the zoom slider to zoom in and see individual pixels clearly.")
-                        tipRow("Your project is auto-saved when you leave the canvas.")
+                        tipRow("Pinch with two fingers or use the zoom slider to zoom in and see individual pixels clearly.")
+                        tipRow("Your project auto-saves after every change — you'll never lose progress.")
                         tipRow("Use the eyedropper to match colors already on your canvas.")
                         tipRow("Long press a project on the main screen to delete it.")
                     }
