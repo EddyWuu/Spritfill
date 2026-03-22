@@ -19,7 +19,8 @@ struct CanvasHelpSheetView: View {
                     helpSection(title: "Tools", icon: "paintbrush") {
                         toolRow(icon: "pencil", name: "Pencil", description: "Draw pixels with the selected color. Long-press to choose a brush size (1×1 up to 5×5)")
                         toolRow(icon: "eraser", name: "Eraser", description: "Clear pixels back to empty. Long-press to choose a brush size (1×1 up to 5×5). Pencil and eraser sizes are independent")
-                        toolRow(icon: "drop.halffull", name: "Fill", description: "Flood-fill a connected area with the selected color")
+                        toolRow(icon: "drop.halffull", name: "Fill", description: "Flood-fill a connected area with the selected color. Long-press to switch between Fill Color and Fill Erase mode")
+                        toolRow(icon: "eraser", name: "Fill Erase", description: "Erase all connected pixels of the same color. Access by long-pressing the Fill button and selecting Fill Erase")
                         toolRow(icon: "eyedropper", name: "Eyedropper", description: "Pick a color from the canvas and set it as the active color")
                         toolRow(icon: "arrow.up.and.down.and.arrow.left.and.right", name: "Shift", description: "Move the entire artwork up, down, left, or right")
                         toolRow(icon: "arrow.left.and.right.righttriangle.left.righttriangle.right", name: "Flip", description: "Mirror the artwork horizontally or vertically")

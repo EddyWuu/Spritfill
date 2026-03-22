@@ -147,7 +147,8 @@ class GalleryViewModel: ObservableObject {
                 items.append(GalleryBoardItem(
                     id: project.id,
                     position: CGPoint(x: x, y: y),
-                    displaySize: defaultItemSize
+                    displaySize: defaultItemSize,
+                    isArchived: true
                 ))
                 col += 1
                 if col >= 4 {

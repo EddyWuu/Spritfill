@@ -41,6 +41,9 @@ class ToolsViewModel: ObservableObject {
     @Published var pencilBrushSize: Int = 1
     @Published var eraserBrushSize: Int = 1
     
+    // Fill mode: false = fill with color, true = fill erase (clear connected area)
+    @Published var fillEraseMode: Bool = false
+    
     // The brush size for the currently selected tool.
     var brushSize: Int {
         get {

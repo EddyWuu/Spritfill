@@ -12,28 +12,32 @@ struct ToolButtonView: View {
     let tool: ToolsViewModel.ToolType
     @ObservedObject var toolsVM: ToolsViewModel
     @State private var showBrushPicker = false
+    @State private var showFillPicker = false
     @State private var longPressTriggered = false
 
     var body: some View {
         let isSelected = toolsVM.isSelected(tool: tool)
         let isBrushTool = (tool == .pencil || tool == .eraser)
+        let isFillTool = (tool == .fill)
         let toolBrushSize = toolsVM.brushSize(for: tool)
         let hasBrushSize = isBrushTool && toolBrushSize > 1
         
         let button = Button(action: {
-            // Skip if long press just opened the picker
+            // Skip if long press just opened a picker
             if longPressTriggered {
                 longPressTriggered = false
                 return
             }
             if isBrushTool && showBrushPicker {
                 showBrushPicker = false
+            } else if isFillTool && showFillPicker {
+                showFillPicker = false
             } else {
                 toolsVM.selectTool(tool)
             }
         }) {
             ZStack(alignment: .topTrailing) {
-                Image(systemName: tool.iconName)
+                Image(systemName: isFillTool && toolsVM.fillEraseMode ? "drop.halffull" : tool.iconName)
                     .font(.body)
                     .foregroundColor(isSelected ? .blue : .primary)
                     .padding(10)
@@ -50,10 +54,21 @@ struct ToolButtonView: View {
                         .clipShape(Circle())
                         .offset(x: 2, y: -2)
                 }
+                
+                // Fill erase badge
+                if isFillTool && toolsVM.fillEraseMode {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 14, height: 14)
+                        .background(Color.red)
+                        .clipShape(Circle())
+                        .offset(x: 2, y: -2)
+                }
             }
         }
         
-        // Only attach long-press + popover to pencil/eraser — keeps other buttons snappy
+        // Attach long-press + popover to pencil, eraser, and fill
         if isBrushTool {
             button
                 .simultaneousGesture(
@@ -70,9 +85,96 @@ struct ToolButtonView: View {
                     BrushSizePickerView(toolsVM: toolsVM, tool: tool)
                         .presentationCompactAdaptation(.popover)
                 }
+        } else if isFillTool {
+            button
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 0.4)
+                        .onEnded { _ in
+                            longPressTriggered = true
+                            toolsVM.selectTool(tool)
+                            let impact = UIImpactFeedbackGenerator(style: .light)
+                            impact.impactOccurred()
+                            showFillPicker = true
+                        }
+                )
+                .popover(isPresented: $showFillPicker, arrowEdge: .top) {
+                    FillModePickerView(toolsVM: toolsVM)
+                        .presentationCompactAdaptation(.popover)
+                }
         } else {
             button
         }
+    }
+}
+
+// MARK: - Fill Mode Picker Popover
+
+private struct FillModePickerView: View {
+    @ObservedObject var toolsVM: ToolsViewModel
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            Text("Fill Mode")
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+            
+            VStack(spacing: 6) {
+                Button(action: {
+                    toolsVM.fillEraseMode = false
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "drop.halffull")
+                            .font(.body)
+                            .frame(width: 24)
+                        Text("Fill Color")
+                            .font(.subheadline)
+                        Spacer()
+                        if !toolsVM.fillEraseMode {
+                            Image(systemName: "checkmark")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .foregroundColor(!toolsVM.fillEraseMode ? .white : .primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(!toolsVM.fillEraseMode ? Color.blue : Color(.systemGray5))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    toolsVM.fillEraseMode = true
+                    let impact = UIImpactFeedbackGenerator(style: .light)
+                    impact.impactOccurred()
+                }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "eraser")
+                            .font(.body)
+                            .frame(width: 24)
+                        Text("Fill Erase")
+                            .font(.subheadline)
+                        Spacer()
+                        if toolsVM.fillEraseMode {
+                            Image(systemName: "checkmark")
+                                .font(.caption)
+                                .fontWeight(.bold)
+                        }
+                    }
+                    .foregroundColor(toolsVM.fillEraseMode ? .white : .primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(toolsVM.fillEraseMode ? Color.red : Color(.systemGray5))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .frame(width: 180)
     }
 }
 

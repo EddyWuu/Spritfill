@@ -52,7 +52,7 @@ struct GalleryStorageView: View {
                                     Button(action: {
                                         viewModel.restoreItem(id: item.id)
                                     }) {
-                                        Text("Restore")
+                                        Text("Add")
                                             .font(.caption2)
                                             .fontWeight(.semibold)
                                             .foregroundColor(.white)

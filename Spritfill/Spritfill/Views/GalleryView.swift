@@ -25,7 +25,7 @@ struct GalleryView: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
-                        Text("Create some pixel art in the Canvas tab\nand it will appear here!")
+                        Text("Create pixel art in the Canvas tab, then\nrestore it from the Archive to display here!")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -43,12 +43,10 @@ struct GalleryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if galleryViewModel.isEditMode {
-                        Button {
-                            galleryViewModel.showStorage = true
-                        } label: {
-                            Image(systemName: "archivebox")
-                        }
+                    Button {
+                        galleryViewModel.showStorage = true
+                    } label: {
+                        Image(systemName: "archivebox")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {

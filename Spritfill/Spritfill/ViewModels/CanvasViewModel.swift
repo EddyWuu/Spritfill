@@ -486,7 +486,8 @@ class CanvasViewModel: ObservableObject {
         
         for idx in indices {
             if tool == .fill {
-                floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
+                let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
+                floodFill(at: idx, with: fillColor)
             } else {
                 applyToolToPixel(at: idx)
             }
@@ -501,7 +502,8 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndices = brushIndices(centerRow: row, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
             for idx in mirrorIndices where idx != index {
                 if tool == .fill {
-                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
+                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
+                    floodFill(at: idx, with: fillColor)
                 } else {
                     applyToolToPixel(at: idx)
                 }
@@ -513,7 +515,8 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: col, brushSize: brushSize, width: width, height: height)
             for idx in mirrorIndices where idx != index {
                 if tool == .fill {
-                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
+                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
+                    floodFill(at: idx, with: fillColor)
                 } else {
                     applyToolToPixel(at: idx)
                 }
@@ -527,7 +530,8 @@ class CanvasViewModel: ObservableObject {
             let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
             for idx in mirrorIndices where idx != index {
                 if tool == .fill {
-                    floodFill(at: idx, with: toolsVM.effectiveDrawingColor)
+                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
+                    floodFill(at: idx, with: fillColor)
                 } else {
                     applyToolToPixel(at: idx)
                 }
