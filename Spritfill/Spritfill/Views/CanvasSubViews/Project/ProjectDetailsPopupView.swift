@@ -64,6 +64,20 @@ struct ProjectDetailsPopupView: View {
                     Divider()
                     
                     HStack {
+                        Image(systemName: "photo")
+                            .foregroundColor(.teal)
+                            .frame(width: 20)
+                        Text("Export Resolution:")
+                            .font(.headline)
+                        Spacer()
+                        Text(viewModel.exportResolutionLabel)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Divider()
+                    
+                    HStack {
                         Image(systemName: "paintpalette")
                             .foregroundColor(.purple)
                             .frame(width: 20)

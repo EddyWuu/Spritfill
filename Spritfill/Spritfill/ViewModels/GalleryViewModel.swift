@@ -88,7 +88,7 @@ class GalleryViewModel: ObservableObject {
     }
     
     var canPan: Bool {
-        !isEditMode
+        true
     }
     
     // MARK: - Persistence

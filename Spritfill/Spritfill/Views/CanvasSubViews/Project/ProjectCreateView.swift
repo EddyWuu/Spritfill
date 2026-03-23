@@ -26,6 +26,7 @@ struct ProjectCreateView: View {
     @State private var showClearLayerAlert = false
     @State private var showExportedAlert = false
     @State private var showSaveSizeSheet = false
+    @State private var showShareSizeSheet = false
     @State private var showFinishAlert = false
     @State private var showFinishCongrats = false
     @State private var showColorAdder = false
@@ -115,8 +116,12 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            viewModel.exportAndGetShareImage { image in
-                                shareImage = image
+                            if viewModel.exportNeedsUpscale {
+                                showShareSizeSheet = true
+                            } else {
+                                viewModel.exportAndGetShareImage { image in
+                                    shareImage = image
+                                }
                             }
                         }) {
                             Image(systemName: "square.and.arrow.up")
@@ -162,6 +167,7 @@ struct ProjectCreateView: View {
                 
                 // MARK: - Tool buttons (always visible)
                 ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder)
+                    .padding(.bottom, bottomPanelCollapsed ? 6 : 0)
                     .background(Color(.secondarySystemBackground))
                 
                 // MARK: - Collapsible bottom panel
@@ -295,9 +301,28 @@ struct ProjectCreateView: View {
         } message: {
             Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
+        .confirmationDialog(
+            "Small Export Size (\(viewModel.exportResolutionLabel))",
+            isPresented: $showShareSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Export at Original Size — \(viewModel.exportResolutionLabel)") {
+                viewModel.exportAndGetShareImage(upscale: false) { image in
+                    shareImage = image
+                }
+            }
+            Button("Upscale for Sharing — sharper on device") {
+                viewModel.exportAndGetShareImage(upscale: true) { image in
+                    shareImage = image
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This image may appear blurry when shared. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
+        }
         .sheet(isPresented: $showProjectDetails) {
             ProjectDetailsPopupView(viewModel: viewModel)
-                .presentationDetents([.height(360)])
+                .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $shareImage) { item in

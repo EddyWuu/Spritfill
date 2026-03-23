@@ -14,6 +14,23 @@ class CatalogViewModel: ObservableObject {
     @Published var savedSpriteName = ""
     
     private let communityService = CommunitySpritesService.shared
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        // Set up Combine subscriptions once
+        communityService.$communitySprites
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+        communityService.$fetchFailed
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+    }
     
     // All sprites: premade + community
     private var allSprites: [PremadeSpriteData] {
@@ -66,23 +83,8 @@ class CatalogViewModel: ObservableObject {
     }
     
     func loadCommunitySprites() {
-        communityService.fetchCommunitySprites()
-        // Observe changes from the community service
-        communityService.$communitySprites
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-        communityService.$fetchFailed
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
+        communityService.fetchIfNeeded()
     }
-    
-    private var cancellables = Set<AnyCancellable>()
     
     private static let exportTileSize = 16
     

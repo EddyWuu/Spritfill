@@ -15,7 +15,50 @@ class FirebaseSubmissionService {
     
     private let db = Firestore.firestore()
     
+    private static let dailyLimitKey = "dailySubmissionCount"
+    private static let dailyLimitDateKey = "dailySubmissionDate"
+    static let maxDailySubmissions = 10
+    
     private init() {}
+    
+    // MARK: - Daily submission limit
+    
+    /// Number of submissions made today.
+    var todaySubmissionCount: Int {
+        resetIfNewDay()
+        return UserDefaults.standard.integer(forKey: Self.dailyLimitKey)
+    }
+    
+    /// Whether the user has reached the daily submission limit.
+    var hasReachedDailyLimit: Bool {
+        todaySubmissionCount >= Self.maxDailySubmissions
+    }
+    
+    /// Remaining submissions available today.
+    var remainingSubmissions: Int {
+        max(0, Self.maxDailySubmissions - todaySubmissionCount)
+    }
+    
+    private func resetIfNewDay() {
+        let storedDate = UserDefaults.standard.string(forKey: Self.dailyLimitDateKey) ?? ""
+        let todayString = Self.todayDateString()
+        if storedDate != todayString {
+            UserDefaults.standard.set(0, forKey: Self.dailyLimitKey)
+            UserDefaults.standard.set(todayString, forKey: Self.dailyLimitDateKey)
+        }
+    }
+    
+    private func incrementDailyCount() {
+        resetIfNewDay()
+        let current = UserDefaults.standard.integer(forKey: Self.dailyLimitKey)
+        UserDefaults.standard.set(current + 1, forKey: Self.dailyLimitKey)
+    }
+    
+    private static func todayDateString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
     
     // Submits artwork for review
     // - Parameters:
@@ -23,6 +66,11 @@ class FirebaseSubmissionService {
     //   - image: The rendered PNG image of the artwork
     //   - completion: Returns success or error
     func submitArtwork(submission: ArtSubmission, image: UIImage, completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        guard !hasReachedDailyLimit else {
+            completion(.failure(SubmissionError.dailyLimitReached))
+            return
+        }
         
         guard let pngData = image.pngData() else {
             completion(.failure(SubmissionError.imageConversionFailed))
@@ -43,10 +91,11 @@ class FirebaseSubmissionService {
             "status": "pending_review"
         ]
         
-        db.collection("submissions").document(submission.id.uuidString).setData(data) { error in
+        db.collection("submissions").document(submission.id.uuidString).setData(data) { [weak self] error in
             if let error = error {
                 completion(.failure(error))
             } else {
+                self?.incrementDailyCount()
                 completion(.success(()))
             }
         }
@@ -54,11 +103,14 @@ class FirebaseSubmissionService {
     
     enum SubmissionError: LocalizedError {
         case imageConversionFailed
+        case dailyLimitReached
         
         var errorDescription: String? {
             switch self {
             case .imageConversionFailed:
                 return "Failed to convert artwork to PNG."
+            case .dailyLimitReached:
+                return "You've reached the daily submission limit of \(FirebaseSubmissionService.maxDailySubmissions). Please try again tomorrow."
             }
         }
     }

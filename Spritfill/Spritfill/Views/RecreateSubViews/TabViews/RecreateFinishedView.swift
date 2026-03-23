@@ -16,7 +16,9 @@ struct RecreateFinishedView: View {
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showSaveSizeSheet = false
+    @State private var showShareSizeSheet = false
     @State private var pendingSaveSession: RecreateSession? = nil
+    @State private var pendingShareSession: RecreateSession? = nil
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     private var columns: [GridItem] {
@@ -79,6 +81,30 @@ struct RecreateFinishedView: View {
             }
         } message: {
             Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
+        }
+        .confirmationDialog(
+            "Small Export Size" + (pendingShareSession.map { " (\(viewModel.sessionExportResolutionLabel($0)))" } ?? ""),
+            isPresented: $showShareSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Export at Original Size") {
+                if let session = pendingShareSession, let image = viewModel.exportSessionImage(session) {
+                    shareImage = IdentifiableImage(image: image)
+                }
+                pendingShareSession = nil
+            }
+            Button("Upscale for Sharing — sharper on device") {
+                if let session = pendingShareSession, var image = viewModel.exportSessionImage(session) {
+                    image = BitmapExporter.upscaleForPhotos(image)
+                    shareImage = IdentifiableImage(image: image)
+                }
+                pendingShareSession = nil
+            }
+            Button("Cancel", role: .cancel) {
+                pendingShareSession = nil
+            }
+        } message: {
+            Text("This image may appear blurry when shared. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])
@@ -232,7 +258,10 @@ struct RecreateFinishedView: View {
                     }
                     
                     Button {
-                        if let image = viewModel.exportSessionImage(item.session) {
+                        if viewModel.sessionNeedsUpscale(item.session) {
+                            pendingShareSession = item.session
+                            showShareSizeSheet = true
+                        } else if let image = viewModel.exportSessionImage(item.session) {
                             shareImage = IdentifiableImage(image: image)
                         }
                     } label: {

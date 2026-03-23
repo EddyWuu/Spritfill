@@ -16,7 +16,9 @@ struct CatalogView: View {
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showSaveSizeSheet = false
+    @State private var showShareSizeSheet = false
     @State private var pendingSaveSprite: PremadeSpriteData? = nil
+    @State private var pendingShareSprite: PremadeSpriteData? = nil
     @State private var showCommunityInfo = false
     @Environment(\.horizontalSizeClass) private var sizeClass
     
@@ -158,6 +160,30 @@ struct CatalogView: View {
             } message: {
                 Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
             }
+            .confirmationDialog(
+                "Small Export Size" + (pendingShareSprite.map { " (\(viewModel.spriteExportResolutionLabel($0)))" } ?? ""),
+                isPresented: $showShareSizeSheet,
+                titleVisibility: .visible
+            ) {
+                Button("Export at Original Size") {
+                    if let sprite = pendingShareSprite, let image = viewModel.renderSpriteImage(sprite) {
+                        shareImage = IdentifiableImage(image: image)
+                    }
+                    pendingShareSprite = nil
+                }
+                Button("Upscale for Sharing — sharper on device") {
+                    if let sprite = pendingShareSprite, var image = viewModel.renderSpriteImage(sprite) {
+                        image = BitmapExporter.upscaleForPhotos(image)
+                        shareImage = IdentifiableImage(image: image)
+                    }
+                    pendingShareSprite = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingShareSprite = nil
+                }
+            } message: {
+                Text("This image may appear blurry when shared. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
+            }
             .sheet(item: $shareImage) { item in
                 ShareSheet(activityItems: [item.image])
             }
@@ -232,8 +258,11 @@ struct CatalogView: View {
                     }
                     
                     Button {
-                        // Share sprite image
-                        if let image = viewModel.renderSpriteImage(sprite) {
+                        // Share sprite image with upscale prompt
+                        if viewModel.spriteNeedsUpscale(sprite) {
+                            pendingShareSprite = sprite
+                            showShareSizeSheet = true
+                        } else if let image = viewModel.renderSpriteImage(sprite) {
                             shareImage = IdentifiableImage(image: image)
                         }
                     } label: {

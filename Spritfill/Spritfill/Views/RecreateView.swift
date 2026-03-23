@@ -66,15 +66,15 @@ struct RecreateView: View {
             }
             .onChange(of: navigateToCanvas) { _, isActive in
                 if !isActive {
-                    // Reload when returning from canvas
-                    recreateViewModel.loadAll()
+                    // Reload local sessions when returning from canvas (no Firebase fetch needed)
+                    recreateViewModel.reloadSessions()
                 }
             }
             .alert("Start Recreating?", isPresented: $showConfirmAlert) {
                 Button("Start") {
                     if let sprite = spriteToConfirm {
                         activeSession = recreateViewModel.getOrCreateSession(for: sprite)
-                        recreateViewModel.loadAll()
+                        recreateViewModel.reloadSessions()
                         navigateToCanvas = true
                     }
                 }

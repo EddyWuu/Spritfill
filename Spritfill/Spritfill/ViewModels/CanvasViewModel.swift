@@ -881,11 +881,14 @@ class CanvasViewModel: ObservableObject {
         saveToPhotos(upscale: false, completion: completion)
     }
     
-    func exportAndGetShareImage(completion: @escaping (IdentifiableImage) -> Void) {
+    func exportAndGetShareImage(upscale: Bool = false, completion: @escaping (IdentifiableImage) -> Void) {
         isExporting = true
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
-            let image = self.exportImage()
+            var image = self.exportImage()
+            if upscale, let img = image {
+                image = BitmapExporter.upscaleForPhotos(img)
+            }
             self.isExporting = false
             guard let image else { return }
             completion(IdentifiableImage(image: image))

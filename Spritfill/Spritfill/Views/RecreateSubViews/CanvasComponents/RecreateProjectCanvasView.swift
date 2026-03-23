@@ -294,25 +294,23 @@ private struct RecreateCanvasRenderer: View, Equatable {
     
     // MARK: - Bitmap rendering
     
-    // Renders checkerboard + user pixels + reference ghost into a 1:1 CGImage.
+    // Renders solid white background + user pixels + reference ghost into a 1:1 CGImage.
     // Pure byte-level operations — no UIColor, no SwiftUI Color, no Path fills.
+    // Uses a plain white background (not checkerboard) so reference ghost colors
+    // blend uniformly and don't show brightness differences per cell.
     private func renderBitmap() -> UIImage? {
         let w = gridWidth
         let h = gridHeight
         guard w > 0, h > 0 else { return nil }
         
-        // Checkerboard RGBA
-        let lightR: UInt8 = 240, lightG: UInt8 = 240, lightB: UInt8 = 240
-        let darkR:  UInt8 = 220, darkG:  UInt8 = 220, darkB:  UInt8 = 220
+        // Solid white background
+        let bgR: UInt8 = 255, bgG: UInt8 = 255, bgB: UInt8 = 255
         
         var buffer = [UInt8](repeating: 255, count: w * h * 4)
         let pixelCount = userPixelHexes.count
         
         for i in 0..<(w * h) {
             let bi = i * 4
-            let row = i / w
-            let col = i % w
-            let isLight = (row + col) % 2 == 0
             
             let userHex = i < pixelCount ? userPixelHexes[i] : "clear"
             let refRGB = referenceRGB[i]
@@ -324,19 +322,16 @@ private struct RecreateCanvasRenderer: View, Equatable {
                 buffer[bi + 1] = rgb.g
                 buffer[bi + 2] = rgb.b
             } else if let ref = refRGB {
-                // Unpainted reference cell — blend reference color at 15% over checkerboard
-                let bgR = isLight ? lightR : darkR
-                let bgG = isLight ? lightG : darkG
-                let bgB = isLight ? lightB : darkB
+                // Unpainted reference cell — blend reference color at 15% over white
                 // alpha blend: out = src * 0.15 + bg * 0.85
                 buffer[bi]     = UInt8(Double(ref.r) * 0.15 + Double(bgR) * 0.85)
                 buffer[bi + 1] = UInt8(Double(ref.g) * 0.15 + Double(bgG) * 0.85)
                 buffer[bi + 2] = UInt8(Double(ref.b) * 0.15 + Double(bgB) * 0.85)
             } else {
-                // Empty cell — checkerboard
-                buffer[bi]     = isLight ? lightR : darkR
-                buffer[bi + 1] = isLight ? lightG : darkG
-                buffer[bi + 2] = isLight ? lightB : darkB
+                // Empty cell — white
+                buffer[bi]     = bgR
+                buffer[bi + 1] = bgG
+                buffer[bi + 2] = bgB
             }
             buffer[bi + 3] = 255
         }

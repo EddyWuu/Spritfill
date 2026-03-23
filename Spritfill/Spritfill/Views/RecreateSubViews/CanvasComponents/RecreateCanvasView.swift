@@ -15,6 +15,7 @@ struct RecreateCanvasView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showCompletionAlert = false
     @State private var showDeleteAlert = false
+    @State private var bottomPanelCollapsed = false
     
     init(session: RecreateSession, selectedTab: Binding<RecreateView.RecreateTab>) {
         self.session = session
@@ -60,25 +61,44 @@ struct RecreateCanvasView: View {
                 
                 // MARK: - Canvas
                 RecreateProjectCanvasView(viewModel: viewModel)
-                    .frame(height: geo.size.height * 0.48)
                     .clipped()
-                
-                // MARK: - Zoom slider (disabled — pinch-to-zoom is used instead)
-                // RecreateZoomSliderView(viewModel: viewModel)
-                //     .background(Color(.secondarySystemBackground))
-                
-                Divider()
-                
-                // MARK: - Tool buttons
-                RecreateToolBarView(viewModel: viewModel)
-                    .background(Color(.secondarySystemBackground))
-                
-                Divider()
-                
-                // MARK: - Numbered color palette
-                RecreateColorPaletteView(viewModel: viewModel)
                     .frame(maxHeight: .infinity)
+                
+                // MARK: - Collapse/expand handle
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        bottomPanelCollapsed.toggle()
+                    }
+                }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: bottomPanelCollapsed ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(.secondary)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color(.systemGray3))
+                            .frame(width: 36, height: 4)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
                     .background(Color(.secondarySystemBackground))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                
+                // MARK: - Tool buttons (always visible)
+                RecreateToolBarView(viewModel: viewModel)
+                    .padding(.bottom, bottomPanelCollapsed ? 6 : 0)
+                    .background(Color(.secondarySystemBackground))
+                
+                // MARK: - Collapsible color palette
+                if !bottomPanelCollapsed {
+                    Divider()
+                    
+                    RecreateColorPaletteView(viewModel: viewModel)
+                        .frame(maxHeight: .infinity)
+                        .background(Color(.secondarySystemBackground))
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }

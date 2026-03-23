@@ -18,17 +18,53 @@ struct SubmitArtView: View {
     @State private var showSuccessAlert: Bool = false
     @State private var showErrorAlert: Bool = false
     
+    private var dailyLimitReached: Bool {
+        FirebaseSubmissionService.shared.hasReachedDailyLimit
+    }
+    
+    private var remainingSubmissions: Int {
+        FirebaseSubmissionService.shared.remainingSubmissions
+    }
+    
     private var canSubmit: Bool {
         !artistName.trimmingCharacters(in: .whitespaces).isEmpty
         && agreeToTerms
         && agreeToPublic
         && !viewModel.isSubmitting
+        && !dailyLimitReached
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    
+                    // MARK: - Daily limit warning
+                    if dailyLimitReached {
+                        HStack(spacing: 10) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Daily Limit Reached")
+                                    .font(.subheadline.weight(.semibold))
+                                Text("You've submitted \(FirebaseSubmissionService.maxDailySubmissions) artworks today. Please try again tomorrow.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.orange.opacity(0.1))
+                        .cornerRadius(12)
+                    } else {
+                        HStack(spacing: 6) {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                            Text("\(remainingSubmissions) submission\(remainingSubmissions == 1 ? "" : "s") remaining today")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     
                     // MARK: - What is this?
                     infoSection

@@ -19,10 +19,30 @@ class CommunitySpritesService: ObservableObject {
     
     private let db = Firestore.firestore()
     
+    /// Whether we have successfully fetched at least once this session.
+    private(set) var hasFetched = false
+    
+    /// Timestamp of the last successful fetch.
+    private var lastFetchDate: Date?
+    
+    /// Minimum time between fetches (5 minutes).
+    private static let cooldownInterval: TimeInterval = 5 * 60
+    
     private init() {}
+    
+    /// Fetch only if we haven't fetched yet, or the cached data is stale (>5 min).
+    func fetchIfNeeded(force: Bool = false) {
+        if !force, hasFetched, let lastFetch = lastFetchDate,
+           Date().timeIntervalSince(lastFetch) < Self.cooldownInterval {
+            return  // Data is fresh — skip
+        }
+        fetchCommunitySprites()
+    }
     
     // Fetch all community sprites from Firestore
     func fetchCommunitySprites() {
+        // Prevent concurrent fetches
+        guard !isLoading else { return }
         isLoading = true
         
         db.collection("community_sprites").getDocuments { [weak self] snapshot, error in
@@ -82,6 +102,8 @@ class CommunitySpritesService: ObservableObject {
                 }
                 
                 self.communitySprites = sprites
+                self.hasFetched = true
+                self.lastFetchDate = Date()
                 print("Community sprites: loaded \(sprites.count) sprites")
             }
         }

@@ -22,15 +22,7 @@ struct GalleryBoardItemView: View {
     var body: some View {
         let size = item.displaySize
         
-        ZStack(alignment: .topTrailing) {
-            // Edit mode background box
-            if viewModel.isEditMode {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.blue.opacity(isSelected ? 0.15 : 0.08))
-                    .stroke(Color.blue.opacity(isSelected ? 0.5 : 0.2), lineWidth: isSelected ? 2 : 1)
-                    .frame(width: size + 16, height: size + 16)
-            }
-            
+        ZStack {
             // Sprite image
             if let image = viewModel.thumbnail(for: item.id) {
                 Image(uiImage: image)
@@ -43,7 +35,17 @@ struct GalleryBoardItemView: View {
                     .fill(Color.gray.opacity(0.2))
                     .frame(width: size, height: size)
             }
-            
+        }
+        .background {
+            // Edit mode background box (slightly larger than the image)
+            if viewModel.isEditMode {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.blue.opacity(isSelected ? 0.15 : 0.08))
+                    .stroke(Color.blue.opacity(isSelected ? 0.5 : 0.2), lineWidth: isSelected ? 2 : 1)
+                    .padding(-8)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
             // Edit mode overlays
             if viewModel.isEditMode {
                 // Archive button (top-right)
@@ -56,7 +58,10 @@ struct GalleryBoardItemView: View {
                         .background(Circle().fill(Color.red).frame(width: 20, height: 20))
                 }
                 .offset(x: 4, y: -4)
-                
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.isEditMode {
                 // Resize handle (bottom-right)
                 resizeHandle
             }
@@ -70,7 +75,7 @@ struct GalleryBoardItemView: View {
                 viewModel.selectItem(id: item.id)
             }
         }
-        .gesture(viewModel.isEditMode ? dragGesture : nil)
+        .highPriorityGesture(viewModel.isEditMode ? dragGesture : nil)
     }
     
     // MARK: - Resize handle
@@ -81,7 +86,7 @@ struct GalleryBoardItemView: View {
             .foregroundColor(.white)
             .frame(width: 24, height: 24)
             .background(Circle().fill(Color.blue.opacity(0.8)))
-            .offset(x: 4, y: item.displaySize - 20)
+            .offset(x: 4, y: 4)
             .gesture(
                 DragGesture()
                     .onChanged { value in

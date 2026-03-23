@@ -20,6 +20,7 @@ struct ProjectViewModeView: View {
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showSavedAlert = false
     @State private var showSaveSizeSheet = false
+    @State private var showShareSizeSheet = false
     @State private var showProjectDetails = false
     @State private var showSubmitSheet = false
     
@@ -75,8 +76,12 @@ struct ProjectViewModeView: View {
                         }
                         
                         actionButton(icon: "square.and.arrow.up", label: "Export", color: .indigo) {
-                            viewModel.exportAndGetShareImage { image in
-                                shareImage = image
+                            if viewModel.exportNeedsUpscale {
+                                showShareSizeSheet = true
+                            } else {
+                                viewModel.exportAndGetShareImage { image in
+                                    shareImage = image
+                                }
                             }
                         }
                         
@@ -165,12 +170,31 @@ struct ProjectViewModeView: View {
         } message: {
             Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
+        .confirmationDialog(
+            "Small Export Size (\(viewModel.exportResolutionLabel))",
+            isPresented: $showShareSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Export at Original Size — \(viewModel.exportResolutionLabel)") {
+                viewModel.exportAndGetShareImage(upscale: false) { image in
+                    shareImage = image
+                }
+            }
+            Button("Upscale for Sharing — sharper on device") {
+                viewModel.exportAndGetShareImage(upscale: true) { image in
+                    shareImage = image
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This image may appear blurry when shared. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
+        }
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])
         }
         .sheet(isPresented: $showProjectDetails) {
             ProjectDetailsPopupView(viewModel: viewModel)
-                .presentationDetents([.height(360)])
+                .presentationDetents([.height(420)])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showSubmitSheet) {

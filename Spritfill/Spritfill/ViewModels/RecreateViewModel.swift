@@ -41,11 +41,13 @@ class RecreateViewModel: ObservableObject {
         return maps
     }
     
+    private var hasSetupSubscriptions = false
+    
     // MARK: - Load everything
     
     func loadAll() {
-        // Clear previous subscriptions to prevent stacking
-        cancellables.removeAll()
+        // Set up Combine subscriptions once (not on every loadAll call)
+        setupSubscriptionsIfNeeded()
         
         isLoadingSessions = true
         
@@ -104,6 +106,22 @@ class RecreateViewModel: ObservableObject {
                 ))
             }
             
+            // Include already-loaded community sprites (if Catalog fetched them first)
+            let existingCommunity = self.communityService.communitySprites
+            if !existingCommunity.isEmpty {
+                for community in existingCommunity {
+                    sprites.append(RecreatableArtModel(
+                        id: community.id,
+                        name: community.name,
+                        sourceType: .community,
+                        canvasSize: community.canvasSize,
+                        palette: nil,
+                        pixelGrid: community.pixelGrid,
+                        colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid)
+                    ))
+                }
+            }
+            
             // 3. Publish results on main thread
             DispatchQueue.main.async {
                 self.inProgressSessions = inProgress
@@ -113,12 +131,45 @@ class RecreateViewModel: ObservableObject {
             }
         }
         
-        // Fetch community sprites (async network — already background)
-        communityService.fetchCommunitySprites()
+        // Fetch community sprites only if needed (cached with 5-min cooldown)
+        communityService.fetchIfNeeded()
+    }
+    
+    /// Reload only local sessions (no Firebase fetch). Use when returning from canvas.
+    func reloadSessions() {
+        isLoadingSessions = true
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            let sessions = self.sessionStorage.fetchAllSessions()
+            var inProgress: [RecreateSessionItem] = []
+            var finished: [RecreateSessionItem] = []
+            for session in sessions {
+                let item = RecreateSessionItem(
+                    id: session.id,
+                    session: session,
+                    progressText: "\(session.completionCount)/\(session.totalColoredPixels)"
+                )
+                if session.isComplete {
+                    finished.append(item)
+                } else {
+                    inProgress.append(item)
+                }
+            }
+            DispatchQueue.main.async {
+                self.inProgressSessions = inProgress
+                self.finishedSessions = finished
+                self.isLoadingSessions = false
+            }
+        }
+    }
+    
+    /// Set up Combine subscriptions exactly once.
+    private func setupSubscriptionsIfNeeded() {
+        guard !hasSetupSubscriptions else { return }
+        hasSetupSubscriptions = true
         
         // React to community sprite changes — append to browse list when they arrive
         communityService.$communitySprites
-            .dropFirst()  // Skip initial empty value to avoid double-load
             .receive(on: DispatchQueue.main)
             .sink { [weak self] communitySprites in
                 self?.appendCommunitySprites(communitySprites)
@@ -159,32 +210,6 @@ class RecreateViewModel: ObservableObject {
                 self.browseSprites = updated
             }
         }
-    }
-    
-    // MARK: - Load sessions (in progress + finished)
-    
-    private func loadSessions() {
-        let sessions = sessionStorage.fetchAllSessions()
-        
-        var inProgress: [RecreateSessionItem] = []
-        var finished: [RecreateSessionItem] = []
-        
-        for session in sessions {
-            let item = RecreateSessionItem(
-                id: session.id,
-                session: session,
-                progressText: "\(session.completionCount)/\(session.totalColoredPixels)"
-            )
-            
-            if session.isComplete {
-                finished.append(item)
-            } else {
-                inProgress.append(item)
-            }
-        }
-        
-        inProgressSessions = inProgress
-        finishedSessions = finished
     }
     
     // MARK: - Create or resume session for a sprite

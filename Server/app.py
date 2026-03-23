@@ -76,40 +76,64 @@ def review_dashboard():
     tab = request.args.get("tab", "pending_review")
 
     submissions = []
-    docs = db.collection("submissions").where("status", "==", tab).stream()
 
-    for doc in docs:
-        data = doc.to_dict()
-        data["id"] = doc.id
+    if tab == "approved":
+        # Approved items live in community_sprites (deleted from submissions on approve)
+        docs = db.collection("community_sprites").stream()
+        for doc in docs:
+            data = doc.to_dict()
+            data["id"] = doc.id
+            data["projectName"] = data.get("projectName") or data.get("name", "Untitled")
+            data["artistName"] = data.get("artistName") or data.get("artist", "Anonymous")
+            if data.get("approvedAt"):
+                try:
+                    data["submittedAtFormatted"] = data["approvedAt"].strftime("%B %d, %Y at %I:%M %p")
+                except Exception:
+                    data["submittedAtFormatted"] = "Unknown"
+            elif data.get("submittedAt"):
+                try:
+                    data["submittedAtFormatted"] = data["submittedAt"].strftime("%B %d, %Y at %I:%M %p")
+                except Exception:
+                    data["submittedAtFormatted"] = "Unknown"
+            else:
+                data["submittedAtFormatted"] = "Unknown"
+            if data.get("imageBase64"):
+                data["imageDataURL"] = f"data:image/png;base64,{data['imageBase64']}"
+            else:
+                data["imageDataURL"] = None
+            submissions.append(data)
+    else:
+        # Pending and rejected live in submissions
+        docs = db.collection("submissions").where("status", "==", tab).stream()
+        for doc in docs:
+            data = doc.to_dict()
+            data["id"] = doc.id
+            if data.get("submittedAt"):
+                data["submittedAtFormatted"] = data["submittedAt"].strftime("%B %d, %Y at %I:%M %p")
+            else:
+                data["submittedAtFormatted"] = "Unknown"
+            if data.get("imageBase64"):
+                data["imageDataURL"] = f"data:image/png;base64,{data['imageBase64']}"
+            else:
+                data["imageDataURL"] = None
+            submissions.append(data)
 
-        # Format the timestamp
-        if data.get("submittedAt"):
-            data["submittedAtFormatted"] = data["submittedAt"].strftime("%B %d, %Y at %I:%M %p")
-        else:
-            data["submittedAtFormatted"] = "Unknown"
+    # Sort by date (newest first)
+    submissions.sort(key=lambda s: s.get("submittedAt") or s.get("approvedAt") or "", reverse=True)
 
-        # Build a data URL from the base64 PNG for display
-        if data.get("imageBase64"):
-            data["imageDataURL"] = f"data:image/png;base64,{data['imageBase64']}"
-        else:
-            data["imageDataURL"] = None
-
-        submissions.append(data)
-
-    # Sort by date (newest first) — done in Python to avoid needing a Firestore composite index
-    submissions.sort(key=lambda s: s.get("submittedAt") or "", reverse=True)
-
+    # Count docs per status
     counts = {}
-    for status in ["pending_review", "approved", "rejected"]:
+    for status in ["pending_review", "rejected"]:
         count_docs = db.collection("submissions").where("status", "==", status).stream()
         counts[status] = sum(1 for _ in count_docs)
+    counts["approved"] = sum(1 for _ in db.collection("community_sprites").stream())
 
     return render_template("review.html", submissions=submissions, tab=tab, counts=counts)
 
 
 @app.route("/review/<doc_id>/approve", methods=["POST"])
 def approve_submission(doc_id):
-    """Approve a submission — copies to community_sprites collection and marks as approved."""
+    """Approve a submission — moves to community_sprites, deletes from submissions."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
@@ -119,7 +143,6 @@ def approve_submission(doc_id):
 
     data = doc.to_dict()
 
-    # Copy to community_sprites collection (what the iOS app reads)
     community_data = {
         "name": data.get("projectName", "Untitled"),
         "artist": data.get("artistName", "Anonymous"),
@@ -129,28 +152,50 @@ def approve_submission(doc_id):
         "imageBase64": data.get("imageBase64", ""),
         "approvedAt": firestore.SERVER_TIMESTAMP,
         "submissionId": doc_id,
+        # Preserve original fields for unapprove restore
+        "projectName": data.get("projectName", "Untitled"),
+        "artistName": data.get("artistName", "Anonymous"),
+        "submittedAt": data.get("submittedAt"),
+        "id": data.get("id", doc_id),
     }
     db.collection("community_sprites").document(doc_id).set(community_data)
 
-    # Mark the original submission as approved
-    db.collection("submissions").document(doc_id).update({"status": "approved"})
+    # Remove from submissions — data now lives only in community_sprites
+    db.collection("submissions").document(doc_id).delete()
     return redirect(url_for("review_dashboard", tab="pending_review"))
 
 
 @app.route("/review/<doc_id>/unapprove", methods=["POST"])
 def unapprove_submission(doc_id):
-    """Unapprove a submission — removes from community_sprites and sets back to pending."""
+    """Unapprove — restores to submissions, removes from community_sprites."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
+    doc = db.collection("community_sprites").document(doc_id).get()
+    if not doc.exists:
+        return "Community sprite not found", 404
+
+    data = doc.to_dict()
+
+    submission_data = {
+        "id": data.get("id", doc_id),
+        "artistName": data.get("artistName") or data.get("artist", "Anonymous"),
+        "projectName": data.get("projectName") or data.get("name", "Untitled"),
+        "canvasWidth": data.get("canvasWidth", 0),
+        "canvasHeight": data.get("canvasHeight", 0),
+        "pixelGrid": data.get("pixelGrid", []),
+        "imageBase64": data.get("imageBase64", ""),
+        "submittedAt": data.get("submittedAt"),
+        "status": "pending_review",
+    }
+    db.collection("submissions").document(doc_id).set(submission_data)
     db.collection("community_sprites").document(doc_id).delete()
-    db.collection("submissions").document(doc_id).update({"status": "pending_review"})
     return redirect(url_for("review_dashboard", tab="approved"))
 
 
 @app.route("/review/<doc_id>/reject", methods=["POST"])
 def reject_submission(doc_id):
-    """Reject a submission — removes from community_sprites and deletes from submissions."""
+    """Reject a submission — removes from both collections."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
@@ -161,27 +206,41 @@ def reject_submission(doc_id):
 
 @app.route("/review/<doc_id>/delete", methods=["POST"])
 def delete_submission(doc_id):
-    """Permanently delete a submission."""
+    """Permanently delete a submission from both collections."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
     db.collection("submissions").document(doc_id).delete()
+    db.collection("community_sprites").document(doc_id).delete()
     tab = request.args.get("tab", "pending_review")
     return redirect(url_for("review_dashboard", tab=tab))
 
 
+# Helper: find a document in submissions or community_sprites
+def _find_doc(doc_id):
+    doc = db.collection("submissions").document(doc_id).get()
+    if doc.exists:
+        return doc
+    doc = db.collection("community_sprites").document(doc_id).get()
+    if doc.exists:
+        return doc
+    return None
+
+
 @app.route("/review/<doc_id>/details")
 def submission_details(doc_id):
-    """View full details of a submission — including pixel grid data for export."""
+    """View full details of a submission."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
-    doc = db.collection("submissions").document(doc_id).get()
-    if not doc.exists:
+    doc = _find_doc(doc_id)
+    if not doc:
         return "Submission not found", 404
 
     data = doc.to_dict()
     data["id"] = doc.id
+    data["projectName"] = data.get("projectName") or data.get("name", "Untitled")
+    data["artistName"] = data.get("artistName") or data.get("artist", "Anonymous")
 
     if data.get("submittedAt"):
         data["submittedAtFormatted"] = data["submittedAt"].strftime("%B %d, %Y at %I:%M %p")
@@ -198,19 +257,19 @@ def submission_details(doc_id):
 
 @app.route("/review/<doc_id>/export")
 def export_submission(doc_id):
-    """Export the pixel grid JSON — for adding to PremadeSprites catalog."""
+    """Export the pixel grid JSON."""
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
-    doc = db.collection("submissions").document(doc_id).get()
-    if not doc.exists:
+    doc = _find_doc(doc_id)
+    if not doc:
         return "Submission not found", 404
 
     data = doc.to_dict()
 
     export = {
-        "name": data.get("projectName", "Untitled"),
-        "artist": data.get("artistName", "Anonymous"),
+        "name": data.get("projectName") or data.get("name", "Untitled"),
+        "artist": data.get("artistName") or data.get("artist", "Anonymous"),
         "canvasWidth": data.get("canvasWidth", 0),
         "canvasHeight": data.get("canvasHeight", 0),
         "pixelGrid": data.get("pixelGrid", [])
@@ -225,8 +284,8 @@ def download_png(doc_id):
     if not FIREBASE_ENABLED:
         return "Firebase not configured", 503
 
-    doc = db.collection("submissions").document(doc_id).get()
-    if not doc.exists:
+    doc = _find_doc(doc_id)
+    if not doc:
         return "Submission not found", 404
 
     data = doc.to_dict()
@@ -236,7 +295,7 @@ def download_png(doc_id):
 
     import io
     image_bytes = base64.b64decode(image_b64)
-    name = data.get("projectName", "submission").replace(" ", "_")
+    name = (data.get("projectName") or data.get("name", "submission")).replace(" ", "_")
 
     return send_file(
         io.BytesIO(image_bytes),
