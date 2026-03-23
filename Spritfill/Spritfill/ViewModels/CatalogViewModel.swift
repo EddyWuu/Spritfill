@@ -84,9 +84,30 @@ class CatalogViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     
+    private static let exportTileSize = 16
+    
+    /// Whether the given sprite's export resolution is below 512px.
+    func spriteNeedsUpscale(_ sprite: PremadeSpriteData) -> Bool {
+        let dims = sprite.canvasSize.dimensions
+        return BitmapExporter.needsUpscaleForPhotos(gridWidth: dims.width,
+                                                    gridHeight: dims.height,
+                                                    tileSize: Self.exportTileSize)
+    }
+    
+    /// Human-readable export resolution label for a sprite.
+    func spriteExportResolutionLabel(_ sprite: PremadeSpriteData) -> String {
+        let dims = sprite.canvasSize.dimensions
+        return BitmapExporter.exportResolutionLabel(gridWidth: dims.width,
+                                                    gridHeight: dims.height,
+                                                    tileSize: Self.exportTileSize)
+    }
+    
     @MainActor
-    func exportSprite(_ sprite: PremadeSpriteData) {
-        guard let image = renderSpriteImage(sprite) else { return }
+    func exportSprite(_ sprite: PremadeSpriteData, upscale: Bool = false) {
+        guard var image = renderSpriteImage(sprite) else { return }
+        if upscale {
+            image = BitmapExporter.upscaleForPhotos(image)
+        }
         PhotoSaver.saveAsPNG(image) { [weak self] in
             self?.savedSpriteName = sprite.name
             self?.showSavedAlert = true
@@ -97,28 +118,11 @@ class CatalogViewModel: ObservableObject {
     func renderSpriteImage(_ sprite: PremadeSpriteData) -> UIImage? {
         let width = sprite.canvasSize.dimensions.width
         let height = sprite.canvasSize.dimensions.height
-        let tileSize: CGFloat = 16
-        let renderW = CGFloat(width) * tileSize
-        let renderH = CGFloat(height) * tileSize
-        
-        let view = Canvas { context, size in
-            for row in 0..<height {
-                for col in 0..<width {
-                    let index = row * width + col
-                    guard index < sprite.pixelGrid.count else { continue }
-                    let hex = sprite.pixelGrid[index]
-                    guard hex != "clear" else { continue }
-                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
-                                      width: tileSize, height: tileSize)
-                    context.fill(Path(rect), with: .color(Color(hex: hex)))
-                }
-            }
-        }
-        .frame(width: renderW, height: renderH)
-        
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
-        renderer.isOpaque = false
-        return renderer.uiImage
+        let tileSize = Self.exportTileSize
+        return BitmapExporter.renderImage(hexes: sprite.pixelGrid,
+                                           gridWidth: width,
+                                           gridHeight: height,
+                                           tileSize: tileSize)
     }
 }
+//

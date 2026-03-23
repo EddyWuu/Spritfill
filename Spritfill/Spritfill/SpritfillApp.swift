@@ -23,7 +23,7 @@ struct SpritfillApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashView()
         }
     }
 }

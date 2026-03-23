@@ -75,6 +75,44 @@ struct NewProjectSetUpView: View {
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
+                    
+                    // Low-resolution warning
+                    if let canvas = selectedCanvasSize {
+                        let longestSide = max(canvas.dimensions.width, canvas.dimensions.height) * Int(tileSize)
+                        if longestSide < 128 {
+                            HStack(alignment: .top, spacing: 6) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.orange)
+                                    .font(.caption)
+                                Text("This export size is very small and may look blurry when saved to your phone's photo library. If you plan to export to a computer, this is fine.")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(10)
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                        
+                        // Downscale warning
+                        let maxSide = BitmapExporter.maxPixelSide
+                        let maxDim = max(canvas.dimensions.width, canvas.dimensions.height)
+                        if maxDim * Int(tileSize) > maxSide {
+                            let effectiveTile = maxSide / maxDim
+                            let effectiveW = canvas.dimensions.width * effectiveTile
+                            let effectiveH = canvas.dimensions.height * effectiveTile
+                            HStack(alignment: .top, spacing: 6) {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.caption)
+                                Text("Export will be \(effectiveW)×\(effectiveH) instead of \(canvas.dimensions.width * Int(tileSize))×\(canvas.dimensions.height * Int(tileSize)). Images are capped at \(maxSide)×\(maxSide) due to device memory limits.")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(10)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                    }
                 }
                 .padding(.horizontal)
                 

@@ -15,6 +15,8 @@ struct RecreateFinishedView: View {
     @State private var showDetail = false
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
+    @State private var showSaveSizeSheet = false
+    @State private var pendingSaveSession: RecreateSession? = nil
     @Environment(\.horizontalSizeClass) private var sizeClass
     
     private var columns: [GridItem] {
@@ -50,6 +52,33 @@ struct RecreateFinishedView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Your recreated sprite has been saved to your photo library.")
+        }
+        .confirmationDialog(
+            "Small Export Size" + (pendingSaveSession.map { " (\(viewModel.sessionExportResolutionLabel($0)))" } ?? ""),
+            isPresented: $showSaveSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Save at Original Size") {
+                if let session = pendingSaveSession {
+                    viewModel.saveSessionToPhotos(session, upscale: false) {
+                        showSavedAlert = true
+                    }
+                }
+                pendingSaveSession = nil
+            }
+            Button("Upscale for Photos — sharper on device") {
+                if let session = pendingSaveSession {
+                    viewModel.saveSessionToPhotos(session, upscale: true) {
+                        showSavedAlert = true
+                    }
+                }
+                pendingSaveSession = nil
+            }
+            Button("Cancel", role: .cancel) {
+                pendingSaveSession = nil
+            }
+        } message: {
+            Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])
@@ -181,8 +210,13 @@ struct RecreateFinishedView: View {
                 // Export buttons
                 HStack(spacing: 20) {
                     Button {
-                        viewModel.saveSessionToPhotos(item.session) {
-                            showSavedAlert = true
+                        if viewModel.sessionNeedsUpscale(item.session) {
+                            pendingSaveSession = item.session
+                            showSaveSizeSheet = true
+                        } else {
+                            viewModel.saveSessionToPhotos(item.session) {
+                                showSavedAlert = true
+                            }
                         }
                     } label: {
                         HStack(spacing: 6) {

@@ -19,6 +19,7 @@ struct ProjectViewModeView: View {
     @State private var showEditAlert = false
     @State private var shareImage: IdentifiableImage? = nil
     @State private var showSavedAlert = false
+    @State private var showSaveSizeSheet = false
     @State private var showProjectDetails = false
     @State private var showSubmitSheet = false
     
@@ -64,8 +65,12 @@ struct ProjectViewModeView: View {
                         }
                         
                         actionButton(icon: "square.and.arrow.down", label: "Save", color: .green) {
-                            viewModel.exportAndSaveToPhotos {
-                                showSavedAlert = true
+                            if viewModel.exportNeedsUpscale {
+                                showSaveSizeSheet = true
+                            } else {
+                                viewModel.saveToPhotos(upscale: false) {
+                                    showSavedAlert = true
+                                }
                             }
                         }
                         
@@ -140,6 +145,25 @@ struct ProjectViewModeView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Image saved to Photos!")
+        }
+        .confirmationDialog(
+            "Small Export Size (\(viewModel.exportResolutionLabel))",
+            isPresented: $showSaveSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Save at Original Size — \(viewModel.exportResolutionLabel)") {
+                viewModel.saveToPhotos(upscale: false) {
+                    showSavedAlert = true
+                }
+            }
+            Button("Upscale for Photos — sharper on device") {
+                viewModel.saveToPhotos(upscale: true) {
+                    showSavedAlert = true
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
         .sheet(item: $shareImage) { item in
             ShareSheet(activityItems: [item.image])

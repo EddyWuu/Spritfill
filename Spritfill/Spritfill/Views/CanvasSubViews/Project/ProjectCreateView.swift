@@ -25,6 +25,7 @@ struct ProjectCreateView: View {
     @State private var showDeleteAlert = false
     @State private var showClearLayerAlert = false
     @State private var showExportedAlert = false
+    @State private var showSaveSizeSheet = false
     @State private var showFinishAlert = false
     @State private var showFinishCongrats = false
     @State private var showColorAdder = false
@@ -102,8 +103,12 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            viewModel.exportAndSaveToPhotos {
-                                showExportedAlert = true
+                            if viewModel.exportNeedsUpscale {
+                                showSaveSizeSheet = true
+                            } else {
+                                viewModel.saveToPhotos(upscale: false) {
+                                    showExportedAlert = true
+                                }
                             }
                         }) {
                             Image(systemName: "square.and.arrow.down")
@@ -270,6 +275,25 @@ struct ProjectCreateView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Image saved to Photos!")
+        }
+        .confirmationDialog(
+            "Small Export Size (\(viewModel.exportResolutionLabel))",
+            isPresented: $showSaveSizeSheet,
+            titleVisibility: .visible
+        ) {
+            Button("Save at Original Size — \(viewModel.exportResolutionLabel)") {
+                viewModel.saveToPhotos(upscale: false) {
+                    showExportedAlert = true
+                }
+            }
+            Button("Upscale for Photos — sharper on device") {
+                viewModel.saveToPhotos(upscale: true) {
+                    showExportedAlert = true
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
         }
         .sheet(isPresented: $showProjectDetails) {
             ProjectDetailsPopupView(viewModel: viewModel)

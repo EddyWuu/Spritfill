@@ -196,7 +196,8 @@ private struct RecreateCanvasRenderer: View, Equatable {
                         // Pre-resolve all unique number labels ONCE
                         let fontSize = max(cellSize * 0.4, 8)
                         var resolvedLabels: [Int: GraphicsContext.ResolvedText] = [:]
-                        var resolvedWrongLabels: [Int: GraphicsContext.ResolvedText] = [:]
+                        var resolvedWrongWhite: [Int: GraphicsContext.ResolvedText] = [:]
+                        var resolvedWrongBlack: [Int: GraphicsContext.ResolvedText] = [:]
                         
                         for (_, number) in colorNumberMap {
                             let text = Text("\(number)")
@@ -204,10 +205,15 @@ private struct RecreateCanvasRenderer: View, Equatable {
                                 .foregroundColor(.gray.opacity(0.7))
                             resolvedLabels[number] = context.resolve(text)
                             
-                            let wrongText = Text("\(number)")
+                            let whiteText = Text("\(number)")
                                 .font(.system(size: fontSize, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
-                            resolvedWrongLabels[number] = context.resolve(wrongText)
+                            resolvedWrongWhite[number] = context.resolve(whiteText)
+                            
+                            let blackText = Text("\(number)")
+                                .font(.system(size: fontSize, weight: .bold, design: .rounded))
+                                .foregroundColor(.black)
+                            resolvedWrongBlack[number] = context.resolve(blackText)
                         }
                         
                         let pixelCount = userPixelHexes.count
@@ -236,12 +242,19 @@ private struct RecreateCanvasRenderer: View, Equatable {
                                         context.stroke(xPath, with: .color(.red.opacity(0.4)),
                                                        lineWidth: max(cellSize * 0.08, 1))
                                     } else if userHex.lowercased() != targetHex.lowercased() {
-                                        // Wrong color — show target number in white
-                                        if let number = colorNumberMap[targetHex.lowercased()],
-                                           let resolved = resolvedWrongLabels[number] {
-                                            let pt = CGPoint(x: (CGFloat(col) + 0.5) * cellSize,
-                                                             y: (CGFloat(row) + 0.5) * cellSize)
-                                            context.draw(resolved, at: pt)
+                                        // Wrong color — show target number with contrasting text
+                                        if let number = colorNumberMap[targetHex.lowercased()] {
+                                            let rgb = hexToRGB(userHex)
+                                            // Relative luminance: bright bg → black text, dark bg → white text
+                                            let lum = 0.299 * Double(rgb.r) + 0.587 * Double(rgb.g) + 0.114 * Double(rgb.b)
+                                            let resolved = lum > 150
+                                                ? resolvedWrongBlack[number]
+                                                : resolvedWrongWhite[number]
+                                            if let resolved {
+                                                let pt = CGPoint(x: (CGFloat(col) + 0.5) * cellSize,
+                                                                 y: (CGFloat(row) + 0.5) * cellSize)
+                                                context.draw(resolved, at: pt)
+                                            }
                                         }
                                     }
                                 } else if targetHex != "clear" {

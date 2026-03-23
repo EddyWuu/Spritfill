@@ -397,32 +397,33 @@ class RecreateCanvasViewModel: ObservableObject {
     }
     // MARK: - Export
     
+    private static let exportTileSize = 16
+    
+    /// Whether the current canvas export resolution is below 512px.
+    var exportNeedsUpscale: Bool {
+        BitmapExporter.needsUpscaleForPhotos(gridWidth: gridWidth,
+                                             gridHeight: gridHeight,
+                                             tileSize: Self.exportTileSize)
+    }
+    
+    /// Human-readable export resolution label.
+    var exportResolutionLabel: String {
+        BitmapExporter.exportResolutionLabel(gridWidth: gridWidth,
+                                             gridHeight: gridHeight,
+                                             tileSize: Self.exportTileSize)
+    }
+    
     @MainActor
-    func saveCompletedSpriteToPhotos(completion: (() -> Void)? = nil) {
-        let tileSize: CGFloat = 16
-        let renderW = CGFloat(gridWidth) * tileSize
-        let renderH = CGFloat(gridHeight) * tileSize
+    func saveCompletedSpriteToPhotos(upscale: Bool = false, completion: (() -> Void)? = nil) {
+        let tileSize = Self.exportTileSize
         
-        let view = Canvas { [userPixels = self.userPixels, gridWidth = self.gridWidth, gridHeight = self.gridHeight] context, size in
-            for row in 0..<gridHeight {
-                for col in 0..<gridWidth {
-                    let index = row * gridWidth + col
-                    guard index < userPixels.count else { continue }
-                    let color = userPixels[index]
-                    guard !color.isClear else { continue }
-                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
-                                      width: tileSize, height: tileSize)
-                    context.fill(Path(rect), with: .color(color))
-                }
+        if var image = BitmapExporter.renderImage(hexes: userPixelHexes,
+                                                   gridWidth: gridWidth,
+                                                   gridHeight: gridHeight,
+                                                   tileSize: tileSize) {
+            if upscale {
+                image = BitmapExporter.upscaleForPhotos(image)
             }
-        }
-        .frame(width: renderW, height: renderH)
-        
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = UIScreen.main.scale
-        renderer.isOpaque = false
-        
-        if let image = renderer.uiImage {
             PhotoSaver.saveAsPNG(image) {
                 completion?()
             }

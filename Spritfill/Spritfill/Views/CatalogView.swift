@@ -15,6 +15,8 @@ struct CatalogView: View {
     @State private var showDetail = false
     @State private var showSavedAlert = false
     @State private var shareImage: IdentifiableImage? = nil
+    @State private var showSaveSizeSheet = false
+    @State private var pendingSaveSprite: PremadeSpriteData? = nil
     @State private var showCommunityInfo = false
     @Environment(\.horizontalSizeClass) private var sizeClass
     
@@ -133,6 +135,29 @@ struct CatalogView: View {
             } message: {
                 Text("\(viewModel.savedSpriteName) has been saved as a transparent PNG to your photo library.")
             }
+            .confirmationDialog(
+                "Small Export Size" + (pendingSaveSprite.map { " (\(viewModel.spriteExportResolutionLabel($0)))" } ?? ""),
+                isPresented: $showSaveSizeSheet,
+                titleVisibility: .visible
+            ) {
+                Button("Save at Original Size") {
+                    if let sprite = pendingSaveSprite {
+                        viewModel.exportSprite(sprite, upscale: false)
+                    }
+                    pendingSaveSprite = nil
+                }
+                Button("Upscale for Photos — sharper on device") {
+                    if let sprite = pendingSaveSprite {
+                        viewModel.exportSprite(sprite, upscale: true)
+                    }
+                    pendingSaveSprite = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingSaveSprite = nil
+                }
+            } message: {
+                Text("This image may appear blurry in your Photos library. You can upscale it for a sharper result, or keep the original size for use in editors and game engines.")
+            }
             .sheet(item: $shareImage) { item in
                 ShareSheet(activityItems: [item.image])
             }
@@ -187,8 +212,12 @@ struct CatalogView: View {
                 // Save and Export buttons
                 HStack(spacing: 20) {
                     Button {
-                        // Save sprite as PNG to photo library
-                        viewModel.exportSprite(sprite)
+                        if viewModel.spriteNeedsUpscale(sprite) {
+                            pendingSaveSprite = sprite
+                            showSaveSizeSheet = true
+                        } else {
+                            viewModel.exportSprite(sprite)
+                        }
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "square.and.arrow.down")

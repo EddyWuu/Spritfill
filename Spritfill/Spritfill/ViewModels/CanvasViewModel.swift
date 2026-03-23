@@ -826,39 +826,59 @@ class CanvasViewModel: ObservableObject {
         }
     }
 
-    @MainActor
-    func renderCanvasImage(from view: some View, size: CGSize) -> UIImage {
-        let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
-        renderer.scale = UIScreen.main.scale
-        renderer.isOpaque = false
-        return renderer.uiImage ?? UIImage()
-    }
-    
     // MARK: - Export
     
     @Published var isExporting: Bool = false
     
-    @MainActor
-    func exportImage() -> UIImage {
+    /// Whether the current export resolution is below 512px (blurry on iOS Photos).
+    var exportNeedsUpscale: Bool {
         let dims = projectSettings.selectedCanvasSize.dimensions
-        let tileSize = CGFloat(projectSettings.selectedTileSize)
-        let exportSize = CGSize(width: CGFloat(dims.width) * tileSize,
-                                height: CGFloat(dims.height) * tileSize)
-        let canvasView = ProjectCanvasExportView(viewModel: self)
-        return renderCanvasImage(from: canvasView, size: exportSize)
+        return BitmapExporter.needsUpscaleForPhotos(gridWidth: dims.width,
+                                                    gridHeight: dims.height,
+                                                    tileSize: projectSettings.selectedTileSize)
     }
     
-    func exportAndSaveToPhotos(completion: (() -> Void)? = nil) {
+    /// Human-readable export resolution label, e.g. "128×128".
+    var exportResolutionLabel: String {
+        let dims = projectSettings.selectedCanvasSize.dimensions
+        return BitmapExporter.exportResolutionLabel(gridWidth: dims.width,
+                                                    gridHeight: dims.height,
+                                                    tileSize: projectSettings.selectedTileSize)
+    }
+    
+    @MainActor
+    func exportImage() -> UIImage? {
+        let dims = projectSettings.selectedCanvasSize.dimensions
+        let tileSize = projectSettings.selectedTileSize
+        let hexes = compositePixelHexes()
+        return BitmapExporter.renderImage(hexes: hexes,
+                                          gridWidth: dims.width,
+                                          gridHeight: dims.height,
+                                          tileSize: tileSize)
+    }
+    
+    /// Save to Photos with optional upscale for small exports.
+    func saveToPhotos(upscale: Bool, completion: (() -> Void)? = nil) {
         isExporting = true
         Task { @MainActor in
-            // Yield so the UI can show the loading state
-            try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
-            let image = self.exportImage()
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            var image = self.exportImage()
+            if upscale, let img = image {
+                image = BitmapExporter.upscaleForPhotos(img)
+            }
             self.isExporting = false
+            guard let image else {
+                completion?()
+                return
+            }
             PhotoSaver.saveAsPNG(image) {
                 completion?()
             }
         }
+    }
+    
+    func exportAndSaveToPhotos(completion: (() -> Void)? = nil) {
+        saveToPhotos(upscale: false, completion: completion)
     }
     
     func exportAndGetShareImage(completion: @escaping (IdentifiableImage) -> Void) {
@@ -867,6 +887,7 @@ class CanvasViewModel: ObservableObject {
             try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
             let image = self.exportImage()
             self.isExporting = false
+            guard let image else { return }
             completion(IdentifiableImage(image: image))
         }
     }
@@ -911,7 +932,12 @@ class CanvasViewModel: ObservableObject {
             pixelGrid: compositePixelHexes()
         )
         
-        let image = exportImage()
+        guard let image = exportImage() else {
+            isSubmitting = false
+            submissionError = "Failed to render export image"
+            completion(false)
+            return
+        }
         
         FirebaseSubmissionService.shared.submitArtwork(submission: submission, image: image) { [weak self] result in
             DispatchQueue.main.async {
