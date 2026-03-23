@@ -830,7 +830,7 @@ class CanvasViewModel: ObservableObject {
     
     @Published var isExporting: Bool = false
     
-    /// Whether the current export resolution is below 512px (blurry on iOS Photos).
+    // Whether the current export resolution is below 512px (blurry on iOS Photos).
     var exportNeedsUpscale: Bool {
         let dims = projectSettings.selectedCanvasSize.dimensions
         return BitmapExporter.needsUpscaleForPhotos(gridWidth: dims.width,
@@ -838,7 +838,7 @@ class CanvasViewModel: ObservableObject {
                                                     tileSize: projectSettings.selectedTileSize)
     }
     
-    /// Human-readable export resolution label, e.g. "128×128".
+    // Human-readable export resolution label, e.g. "128×128".
     var exportResolutionLabel: String {
         let dims = projectSettings.selectedCanvasSize.dimensions
         return BitmapExporter.exportResolutionLabel(gridWidth: dims.width,
@@ -857,7 +857,7 @@ class CanvasViewModel: ObservableObject {
                                           tileSize: tileSize)
     }
     
-    /// Save to Photos with optional upscale for small exports.
+    // Save to Photos with optional upscale for small exports.
     func saveToPhotos(upscale: Bool, completion: (() -> Void)? = nil) {
         isExporting = true
         Task { @MainActor in

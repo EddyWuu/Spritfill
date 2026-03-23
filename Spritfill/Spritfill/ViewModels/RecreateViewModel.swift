@@ -294,7 +294,7 @@ class RecreateViewModel: ObservableObject {
     
     private static let exportTileSize = 16
     
-    /// Whether the given session's export resolution is below 512px.
+    // Whether the given session's export resolution is below 512px.
     func sessionNeedsUpscale(_ session: RecreateSession) -> Bool {
         let dims = session.canvasSize.dimensions
         return BitmapExporter.needsUpscaleForPhotos(gridWidth: dims.width,
@@ -302,7 +302,7 @@ class RecreateViewModel: ObservableObject {
                                                     tileSize: Self.exportTileSize)
     }
     
-    /// Human-readable export resolution label for a session.
+    // Human-readable export resolution label for a session.
     func sessionExportResolutionLabel(_ session: RecreateSession) -> String {
         let dims = session.canvasSize.dimensions
         return BitmapExporter.exportResolutionLabel(gridWidth: dims.width,

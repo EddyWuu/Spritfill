@@ -399,14 +399,14 @@ class RecreateCanvasViewModel: ObservableObject {
     
     private static let exportTileSize = 16
     
-    /// Whether the current canvas export resolution is below 512px.
+    // Whether the current canvas export resolution is below 512px.
     var exportNeedsUpscale: Bool {
         BitmapExporter.needsUpscaleForPhotos(gridWidth: gridWidth,
                                              gridHeight: gridHeight,
                                              tileSize: Self.exportTileSize)
     }
     
-    /// Human-readable export resolution label.
+    // Human-readable export resolution label.
     var exportResolutionLabel: String {
         BitmapExporter.exportResolutionLabel(gridWidth: gridWidth,
                                              gridHeight: gridHeight,

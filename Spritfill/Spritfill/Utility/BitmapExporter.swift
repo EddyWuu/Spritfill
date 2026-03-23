@@ -10,19 +10,19 @@ import SwiftUI
 
 enum BitmapExporter {
 
-    /// Maximum pixel dimension for a single side of the exported image.
-    /// Keeps memory usage under ~64 MB RGBA and avoids IOSurface limits.
+    // Maximum pixel dimension for a single side of the exported image.
+    // Keeps memory usage under ~64 MB RGBA and avoids IOSurface limits.
     static let maxPixelSide = 4096
 
-    /// Minimum pixel dimension (longest side) for Photos exports.
-    /// Images smaller than this appear blurry in the iOS Photos app.
+    // Minimum pixel dimension (longest side) for Photos exports.
+    // Images smaller than this appear blurry in the iOS Photos app.
     static let minPhotosSize = 512
 
     // MARK: - Public API (hex strings)
 
-    /// Renders a flat hex-string pixel grid into a `UIImage`.
-    /// `tileSize` controls how many output pixels represent one grid cell.
-    /// The image is automatically down-scaled so that neither side exceeds `maxPixelSide`.
+    // Renders a flat hex-string pixel grid into a `UIImage`.
+    // `tileSize` controls how many output pixels represent one grid cell.
+    // The image is automatically down-scaled so that neither side exceeds `maxPixelSide`.
     static func renderImage(hexes: [String],
                             gridWidth: Int,
                             gridHeight: Int,
@@ -67,7 +67,7 @@ enum BitmapExporter {
 
     // MARK: - Public API (SwiftUI Color array — used by RecreateCanvasViewModel)
 
-    /// Renders a flat `Color` pixel grid into a `UIImage`.
+    // Renders a flat `Color` pixel grid into a `UIImage`.
     static func renderImage(colors: [SwiftUI.Color],
                             gridWidth: Int,
                             gridHeight: Int,
@@ -85,7 +85,7 @@ enum BitmapExporter {
 
     // MARK: - Photos upscale helpers
 
-    /// Returns `true` when the exported image's longest side is below `minPhotosSize`.
+    // Returns `true` when the exported image's longest side is below `minPhotosSize`.
     static func needsUpscaleForPhotos(gridWidth: Int, gridHeight: Int, tileSize: Int) -> Bool {
         let effectiveTile = cappedTileSize(gridWidth: gridWidth,
                                            gridHeight: gridHeight,
@@ -94,7 +94,7 @@ enum BitmapExporter {
         return longest < minPhotosSize
     }
 
-    /// Returns the export resolution string (e.g. "128×128") for display purposes.
+    // Returns the export resolution string (e.g. "128×128") for display purposes.
     static func exportResolutionLabel(gridWidth: Int, gridHeight: Int, tileSize: Int) -> String {
         let effectiveTile = cappedTileSize(gridWidth: gridWidth,
                                            gridHeight: gridHeight,
@@ -104,8 +104,8 @@ enum BitmapExporter {
         return "\(w)×\(h)"
     }
 
-    /// Nearest-neighbor upscale so the longest side reaches at least `minPhotosSize`.
-    /// Pixel-art stays sharp — no smoothing / antialiasing.
+    // Nearest-neighbor upscale so the longest side reaches at least `minPhotosSize`.
+    // Pixel-art stays sharp — no smoothing / antialiasing.
     static func upscaleForPhotos(_ image: UIImage) -> UIImage {
         let longest = max(image.size.width, image.size.height)
         guard longest < CGFloat(minPhotosSize), longest > 0 else { return image }
@@ -136,7 +136,7 @@ enum BitmapExporter {
 
     // MARK: - Helpers
 
-    /// Reduces the tile size so that neither image dimension exceeds `maxPixelSide`.
+    // Reduces the tile size so that neither image dimension exceeds `maxPixelSide`.
     private static func cappedTileSize(gridWidth: Int,
                                        gridHeight: Int,
                                        requestedTile: Int) -> Int {

@@ -86,7 +86,7 @@ class CatalogViewModel: ObservableObject {
     
     private static let exportTileSize = 16
     
-    /// Whether the given sprite's export resolution is below 512px.
+    // Whether the given sprite's export resolution is below 512px.
     func spriteNeedsUpscale(_ sprite: PremadeSpriteData) -> Bool {
         let dims = sprite.canvasSize.dimensions
         return BitmapExporter.needsUpscaleForPhotos(gridWidth: dims.width,
@@ -94,7 +94,7 @@ class CatalogViewModel: ObservableObject {
                                                     tileSize: Self.exportTileSize)
     }
     
-    /// Human-readable export resolution label for a sprite.
+    // Human-readable export resolution label for a sprite.
     func spriteExportResolutionLabel(_ sprite: PremadeSpriteData) -> String {
         let dims = sprite.canvasSize.dimensions
         return BitmapExporter.exportResolutionLabel(gridWidth: dims.width,
@@ -125,4 +125,4 @@ class CatalogViewModel: ObservableObject {
                                            tileSize: tileSize)
     }
 }
-//
+

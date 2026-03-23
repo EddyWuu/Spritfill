@@ -41,51 +41,44 @@ struct ColorAdderSheetView: View {
         return toolsVM.availableColors.contains { ($0.toHex() ?? "").uppercased() == normalized }
     }
     
+    @State private var gridSize: CGSize = .zero
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 12) {
                 
                 // Hue/Saturation grid
-                GeometryReader { geo in
-                    ZStack {
-                        Canvas { context, size in
-                            let cols = Int(size.width)
-                            let rows = Int(size.height)
-                            let colStep = max(1, cols / 64)
-                            let rowStep = max(1, rows / 32)
-                            
-                            for x in stride(from: 0, to: cols, by: colStep) {
-                                for y in stride(from: 0, to: rows, by: rowStep) {
-                                    let h = Double(x) / Double(cols)
-                                    let s = 1.0 - (Double(y) / Double(rows))
-                                    let color = Color(hue: h, saturation: s, brightness: brightness)
-                                    context.fill(
-                                        Path(CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(colStep), height: CGFloat(rowStep))),
-                                        with: .color(color)
-                                    )
-                                }
-                            }
-                        }
+                ZStack {
+                    HueSaturationGrid(brightness: brightness)
+                        .equatable()
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        
-                        Circle()
-                            .stroke(Color.white, lineWidth: 2)
-                            .frame(width: 16, height: 16)
-                            .shadow(color: .black.opacity(0.5), radius: 1)
-                            .position(
-                                x: hue * geo.size.width,
-                                y: (1.0 - saturation) * geo.size.height
-                            )
-                    }
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                overrideHex = nil
-                                hue = min(max(value.location.x / geo.size.width, 0), 1)
-                                saturation = min(max(1.0 - value.location.y / geo.size.height, 0), 1)
-                            }
-                    )
+                    
+                    Circle()
+                        .stroke(Color.white, lineWidth: 2)
+                        .frame(width: 16, height: 16)
+                        .shadow(color: .black.opacity(0.5), radius: 1)
+                        .position(
+                            x: gridSize.width > 0 ? hue * gridSize.width : 0,
+                            y: gridSize.height > 0 ? (1.0 - saturation) * gridSize.height : 0
+                        )
                 }
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear { gridSize = geo.size }
+                            .onChange(of: geo.size) { _, newSize in gridSize = newSize }
+                    }
+                )
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            overrideHex = nil
+                            guard gridSize.width > 0, gridSize.height > 0 else { return }
+                            hue = min(max(value.location.x / gridSize.width, 0), 1)
+                            saturation = min(max(1.0 - value.location.y / gridSize.height, 0), 1)
+                        }
+                )
                 .frame(height: 140)
                 .padding(.horizontal)
                 
@@ -137,6 +130,7 @@ struct ColorAdderSheetView: View {
                                 .stroke(Color.gray.opacity(0.4), lineWidth: 1)
                         )
                         .scaleEffect(addedFlash ? 1.15 : 1.0)
+                        .animation(.easeOut(duration: 0.2), value: addedFlash)
                     
                     Text(selectedHex)
                         .font(.system(.caption, design: .monospaced))
@@ -216,12 +210,11 @@ struct ColorAdderSheetView: View {
                 
                 // Show user-added extra colors with remove option
                 if toolsVM.extraColors.isEmpty {
-                    VStack(spacing: 4) {
-                        Text("Pick a color above, then tap Add to extend your palette")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    .frame(maxHeight: .infinity)
+                    Text("Pick a color above, then tap Add to extend your palette")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 8)
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("\(toolsVM.extraColors.count) extra color\(toolsVM.extraColors.count == 1 ? "" : "s")")
@@ -257,6 +250,8 @@ struct ColorAdderSheetView: View {
                         }
                     }
                 }
+                
+                Spacer(minLength: 0)
             }
             .padding(.top, 8)
             .navigationTitle("Add Colors")
@@ -316,5 +311,41 @@ struct ColorAdderSheetView: View {
         hue = Double(h)
         saturation = Double(s)
         brightness = Double(b)
+    }
+}
+
+
+// MARK: - Hue/Saturation Grid
+
+/// Isolated equatable view so the spectrum only re-draws when brightness changes,
+/// not on every hue/saturation drag.
+private struct HueSaturationGrid: View, Equatable {
+    
+    let brightness: Double
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.brightness == rhs.brightness
+    }
+    
+    var body: some View {
+        Canvas { context, size in
+            let cols = Int(size.width)
+            let rows = Int(size.height)
+            let colStep = max(1, cols / 64)
+            let rowStep = max(1, rows / 32)
+            
+            for x in stride(from: 0, to: cols, by: colStep) {
+                for y in stride(from: 0, to: rows, by: rowStep) {
+                    let h = Double(x) / Double(cols)
+                    let s = 1.0 - (Double(y) / Double(rows))
+                    let color = Color(hue: h, saturation: s, brightness: brightness)
+                    context.fill(
+                        Path(CGRect(x: CGFloat(x), y: CGFloat(y), width: CGFloat(colStep), height: CGFloat(rowStep))),
+                        with: .color(color)
+                    )
+                }
+            }
+        }
+        .drawingGroup()
     }
 }

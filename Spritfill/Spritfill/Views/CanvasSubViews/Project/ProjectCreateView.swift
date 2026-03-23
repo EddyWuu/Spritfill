@@ -305,7 +305,7 @@ struct ProjectCreateView: View {
         }
         .sheet(isPresented: $showColorAdder) {
             ColorAdderSheetView(toolsVM: toolsVM)
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showHelpSheet) {
