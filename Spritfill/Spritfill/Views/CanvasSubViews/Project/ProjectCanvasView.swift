@@ -428,14 +428,22 @@ private struct PixelCanvasRenderer: View, Equatable {
         return UIImage(cgImage: cgImage)
     }
 
-    // Fast hex string to RGB bytes — pure integer math, no UIColor.
+    // Fast hex string to RGB bytes — pure UTF8 byte math, no Scanner/UIColor.
     @inline(__always)
     private func hexToRGB(_ hex: String) -> (r: UInt8, g: UInt8, b: UInt8) {
-        var str = hex
-        if str.hasPrefix("#") { str = String(str.dropFirst()) }
-        guard str.count == 6 else { return (0, 0, 0) }
-        var val: UInt64 = 0
-        Scanner(string: str).scanHexInt64(&val)
+        let start = hex.hasPrefix("#") ? hex.utf8.index(after: hex.utf8.startIndex) : hex.utf8.startIndex
+        let bytes = hex.utf8[start...]
+        guard bytes.count >= 6 else { return (0, 0, 0) }
+        var val: UInt32 = 0
+        for byte in bytes.prefix(6) {
+            val <<= 4
+            switch byte {
+            case 0x30...0x39: val |= UInt32(byte - 0x30)
+            case 0x41...0x46: val |= UInt32(byte - 0x41 + 10)
+            case 0x61...0x66: val |= UInt32(byte - 0x61 + 10)
+            default: return (0, 0, 0)
+            }
+        }
         return (
             r: UInt8((val >> 16) & 0xFF),
             g: UInt8((val >> 8) & 0xFF),

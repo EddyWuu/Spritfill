@@ -266,6 +266,12 @@ struct ColorAdderSheetView: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .onAppear {
+                // Initialize the picker to the current drawing color
+                if let hex = toolsVM.selectedColor.toHex() {
+                    navigateToColor(hex)
+                }
+            }
         }
     }
     

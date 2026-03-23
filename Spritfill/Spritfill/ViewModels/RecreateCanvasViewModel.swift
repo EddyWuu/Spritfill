@@ -217,11 +217,19 @@ class RecreateCanvasViewModel: ObservableObject {
         // Pre-cache reference RGB bytes for the bitmap renderer
         self.referenceRGB = session.referenceGrid.map { hex -> (r: UInt8, g: UInt8, b: UInt8)? in
             guard hex != "clear" else { return nil }
-            var str = hex
-            if str.hasPrefix("#") { str = String(str.dropFirst()) }
-            guard str.count == 6 else { return nil }
-            var val: UInt64 = 0
-            Scanner(string: str).scanHexInt64(&val)
+            let start = hex.hasPrefix("#") ? hex.utf8.index(after: hex.utf8.startIndex) : hex.utf8.startIndex
+            let bytes = hex.utf8[start...]
+            guard bytes.count >= 6 else { return nil }
+            var val: UInt32 = 0
+            for byte in bytes.prefix(6) {
+                val <<= 4
+                switch byte {
+                case 0x30...0x39: val |= UInt32(byte - 0x30)
+                case 0x41...0x46: val |= UInt32(byte - 0x41 + 10)
+                case 0x61...0x66: val |= UInt32(byte - 0x61 + 10)
+                default: return nil
+                }
+            }
             return (r: UInt8((val >> 16) & 0xFF),
                     g: UInt8((val >> 8) & 0xFF),
                     b: UInt8(val & 0xFF))
@@ -320,8 +328,16 @@ class RecreateCanvasViewModel: ObservableObject {
     }
     
     func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
-        let maxX = max(0, (canvasSize.width - geoSize.width) / 2)
-        let maxY = max(0, (canvasSize.height - geoSize.height) / 2)
+        // Extra padding ramps up smoothly based on how far the canvas
+        // exceeds the view. This avoids a sudden snap when zooming out
+        // crosses the canvas == view threshold.
+        let overflowX = max(0, canvasSize.width - geoSize.width)
+        let overflowY = max(0, canvasSize.height - geoSize.height)
+        let extraPaddingX = min(overflowX * 0.5, geoSize.width * 0.4)
+        let extraPaddingY = min(overflowY * 0.5, geoSize.height * 0.4)
+        
+        let maxX = max(0, (canvasSize.width - geoSize.width) / 2 + extraPaddingX)
+        let maxY = max(0, (canvasSize.height - geoSize.height) / 2 + extraPaddingY)
         return CGSize(
             width: offset.width.clamped(to: -maxX...maxX),
             height: offset.height.clamped(to: -maxY...maxY)

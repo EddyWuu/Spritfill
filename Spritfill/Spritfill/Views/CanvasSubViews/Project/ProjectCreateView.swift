@@ -32,6 +32,10 @@ struct ProjectCreateView: View {
     @State private var showLayerPanel = false
     @State private var bottomPanelCollapsed = false
     
+    // Draggable layer panel position
+    @State private var layerPanelOffset: CGSize = .zero
+    @State private var layerPanelDragStart: CGSize = .zero
+    
     init(viewModel: CanvasViewModel, onFinish: (() -> Void)? = nil) {
         self.viewModel = viewModel
         self.onFinish = onFinish
@@ -80,8 +84,10 @@ struct ProjectCreateView: View {
                         }
                         
                         Button(action: {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                showLayerPanel.toggle()
+                            showLayerPanel.toggle()
+                            if showLayerPanel {
+                                layerPanelOffset = .zero
+                                layerPanelDragStart = .zero
                             }
                         }) {
                             Image(systemName: "square.3.layers.3d")
@@ -190,16 +196,26 @@ struct ProjectCreateView: View {
                 if showLayerPanel {
                     let isRegular = sizeClass == .regular
                     LayerPanelView(viewModel: viewModel, layerManager: viewModel.layerManager, onClose: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showLayerPanel = false
-                        }
+                        showLayerPanel = false
                     })
                     .frame(width: isRegular ? 280 : 190)
                     .frame(maxHeight: geo.size.height * (isRegular ? 0.7 : 0.55))
                     .shadow(color: .black.opacity(0.15), radius: 8, x: -2, y: 2)
                     .padding(.trailing, 6)
                     .padding(.top, 50)
-                    .transition(.move(edge: .trailing))
+                    .offset(x: layerPanelOffset.width, y: layerPanelOffset.height)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                layerPanelOffset = CGSize(
+                                    width: layerPanelDragStart.width + value.translation.width,
+                                    height: layerPanelDragStart.height + value.translation.height
+                                )
+                            }
+                            .onEnded { _ in
+                                layerPanelDragStart = layerPanelOffset
+                            }
+                    )
                 }
             }
             

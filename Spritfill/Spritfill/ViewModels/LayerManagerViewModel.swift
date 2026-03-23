@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-/// Manages layer state, CRUD operations, compositing, and thumbnail rendering.
-/// Extracted from CanvasViewModel to keep responsibilities focused.
+// Manages layer state, CRUD operations, compositing, and thumbnail rendering.
+// Extracted from CanvasViewModel to keep responsibilities focused.
 class LayerManagerViewModel: ObservableObject {
     
     // MARK: - Layer (nested class)
@@ -79,7 +79,7 @@ class LayerManagerViewModel: ObservableObject {
     
     // MARK: - Init
     
-    /// Initialize with a set of layers (from saved project or new project)
+    // Initialize with a set of layers (from saved project or new project)
     init(layers: [Layer], activeLayerIndex: Int = 0) {
         self.layers = layers
         self.activeLayerIndex = activeLayerIndex
@@ -282,8 +282,8 @@ class LayerManagerViewModel: ObservableObject {
     
     // MARK: - Thumbnail Rendering
     
-    /// Renders a layer's pixel data + checkerboard into a tiny CGImage bitmap.
-    /// Pure byte-level operations — no SwiftUI Path fills, no Color conversions.
+    // Renders a layer's pixel data + checkerboard into a tiny CGImage bitmap.
+    // Pure byte-level operations — no SwiftUI Path fills, no Color conversions.
     func renderLayerThumbnail(hexes: [String], gridWidth: Int, gridHeight: Int) -> UIImage? {
         let w = gridWidth, h = gridHeight
         guard w > 0, h > 0 else { return nil }

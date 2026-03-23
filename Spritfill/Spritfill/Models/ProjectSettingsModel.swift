@@ -55,10 +55,13 @@ enum ColorPalettes: Hashable, Codable {
     case zughy32
     case generic16
     case pico8
+    case sweetie16
+    case resurrect32
+    case journey64
     case custom(id: String)
     
     static var builtInCases: [ColorPalettes] {
-        [.endesga64, .endesga32, .zughy32, .generic16, .pico8]
+        [.endesga64, .journey64, .endesga32, .zughy32, .resurrect32, .generic16, .pico8, .sweetie16]
     }
     
     var displayName: String {
@@ -68,6 +71,9 @@ enum ColorPalettes: Hashable, Codable {
         case .zughy32: return "Zughy 32"
         case .generic16: return "Generic 16"
         case .pico8: return "Pico-8"
+        case .sweetie16: return "Sweetie 16"
+        case .resurrect32: return "Resurrect 32"
+        case .journey64: return "Journey 64"
         case .custom(let id):
             return CustomPaletteService.shared.fetchPalette(by: id)?.name ?? "Custom"
         }
@@ -77,7 +83,7 @@ enum ColorPalettes: Hashable, Codable {
         switch self {
         case .endesga64:
             return [
-                Color(hex: "#ff0040"), Color(hex: "#131313"), Color(hex: "#1b1b1b"), Color(hex: "#272727"),
+                Color(hex: "#131313"), Color(hex: "#1b1b1b"), Color(hex: "#272727"),
                 Color(hex: "#3d3d3d"), Color(hex: "#5d5d5d"), Color(hex: "#858585"), Color(hex: "#b4b4b4"),
                 Color(hex: "#ffffff"), Color(hex: "#c7cfdd"), Color(hex: "#92a1b9"), Color(hex: "#657392"),
                 Color(hex: "#424c6e"), Color(hex: "#2a2f4e"), Color(hex: "#1a1932"), Color(hex: "#0e071b"),
@@ -92,6 +98,7 @@ enum ColorPalettes: Hashable, Codable {
                 Color(hex: "#db3ffd"), Color(hex: "#7a09fa"), Color(hex: "#3003d9"), Color(hex: "#0c0293"),
                 Color(hex: "#03193f"), Color(hex: "#3b1443"), Color(hex: "#622461"), Color(hex: "#93388f"),
                 Color(hex: "#ca52c9"), Color(hex: "#c85086"), Color(hex: "#f68187"), Color(hex: "#f5555d"),
+                Color(hex: "#ff0040"),
                 Color(hex: "#ea323c"), Color(hex: "#c42430"), Color(hex: "#891e2b"), Color(hex: "#571c27")
             ]
             
@@ -135,6 +142,46 @@ enum ColorPalettes: Hashable, Codable {
                 Color(hex: "#29ADFF"), Color(hex: "#83769C"), Color(hex: "#FF77A8"), Color(hex: "#FFCCAA")
             ]
             
+        case .sweetie16:
+            return [
+                Color(hex: "#1A1C2C"), Color(hex: "#5D275D"), Color(hex: "#B13E53"), Color(hex: "#EF7D57"),
+                Color(hex: "#FFCD75"), Color(hex: "#A7F070"), Color(hex: "#38B764"), Color(hex: "#257179"),
+                Color(hex: "#29366F"), Color(hex: "#3B5DC9"), Color(hex: "#41A6F6"), Color(hex: "#73EFF7"),
+                Color(hex: "#F4F4F4"), Color(hex: "#94B0C2"), Color(hex: "#566C86"), Color(hex: "#333C57")
+            ]
+            
+        case .resurrect32:
+            return [
+                Color(hex: "#2E222F"), Color(hex: "#3E3546"), Color(hex: "#625565"), Color(hex: "#966C6C"),
+                Color(hex: "#AB947A"), Color(hex: "#694F62"), Color(hex: "#7F708A"), Color(hex: "#9BABB2"),
+                Color(hex: "#C7DCD0"), Color(hex: "#FFFFFF"), Color(hex: "#6E2727"), Color(hex: "#B33831"),
+                Color(hex: "#EA4F36"), Color(hex: "#F57D4A"), Color(hex: "#AE2334"), Color(hex: "#E83B3B"),
+                Color(hex: "#FB6B1D"), Color(hex: "#F79617"), Color(hex: "#F9C22B"), Color(hex: "#7A3045"),
+                Color(hex: "#9E4539"), Color(hex: "#CD683D"), Color(hex: "#E6904E"), Color(hex: "#FBB954"),
+                Color(hex: "#4C3E24"), Color(hex: "#676633"), Color(hex: "#A2A947"), Color(hex: "#D5E04B"),
+                Color(hex: "#FBFF86"), Color(hex: "#165A4C"), Color(hex: "#239063"), Color(hex: "#1EBC73")
+            ]
+            
+        case .journey64:
+            return [
+                Color(hex: "#050914"), Color(hex: "#110524"), Color(hex: "#3B063A"), Color(hex: "#691749"),
+                Color(hex: "#9B3645"), Color(hex: "#CD683D"), Color(hex: "#DDA955"), Color(hex: "#EEF28E"),
+                Color(hex: "#B8D86B"), Color(hex: "#6AB552"), Color(hex: "#35854B"), Color(hex: "#1A5944"),
+                Color(hex: "#0E3B3C"), Color(hex: "#122631"), Color(hex: "#122631"), Color(hex: "#0F1620"),
+                Color(hex: "#F4F4ED"), Color(hex: "#D5D5C9"), Color(hex: "#B0AFA5"), Color(hex: "#898882"),
+                Color(hex: "#636362"), Color(hex: "#434345"), Color(hex: "#2B2B2E"), Color(hex: "#1A1A1F"),
+                Color(hex: "#F4E3C4"), Color(hex: "#DBC1A0"), Color(hex: "#C4A27A"), Color(hex: "#A47B5C"),
+                Color(hex: "#7E5B48"), Color(hex: "#5B3F3A"), Color(hex: "#3D2832"), Color(hex: "#261628"),
+                Color(hex: "#F4D5B0"), Color(hex: "#D5A88C"), Color(hex: "#B37E6D"), Color(hex: "#925A55"),
+                Color(hex: "#6E3E44"), Color(hex: "#4E2837"), Color(hex: "#341628"), Color(hex: "#200D1E"),
+                Color(hex: "#F4C1A8"), Color(hex: "#E09882"), Color(hex: "#C47162"), Color(hex: "#A04F4B"),
+                Color(hex: "#78343A"), Color(hex: "#53212D"), Color(hex: "#351325"), Color(hex: "#1F0A1C"),
+                Color(hex: "#5E91D1"), Color(hex: "#4470A8"), Color(hex: "#2F5385"), Color(hex: "#1F3A65"),
+                Color(hex: "#142648"), Color(hex: "#0D1830"), Color(hex: "#080E1E"), Color(hex: "#040712"),
+                Color(hex: "#EDD57A"), Color(hex: "#D4A85B"), Color(hex: "#B57E44"), Color(hex: "#905833"),
+                Color(hex: "#6E3926"), Color(hex: "#4C221D"), Color(hex: "#301217"), Color(hex: "#1B0A10")
+            ]
+            
         case .custom(let id):
             if let palette = CustomPaletteService.shared.fetchPalette(by: id) {
                 return palette.hexColors.map { Color(hex: $0) }
@@ -172,6 +219,9 @@ enum ColorPalettes: Hashable, Codable {
             case "Zughy 32": self = .zughy32
             case "Generic 16": self = .generic16
             case "Pico-8": self = .pico8
+            case "Sweetie 16": self = .sweetie16
+            case "Resurrect 32": self = .resurrect32
+            case "Journey 64": self = .journey64
             case "custom":
                 let id = try container.decode(String.self, forKey: .customId)
                 self = .custom(id: id)
@@ -190,6 +240,9 @@ enum ColorPalettes: Hashable, Codable {
         case "Zughy 32": self = .zughy32
         case "Generic 16": self = .generic16
         case "Pico-8": self = .pico8
+        case "Sweetie 16": self = .sweetie16
+        case "Resurrect 32": self = .resurrect32
+        case "Journey 64": self = .journey64
         default: self = .endesga64
         }
     }
@@ -203,6 +256,9 @@ enum ColorPalettes: Hashable, Codable {
         case .zughy32: try container.encode("Zughy 32", forKey: .type)
         case .generic16: try container.encode("Generic 16", forKey: .type)
         case .pico8: try container.encode("Pico-8", forKey: .type)
+        case .sweetie16: try container.encode("Sweetie 16", forKey: .type)
+        case .resurrect32: try container.encode("Resurrect 32", forKey: .type)
+        case .journey64: try container.encode("Journey 64", forKey: .type)
         case .custom(let id):
             try container.encode("custom", forKey: .type)
             try container.encode(id, forKey: .customId)
@@ -216,12 +272,16 @@ enum CanvasSizes: String, CaseIterable, Codable {
     
     case smallSquare  // 16x16
     case mediumSquare // 32x32
+    case midSquare    // 48x48
     case largeSquare  // 64x64
     case extraLargeSquare // 128x128
+    case hugeSquare   // 256x256
     case wide // 64x32
     case tall // 32x64
     case landscape // 80x60
     case portrait // 60x80
+    case wideCinematic // 96x128
+    case landscapeBanner // 128x96
     
     
     // (width, height)
@@ -235,11 +295,17 @@ enum CanvasSizes: String, CaseIterable, Codable {
         case .mediumSquare:
             return (32, 32)
             
+        case .midSquare:
+            return (48, 48)
+            
         case .largeSquare:
             return (64, 64)
             
         case .extraLargeSquare:
             return (128, 128)
+            
+        case .hugeSquare:
+            return (256, 256)
             
         case .wide:
             return (64, 32)
@@ -252,6 +318,12 @@ enum CanvasSizes: String, CaseIterable, Codable {
             
         case .portrait:
             return (60, 80)
+            
+        case .wideCinematic:
+            return (96, 128)
+            
+        case .landscapeBanner:
+            return (128, 96)
             
         }
     }

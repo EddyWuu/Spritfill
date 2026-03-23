@@ -73,6 +73,16 @@ class ToolsViewModel: ObservableObject {
     
     private var palette: ColorPalettes
     private var embeddedPaletteColors: [String]?
+    
+    // Cached values to avoid recomputation on every pixel
+    private var _cachedAvailableColors: [Color]?
+    private var _cachedExtraColorsSnapshot: [String] = []
+    
+    // Cached effective drawing color hex — avoids repeated toHex() during drag drawing
+    private var _cachedEffectiveHex: String?
+    private var _cachedEffectiveColor: Color?
+    private var _cachedEffectiveOpacity: Double = -1
+    private var _cachedEffectiveBaseColor: Color?
 
     init(defaultColor: Color, palette: ColorPalettes, embeddedPaletteColors: [String]? = nil, extraColors: [String] = []) {
         self.selectedColor = defaultColor
@@ -86,8 +96,14 @@ class ToolsViewModel: ObservableObject {
     }
     
     var availableColors: [Color] {
+        // Return cached if extraColors haven't changed
+        if let cached = _cachedAvailableColors, _cachedExtraColorsSnapshot == extraColors {
+            return cached
+        }
         var colors = baseColors
         colors.append(contentsOf: extraColors.map { Color(hex: $0) })
+        _cachedAvailableColors = colors
+        _cachedExtraColorsSnapshot = extraColors
         return colors
     }
     
@@ -97,21 +113,38 @@ class ToolsViewModel: ObservableObject {
     }
     
     // The selected color with drawingOpacity applied, pre-composited onto white.
-    // This produces a fully opaque color so the checkerboard background never
-    // bleeds through on the canvas.
+    // Cached so the UIColor blend is only computed once per color/opacity change.
     var effectiveDrawingColor: Color {
-        guard drawingOpacity < 1.0 else { return selectedColor }
-        
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        UIColor(selectedColor).getRed(&r, green: &g, blue: &b, alpha: &a)
-        
-        let alpha = CGFloat(drawingOpacity)
-        // Blend: result = src * alpha + white * (1 - alpha)
-        let blendedR = r * alpha + 1.0 * (1.0 - alpha)
-        let blendedG = g * alpha + 1.0 * (1.0 - alpha)
-        let blendedB = b * alpha + 1.0 * (1.0 - alpha)
-        
-        return Color(red: Double(blendedR), green: Double(blendedG), blue: Double(blendedB))
+        if let cached = _cachedEffectiveColor,
+           _cachedEffectiveOpacity == drawingOpacity,
+           _cachedEffectiveBaseColor == selectedColor {
+            return cached
+        }
+        let result: Color
+        if drawingOpacity >= 1.0 {
+            result = selectedColor
+        } else {
+            var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            UIColor(selectedColor).getRed(&r, green: &g, blue: &b, alpha: &a)
+            let alpha = CGFloat(drawingOpacity)
+            let blendedR = r * alpha + 1.0 * (1.0 - alpha)
+            let blendedG = g * alpha + 1.0 * (1.0 - alpha)
+            let blendedB = b * alpha + 1.0 * (1.0 - alpha)
+            result = Color(red: Double(blendedR), green: Double(blendedG), blue: Double(blendedB))
+        }
+        _cachedEffectiveColor = result
+        _cachedEffectiveOpacity = drawingOpacity
+        _cachedEffectiveBaseColor = selectedColor
+        _cachedEffectiveHex = nil  // invalidate hex cache
+        return result
+    }
+    
+    // Cached hex of the effective drawing color — avoids repeated toHex() during drag strokes
+    var effectiveDrawingHex: String {
+        if let cached = _cachedEffectiveHex { return cached }
+        let hex = effectiveDrawingColor.toHex() ?? "#000000"
+        _cachedEffectiveHex = hex
+        return hex
     }
     
     // Add a user-picked color to the extra colors list
@@ -121,6 +154,7 @@ class ToolsViewModel: ObservableObject {
         let allHexes = baseColors.map { $0.toHex()?.uppercased() ?? "" } + extraColors.map { $0.uppercased() }
         guard !allHexes.contains(normalized) else { return }
         extraColors.append(normalized)
+        _cachedAvailableColors = nil  // invalidate cache
         canvasVM?.syncExtraColors(extraColors)
     }
     
@@ -128,6 +162,7 @@ class ToolsViewModel: ObservableObject {
     func removeExtraColor(at index: Int) {
         guard index >= 0, index < extraColors.count else { return }
         extraColors.remove(at: index)
+        _cachedAvailableColors = nil  // invalidate cache
         canvasVM?.syncExtraColors(extraColors)
     }
     

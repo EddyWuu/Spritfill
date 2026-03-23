@@ -96,18 +96,21 @@ struct NewProjectSetUpView: View {
                             selectedCanvasSize = canvas
                         } label: {
                             VStack(spacing: 8) {
-                                // Aspect-ratio preview box
+                                // Aspect-ratio preview box inside a fixed container
                                 let maxDim: CGFloat = 50
                                 let previewW = aspectRatio >= 1 ? maxDim : maxDim * aspectRatio
                                 let previewH = aspectRatio <= 1 ? maxDim : maxDim / aspectRatio
                                 
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
-                                    .frame(width: max(previewW, 20), height: max(previewH, 20))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
-                                    )
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
+                                        .frame(width: max(previewW, 20), height: max(previewH, 20))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                }
+                                .frame(width: maxDim, height: maxDim)
                                 
                                 Text("\(w)×\(h)")
                                     .font(.subheadline)

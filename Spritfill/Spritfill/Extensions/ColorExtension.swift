@@ -12,30 +12,38 @@ extension Color {
     // MARK: - initializer
     
     init(hex: String) {
+        // Fast manual UTF8 hex parsing — avoids Scanner overhead on large canvases.
+        let start = hex.hasPrefix("#") ? hex.utf8.index(after: hex.utf8.startIndex) : hex.utf8.startIndex
+        let bytes = hex.utf8[start...]
         
-        let hexSanitized = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hexSanitized).scanHexInt64(&int)
-
-        let r, g, b: Double
-        let a: Double = 1.0
-
-        if hexSanitized.count == 6 {
-            r = Double((int >> 16) & 0xFF) / 255.0
-            g = Double((int >> 8) & 0xFF) / 255.0
-            b = Double(int & 0xFF) / 255.0
-        } else {
-            
-            r = 1.0
-            g = 1.0
-            b = 1.0
+        guard bytes.count >= 6 else {
+            self.init(red: 1.0, green: 1.0, blue: 1.0, opacity: 1.0)
+            return
         }
-
-        self.init(red: r, green: g, blue: b, opacity: a)
+        
+        var val: UInt32 = 0
+        for byte in bytes.prefix(6) {
+            val <<= 4
+            switch byte {
+            case 0x30...0x39: val |= UInt32(byte - 0x30)       // 0-9
+            case 0x41...0x46: val |= UInt32(byte - 0x41 + 10)  // A-F
+            case 0x61...0x66: val |= UInt32(byte - 0x61 + 10)  // a-f
+            default:
+                self.init(red: 1.0, green: 1.0, blue: 1.0, opacity: 1.0)
+                return
+            }
+        }
+        
+        let r = Double((val >> 16) & 0xFF) / 255.0
+        let g = Double((val >> 8) & 0xFF) / 255.0
+        let b = Double(val & 0xFF) / 255.0
+        self.init(red: r, green: g, blue: b, opacity: 1.0)
     }
     
     func toHex() -> String? {
-        UIColor(self).toHex()
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard UIColor(self).getRed(&r, green: &g, blue: &b, alpha: &a) else { return nil }
+        return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
     }
     
     var isClear: Bool {

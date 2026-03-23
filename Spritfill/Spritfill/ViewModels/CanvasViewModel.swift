@@ -67,10 +67,11 @@ class CanvasViewModel: ObservableObject {
         let pixelCount = pixels.count
         let layerDivisor = max(1, layers.count)
         let base: Int
-        if pixelCount > 4096 { base = 50 }
-        else if pixelCount > 1024 { base = 100 }
+        if pixelCount > 16384 { base = 20 }       // 128x128 and above
+        else if pixelCount > 4096 { base = 50 }    // 64x64 and above
+        else if pixelCount > 1024 { base = 100 }   // 32x32 and above
         else { base = 150 }
-        return max(10, base / layerDivisor)
+        return max(5, base / layerDivisor)
     }
     
     private func setupMemoryWarning() {
@@ -203,10 +204,9 @@ class CanvasViewModel: ObservableObject {
         let oldHex = pixelHexes[index]
         switch toolsVM.selectedTool {
         case .pencil:
-            let color = toolsVM.effectiveDrawingColor
-            let newHex = color.toHex() ?? "#000000"
+            let newHex = toolsVM.effectiveDrawingHex
             guard oldHex != newHex else { return }
-            pixels[index] = color
+            pixels[index] = toolsVM.effectiveDrawingColor
             pixelHexes[index] = newHex
         case .eraser:
             guard oldHex != "clear" else { return }
@@ -434,11 +434,20 @@ class CanvasViewModel: ObservableObject {
         pixelGeneration &+= 1
     }
     
-    // Clamp to screen bounds
+    // Clamp to screen bounds — with extra padding when zoomed in so
+    // edge pixels aren't stuck at the device edge.
     func clampedOffset(for offset: CGSize, geoSize: CGSize, canvasSize: CGSize) -> CGSize {
         
-        let maxX = max(0, (canvasSize.width - geoSize.width) / 2)
-        let maxY = max(0, (canvasSize.height - geoSize.height) / 2)
+        // Extra padding ramps up smoothly based on how far the canvas
+        // exceeds the view. This avoids a sudden snap when zooming out
+        // crosses the canvas == view threshold.
+        let overflowX = max(0, canvasSize.width - geoSize.width)
+        let overflowY = max(0, canvasSize.height - geoSize.height)
+        let extraPaddingX = min(overflowX * 0.5, geoSize.width * 0.4)
+        let extraPaddingY = min(overflowY * 0.5, geoSize.height * 0.4)
+        
+        let maxX = max(0, (canvasSize.width - geoSize.width) / 2 + extraPaddingX)
+        let maxY = max(0, (canvasSize.height - geoSize.height) / 2 + extraPaddingY)
 
         return CGSize(
             width: offset.width.clamped(to: -maxX...maxX),
@@ -731,56 +740,76 @@ class CanvasViewModel: ObservableObject {
         
         guard startIndex >= 0, startIndex < totalPixels else { return }
         
-        let targetColor = pixels[startIndex]
+        let targetHex = pixelHexes[startIndex]
+        let newHex = newColor.isClear ? "clear" : (newColor.toHex() ?? "#000000")
         
         // Don't fill if the color is the same
-        if colorsMatch(targetColor, newColor) { return }
-        
-        let newHex = newColor.isClear ? "clear" : (newColor.toHex() ?? "#000000")
+        guard targetHex != newHex else { return }
         actionDidChange = true
         
-        var queue: [Int] = [startIndex]
-        var visited = Set<Int>()
-        visited.insert(startIndex)
+        // Fast path: if every pixel matches the target, fill the entire canvas at once
+        // This turns a 65K-iteration BFS into two Array(repeating:), so basically instant
+        let allMatch = pixelHexes.allSatisfy { $0 == targetHex }
+        if allMatch {
+            pixels = Array(repeating: newColor, count: totalPixels)
+            pixelHexes = Array(repeating: newHex, count: totalPixels)
+            return
+        }
         
-        while !queue.isEmpty {
-            let current = queue.removeFirst()
-            pixels[current] = newColor
-            pixelHexes[current] = newHex
+        // Phase 1: BFS to collect all matching indices (no pixel mutation yet)
+        var visited = [Bool](repeating: false, count: totalPixels)
+        var fillIndices = [Int]()
+        fillIndices.reserveCapacity(min(totalPixels, 4096))
+        
+        visited[startIndex] = true
+        fillIndices.append(startIndex)
+        var head = 0
+        
+        while head < fillIndices.count {
+            let current = fillIndices[head]
+            head += 1
             
             let row = current / width
             let col = current % width
             
-            // Check 4 neighbors
-            let neighbors = [
-                (row - 1, col), // up
-                (row + 1, col), // down
-                (row, col - 1), // left
-                (row, col + 1)  // right
-            ]
-            
-            for (r, c) in neighbors {
-                guard r >= 0, r < height, c >= 0, c < width else { continue }
-                let neighborIndex = r * width + c
-                guard !visited.contains(neighborIndex) else { continue }
-                guard colorsMatch(pixels[neighborIndex], targetColor) else { continue }
-                
-                visited.insert(neighborIndex)
-                queue.append(neighborIndex)
+            // check if out of bounds, if same color, or if visited. if not out of bounds,
+            // is same color, and is not visited, mark visited and add to fillIndices for next iteration
+            if row > 0 {
+                let n = current - width
+                if !visited[n] && pixelHexes[n] == targetHex { visited[n] = true; fillIndices.append(n) }
+            }
+            if row < height - 1 {
+                let n = current + width
+                if !visited[n] && pixelHexes[n] == targetHex { visited[n] = true; fillIndices.append(n) }
+            }
+            if col > 0 {
+                let n = current - 1
+                if !visited[n] && pixelHexes[n] == targetHex { visited[n] = true; fillIndices.append(n) }
+            }
+            if col < width - 1 {
+                let n = current + 1
+                if !visited[n] && pixelHexes[n] == targetHex { visited[n] = true; fillIndices.append(n) }
             }
         }
+        
+        // Phase 2: Batch-apply all changes at once.
+        // Copy arrays out, mutate locally, write back once — avoids per-pixel
+        // published-array copy-on-write overhead.
+        var localPixels = pixels
+        var localHexes = pixelHexes
+        for idx in fillIndices {
+            localPixels[idx] = newColor
+            localHexes[idx] = newHex
+        }
+        pixels = localPixels
+        pixelHexes = localHexes
     }
     
+    // colorsMatch kept for any remaining callers but now uses hex comparison
     private func colorsMatch(_ a: Color, _ b: Color) -> Bool {
         if a.isClear && b.isClear { return true }
         if a.isClear || b.isClear { return false }
-        // Direct RGBA comparison — avoids expensive Color->UIColor->hex roundtrip
-        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
-        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
-        UIColor(a).getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-        UIColor(b).getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
-        let tolerance: CGFloat = 1.0 / 255.0
-        return abs(r1 - r2) < tolerance && abs(g1 - g2) < tolerance && abs(b1 - b2) < tolerance
+        return a.toHex() == b.toHex()
     }
     
     func getGridCoordinates(from location: CGPoint) -> (row: Int, col: Int)? {
