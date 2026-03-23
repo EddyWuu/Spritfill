@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "duck_white.png",
+      "filename" : "duck_black.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "duck_black.png",
+      "filename" : "duck_white.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
