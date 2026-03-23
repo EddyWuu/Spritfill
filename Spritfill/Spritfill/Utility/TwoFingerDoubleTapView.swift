@@ -21,9 +21,10 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
     var onPinch: ((CGFloat) -> Void)?
     var onPinchEnd: (() -> Void)?
     // Single-finger callbacks (for drawing tools) — replaces SwiftUI DragGesture
-    var onSingleTouchBegan: ((CGPoint) -> Void)?
-    var onSingleTouchMoved: ((CGPoint) -> Void)?
-    var onSingleTouchEnded: ((CGPoint) -> Void)?
+    // isPencilTouch: true when the touch came from Apple Pencil
+    var onSingleTouchBegan: ((CGPoint, Bool) -> Void)?
+    var onSingleTouchMoved: ((CGPoint, Bool) -> Void)?
+    var onSingleTouchEnded: ((CGPoint, Bool) -> Void)?
 
     // Convenience init for just the double-tap (backward compatible)
     init(action: @escaping () -> Void) {
@@ -58,9 +59,9 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
          onPanEnd: @escaping () -> Void,
          onPinch: @escaping (CGFloat) -> Void,
          onPinchEnd: @escaping () -> Void,
-         onSingleTouchBegan: @escaping (CGPoint) -> Void,
-         onSingleTouchMoved: @escaping (CGPoint) -> Void,
-         onSingleTouchEnded: @escaping (CGPoint) -> Void) {
+         onSingleTouchBegan: @escaping (CGPoint, Bool) -> Void,
+         onSingleTouchMoved: @escaping (CGPoint, Bool) -> Void,
+         onSingleTouchEnded: @escaping (CGPoint, Bool) -> Void) {
         self.doubleTapAction = doubleTapAction
         self.onPan = onPan
         self.onPanEnd = onPanEnd
@@ -148,23 +149,25 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
         var onPanEnd: (() -> Void)?
         var onPinch: ((CGFloat) -> Void)?
         var onPinchEnd: (() -> Void)?
-        var onSingleTouchBegan: ((CGPoint) -> Void)?
-        var onSingleTouchMoved: ((CGPoint) -> Void)?
-        var onSingleTouchEnded: ((CGPoint) -> Void)?
+        var onSingleTouchBegan: ((CGPoint, Bool) -> Void)?
+        var onSingleTouchMoved: ((CGPoint, Bool) -> Void)?
+        var onSingleTouchEnded: ((CGPoint, Bool) -> Void)?
         
         var singlePanGesture: UIPanGestureRecognizer?
         private var pinchStartScale: CGFloat = 1.0
         // Track if touchesBegan already fired the initial callback
         var touchBeganFired = false
+        // Track whether the current single-finger touch is from Apple Pencil
+        var currentTouchIsPencil = false
 
         init(doubleTapAction: @escaping () -> Void,
              onPan: ((CGSize) -> Void)?,
              onPanEnd: (() -> Void)?,
              onPinch: ((CGFloat) -> Void)?,
              onPinchEnd: (() -> Void)?,
-             onSingleTouchBegan: ((CGPoint) -> Void)?,
-             onSingleTouchMoved: ((CGPoint) -> Void)?,
-             onSingleTouchEnded: ((CGPoint) -> Void)?) {
+             onSingleTouchBegan: ((CGPoint, Bool) -> Void)?,
+             onSingleTouchMoved: ((CGPoint, Bool) -> Void)?,
+             onSingleTouchEnded: ((CGPoint, Bool) -> Void)?) {
             self.doubleTapAction = doubleTapAction
             self.onPan = onPan
             self.onPanEnd = onPanEnd
@@ -206,27 +209,28 @@ struct TwoFingerDoubleTapView: UIViewRepresentable {
         @objc func handleSinglePan(_ g: UIPanGestureRecognizer) {
             guard let view = g.view else { return }
             let location = g.location(in: view)
+            let isPencil = currentTouchIsPencil
             
             switch g.state {
             case .began:
                 // touchesBegan already fired onSingleTouchBegan — don't duplicate
                 break
             case .changed:
-                onSingleTouchMoved?(location)
+                onSingleTouchMoved?(location, isPencil)
             case .ended:
-                onSingleTouchEnded?(location)
+                onSingleTouchEnded?(location, isPencil)
                 touchBeganFired = false
             case .cancelled, .failed:
-                onSingleTouchEnded?(location)
+                onSingleTouchEnded?(location, isPencil)
                 touchBeganFired = false
             default: break
             }
         }
         
         // Handle taps (touch down + up without significant movement)
-        func handleSingleTap(at point: CGPoint) {
-            onSingleTouchBegan?(point)
-            onSingleTouchEnded?(point)
+        func handleSingleTap(at point: CGPoint, isPencil: Bool) {
+            onSingleTouchBegan?(point, isPencil)
+            onSingleTouchEnded?(point, isPencil)
         }
 
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
@@ -260,8 +264,10 @@ private class TwoFingerPassthroughView: UIView {
         super.touchesBegan(touches, with: event)
         if let touch = touches.first, (event?.allTouches?.count ?? 0) <= 1 {
             let location = touch.location(in: self)
+            let isPencil = touch.type == .pencil
+            coordinator?.currentTouchIsPencil = isPencil
             coordinator?.touchBeganFired = true
-            coordinator?.onSingleTouchBegan?(location)
+            coordinator?.onSingleTouchBegan?(location, isPencil)
         }
     }
     
@@ -275,7 +281,8 @@ private class TwoFingerPassthroughView: UIView {
                 // Pan gesture handled it — don't duplicate
             } else {
                 let location = touch.location(in: self)
-                coordinator?.onSingleTouchEnded?(location)
+                let isPencil = coordinator?.currentTouchIsPencil ?? false
+                coordinator?.onSingleTouchEnded?(location, isPencil)
                 coordinator?.touchBeganFired = false
             }
         }

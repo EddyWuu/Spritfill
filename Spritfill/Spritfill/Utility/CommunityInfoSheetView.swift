@@ -60,6 +60,7 @@ struct CommunityInfoSheetView: View {
                                 description: "Your submission is manually reviewed. If approved, it'll appear in the Community section for all users to enjoy and recreate!")
                     }
                     .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
                     
@@ -74,6 +75,7 @@ struct CommunityInfoSheetView: View {
                         guidelineRow(icon: "person.crop.circle", text: "Artist names can be pseudonyms — no real name required")
                     }
                     .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
                     

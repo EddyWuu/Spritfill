@@ -44,6 +44,32 @@ class ToolsViewModel: ObservableObject {
     // Fill mode: false = fill with color, true = fill erase (clear connected area)
     @Published var fillEraseMode: Bool = false
     
+    // Apple Pencil detection — when true, only pencil can draw/erase/fill on canvas.
+    // Finger touches are treated as pan. Resets automatically when no pencil touch
+    // is detected for 10 seconds (i.e. pencil put back in holder).
+    @Published var applePencilDetected: Bool = false
+    private var pencilResetTimer: Timer?
+    private static let pencilTimeout: TimeInterval = 10
+    
+    /// Called when a pencil touch is detected. Sets the flag and starts/restarts the reset timer.
+    func registerPencilTouch() {
+        applePencilDetected = true
+        pencilResetTimer?.invalidate()
+        pencilResetTimer = Timer.scheduledTimer(withTimeInterval: Self.pencilTimeout, repeats: false) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.applePencilDetected = false
+            }
+        }
+    }
+    
+    /// Whether the given tool is a "drawing" tool that should be pencil-only when detected.
+    static func isDrawingTool(_ tool: ToolType) -> Bool {
+        switch tool {
+        case .pencil, .eraser, .fill, .eyedropper: return true
+        case .pan, .shift, .flip: return false
+        }
+    }
+    
     // The brush size for the currently selected tool.
     var brushSize: Int {
         get {

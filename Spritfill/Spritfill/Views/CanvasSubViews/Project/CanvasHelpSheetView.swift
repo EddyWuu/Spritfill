@@ -17,15 +17,33 @@ struct CanvasHelpSheetView: View {
                     
                     // MARK: - Tools
                     helpSection(title: "Tools", icon: "paintbrush") {
-                        toolRow(icon: "pencil", name: "Pencil", description: "Draw pixels with the selected color. Long-press to choose a brush size (1×1 up to 5×5)")
-                        toolRow(icon: "eraser", name: "Eraser", description: "Clear pixels back to empty. Long-press to choose a brush size (1×1 up to 5×5). Pencil and eraser sizes are independent")
-                        toolRow(icon: "drop.halffull", name: "Fill", description: "Flood-fill a connected area with the selected color. Long-press to switch between Fill Color and Fill Erase mode")
-                        toolRow(icon: "eraser", name: "Fill Erase", description: "Erase all connected pixels of the same color. Access by long-pressing the Fill button and selecting Fill Erase")
+                        toolRow(icon: "pencil", name: "Pencil", description: "Draw pixels with the selected color. Tap again while selected to choose a brush size (1×1 up to 5×5)")
+                        toolRow(icon: "eraser", name: "Eraser", description: "Clear pixels back to empty. Tap again while selected to choose a brush size (1×1 up to 5×5). Pencil and eraser sizes are independent")
+                        toolRow(icon: "drop.halffull", name: "Fill", description: "Flood-fill a connected area with the selected color. Tap again while selected to switch between Fill Color and Fill Erase mode")
+                        toolRow(icon: "eraser", name: "Fill Erase", description: "Erase all connected pixels of the same color. Access by tapping Fill again while selected and choosing Fill Erase")
                         toolRow(icon: "eyedropper", name: "Eyedropper", description: "Pick a color from the canvas and set it as the active color")
                         toolRow(icon: "arrow.up.and.down.and.arrow.left.and.right", name: "Shift", description: "Move the entire artwork up, down, left, or right")
                         toolRow(icon: "arrow.left.and.right.righttriangle.left.righttriangle.right", name: "Flip", description: "Mirror the artwork horizontally or vertically")
                         toolRow(icon: "hand.draw", name: "Pan", description: "Drag to move around the canvas without drawing")
                         toolRow(icon: "plus.circle", name: "Add Colors", description: "Tap the + button in the toolbar to add custom colors to your palette. Added colors appear in a separate section below the base palette")
+                    }
+                    
+                    // MARK: - Apple Pencil
+                    helpSection(title: "Apple Pencil", icon: "applepencil") {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "applepencil")
+                                .font(.body)
+                                .foregroundColor(.blue)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Pencil-Only Drawing")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                Text("When Apple Pencil is detected, only the pencil can draw, erase, and fill on the canvas. Your finger automatically becomes a pan tool so you can move around without accidentally painting. When the pencil is put away, finger drawing is re-enabled.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
                     }
                     
                     // MARK: - Symmetry

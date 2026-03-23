@@ -28,7 +28,15 @@ struct ToolButtonView: View {
                 longPressTriggered = false
                 return
             }
-            if isBrushTool && showBrushPicker {
+            
+            if isSelected {
+                // Already selected — open options popover if this tool has one
+                if isBrushTool {
+                    showBrushPicker.toggle()
+                } else if isFillTool {
+                    showFillPicker.toggle()
+                }
+            } else if isBrushTool && showBrushPicker {
                 showBrushPicker = false
             } else if isFillTool && showFillPicker {
                 showFillPicker = false

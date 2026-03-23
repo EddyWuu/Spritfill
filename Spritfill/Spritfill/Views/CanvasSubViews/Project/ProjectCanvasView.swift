@@ -112,9 +112,21 @@ struct ProjectCanvasView: View {
                     onPinchEnd: {
                         dragStart = canvasOffset
                     },
-                    onSingleTouchBegan: { location in
+                    onSingleTouchBegan: { location, isPencil in
+                        // Detect Apple Pencil on pencil touch — starts/restarts auto-reset timer
+                        if isPencil {
+                            toolsVM.registerPencilTouch()
+                        }
+                        
                         let tool = toolsVM.selectedTool
-                        if tool == .eyedropper {
+                        
+                        // When Apple Pencil is detected and this is a finger touch,
+                        // treat drawing tools as pan instead
+                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
+                            panStartLocation = location
+                        } else if tool == .eyedropper {
                             magnifierPosition = location
                             if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
@@ -124,8 +136,6 @@ struct ProjectCanvasView: View {
                                 magnifierColor = viewModel.colorAtIndex(index)
                             }
                             showMagnifier = true
-                        } else if tool == .pan {
-                            panStartLocation = location
                         } else if tool != .shift && tool != .flip {
                             viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: location,
@@ -141,21 +151,11 @@ struct ProjectCanvasView: View {
                             }
                         }
                     },
-                    onSingleTouchMoved: { location in
+                    onSingleTouchMoved: { location, isPencil in
                         let tool = toolsVM.selectedTool
-                        if tool == .eyedropper {
-                            magnifierPosition = location
-                            if let index = viewModel.gridIndex(from: location,
-                                                                geoSize: geo.size,
-                                                                canvasOffset: canvasOffset,
-                                                                zoomScale: zoomScale) {
-                                magnifierIndex = index
-                                magnifierColor = viewModel.colorAtIndex(index)
-                            } else {
-                                magnifierIndex = nil
-                                magnifierColor = nil
-                            }
-                        } else if tool == .pan {
+                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
                             let dx = location.x - panStartLocation.x
                             let dy = location.y - panStartLocation.y
                             let proposed = CGSize(
@@ -167,6 +167,18 @@ struct ProjectCanvasView: View {
                                 geoSize: geo.size,
                                 canvasSize: scaledCanvasSize
                             )
+                        } else if tool == .eyedropper {
+                            magnifierPosition = location
+                            if let index = viewModel.gridIndex(from: location,
+                                                                geoSize: geo.size,
+                                                                canvasOffset: canvasOffset,
+                                                                zoomScale: zoomScale) {
+                                magnifierIndex = index
+                                magnifierColor = viewModel.colorAtIndex(index)
+                            } else {
+                                magnifierIndex = nil
+                                magnifierColor = nil
+                            }
                         } else if tool != .shift && tool != .flip {
                             if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
@@ -183,9 +195,18 @@ struct ProjectCanvasView: View {
                             }
                         }
                     },
-                    onSingleTouchEnded: { location in
+                    onSingleTouchEnded: { location, isPencil in
+                        // Restart pencil timeout on pencil lift so countdown starts fresh
+                        if isPencil {
+                            toolsVM.registerPencilTouch()
+                        }
+                        
                         let tool = toolsVM.selectedTool
-                        if tool == .eyedropper {
+                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
+                            dragStart = canvasOffset
+                        } else if tool == .eyedropper {
                             if let index = magnifierIndex ?? viewModel.gridIndex(from: location,
                                                                                    geoSize: geo.size,
                                                                                    canvasOffset: canvasOffset,
@@ -195,8 +216,6 @@ struct ProjectCanvasView: View {
                             showMagnifier = false
                             magnifierColor = nil
                             magnifierIndex = nil
-                        } else if tool == .pan {
-                            dragStart = canvasOffset
                         } else if tool != .shift && tool != .flip {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
