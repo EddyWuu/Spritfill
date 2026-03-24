@@ -1,33 +1,27 @@
 # macOS system files
 .DS_Store
 
-# Xcode specific files
-*.xcuserstate
+# Xcode user-specific files (per-user settings, breakpoints, etc.)
 xcuserdata/
-xcuserdatad/
-DerivedData/
-*.xcworkspace/
-!default.xcworkspace
-project.xcworkspace/
-*.xcodeproj/*.pbxproj
-*.xcodeproj/project.xcworkspace/
+*.xcuserstate
 IDEWorkspaceChecks.plist
 
-# Build products
+# Xcode build artifacts
+DerivedData/
 build/
 *.build/
 
-# CocoaPods dependencies
+# CocoaPods
 Pods/
 
-# Swift Package Manager files
+# Swift Package Manager
 .swiftpm/
 Package.resolved
 
-# Carthage dependencies
+# Carthage
 Carthage/Build
 
-# Fastlane specific files
+# Fastlane
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
@@ -44,3 +38,6 @@ serviceAccountKey.json
 
 # Server temp files
 Server/temp/
+
+# StoreKit config (contains internal IDs, recreate via Xcode)
+*.storekit

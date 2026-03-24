@@ -32,6 +32,11 @@ struct ContentView: View {
                 .tabItem {
                     Label("Catalog", systemImage: "books.vertical")
                 }
+            
+            StoreView()
+                .tabItem {
+                    Label("Support", systemImage: "heart.fill")
+                }
         }
     }
 }

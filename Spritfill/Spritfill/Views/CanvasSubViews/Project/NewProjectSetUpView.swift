@@ -139,16 +139,14 @@ struct NewProjectSetUpView: View {
                                 let previewW = aspectRatio >= 1 ? maxDim : maxDim * aspectRatio
                                 let previewH = aspectRatio <= 1 ? maxDim : maxDim / aspectRatio
                                 
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
-                                        .frame(width: max(previewW, 20), height: max(previewH, 20))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 4)
-                                                .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
-                                        )
-                                }
-                                .frame(width: maxDim, height: maxDim)
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
+                                    .frame(width: max(previewW, 20), height: max(previewH, 20))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .frame(width: maxDim, height: maxDim)
                                 
                                 Text("\(w)×\(h)")
                                     .font(.subheadline)

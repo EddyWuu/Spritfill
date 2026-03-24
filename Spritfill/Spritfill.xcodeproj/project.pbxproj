@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ADCB23092F729008006994CE /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ADCB23082F729008006994CE /* StoreKit.framework */; };
 		ADFB00052D89000000000005 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = ADFB00012D89000000000001 /* FirebaseFirestore */; };
 		ADFB00072D89000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = ADFB00042D89000000000004 /* FirebaseCore */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		AD3EF79F2D43362A00178E85 /* Spritfill.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spritfill.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD3EF7AF2D43362C00178E85 /* SpritfillTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpritfillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADCB23082F729008006994CE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -78,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADCB23092F729008006994CE /* StoreKit.framework in Frameworks */,
 				ADFB00052D89000000000005 /* FirebaseFirestore in Frameworks */,
 				ADFB00072D89000000000007 /* FirebaseCore in Frameworks */,
 			);
@@ -106,6 +109,7 @@
 				AD3EF7A12D43362A00178E85 /* Spritfill */,
 				AD3EF7B22D43362C00178E85 /* SpritfillTests */,
 				AD3EF7BC2D43362C00178E85 /* SpritfillUITests */,
+				ADCB23072F729008006994CE /* Frameworks */,
 				AD3EF7A02D43362A00178E85 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -118,6 +122,14 @@
 				AD3EF7B92D43362C00178E85 /* SpritfillUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		ADCB23072F729008006994CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ADCB23082F729008006994CE /* StoreKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

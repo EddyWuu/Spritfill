@@ -55,10 +55,12 @@ struct LayerPanelView: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 
-                Button(action: { viewModel.addLayer() }) {
+                Button(action: {
+                    viewModel.addLayer()
+                }) {
                     Image(systemName: "plus.circle.fill")
                         .font(isCompact ? .subheadline : .body)
-                        .foregroundColor(viewModel.layers.count < CanvasViewModel.maxLayers ? .blue : .gray)
+                    .foregroundColor(viewModel.layers.count < CanvasViewModel.maxLayers ? .blue : .gray)
                 }
                 .disabled(viewModel.layers.count >= CanvasViewModel.maxLayers)
                 
@@ -230,7 +232,9 @@ struct LayerPanelView: View {
                     Label("Rename", systemImage: "pencil")
                 }
                 
-                Button(action: { viewModel.duplicateLayer(at: index) }) {
+                Button(action: {
+                    viewModel.duplicateLayer(at: index)
+                }) {
                     Label("Duplicate", systemImage: "plus.square.on.square")
                 }
                 .disabled(viewModel.layers.count >= CanvasViewModel.maxLayers)

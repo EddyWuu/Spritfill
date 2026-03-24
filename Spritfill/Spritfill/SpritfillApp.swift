@@ -24,6 +24,12 @@ struct SpritfillApp: App {
     var body: some Scene {
         WindowGroup {
             SplashView()
+                .task {
+                    // Start listening for transaction updates (renewals, refunds, etc.)
+                    StoreService.shared.startTransactionListener()
+                    // Pre-load products so the store view opens instantly
+                    await StoreService.shared.loadProducts()
+                }
         }
     }
 }
