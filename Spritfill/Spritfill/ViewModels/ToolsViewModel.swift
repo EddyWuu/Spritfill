@@ -51,7 +51,7 @@ class ToolsViewModel: ObservableObject {
     private var pencilResetTimer: Timer?
     private static let pencilTimeout: TimeInterval = 10
     
-    /// Called when a pencil touch is detected. Sets the flag and starts/restarts the reset timer.
+    // Called when a pencil touch is detected. Sets the flag and starts/restarts the reset timer.
     func registerPencilTouch() {
         applePencilDetected = true
         pencilResetTimer?.invalidate()
@@ -62,7 +62,7 @@ class ToolsViewModel: ObservableObject {
         }
     }
     
-    /// Whether the given tool is a "drawing" tool that should be pencil-only when detected.
+    // Whether the given tool is a "drawing" tool that should be pencil-only when detected.
     static func isDrawingTool(_ tool: ToolType) -> Bool {
         switch tool {
         case .pencil, .eraser, .fill, .eyedropper: return true

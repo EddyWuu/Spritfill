@@ -19,18 +19,18 @@ class CommunitySpritesService: ObservableObject {
     
     private let db = Firestore.firestore()
     
-    /// Whether we have successfully fetched at least once this session.
+    // Whether we have successfully fetched at least once this session.
     private(set) var hasFetched = false
     
-    /// Timestamp of the last successful fetch.
+    // Timestamp of the last successful fetch.
     private var lastFetchDate: Date?
     
-    /// Minimum time between fetches (5 minutes).
+    // Minimum time between fetches (5 minutes).
     private static let cooldownInterval: TimeInterval = 5 * 60
     
     private init() {}
     
-    /// Fetch only if we haven't fetched yet, or the cached data is stale (>5 min).
+    // Fetch only if we haven't fetched yet, or the cached data is stale (>5 min).
     func fetchIfNeeded(force: Bool = false) {
         if !force, hasFetched, let lastFetch = lastFetchDate,
            Date().timeIntervalSince(lastFetch) < Self.cooldownInterval {

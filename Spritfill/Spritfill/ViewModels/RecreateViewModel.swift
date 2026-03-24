@@ -135,7 +135,7 @@ class RecreateViewModel: ObservableObject {
         communityService.fetchIfNeeded()
     }
     
-    /// Reload only local sessions (no Firebase fetch). Use when returning from canvas.
+    // Reload only local sessions (no Firebase fetch). Use when returning from canvas.
     func reloadSessions() {
         isLoadingSessions = true
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -163,7 +163,7 @@ class RecreateViewModel: ObservableObject {
         }
     }
     
-    /// Set up Combine subscriptions exactly once.
+    // Set up Combine subscriptions exactly once.
     private func setupSubscriptionsIfNeeded() {
         guard !hasSetupSubscriptions else { return }
         hasSetupSubscriptions = true

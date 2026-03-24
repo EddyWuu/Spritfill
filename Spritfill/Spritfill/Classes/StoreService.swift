@@ -8,8 +8,8 @@
 import Foundation
 import StoreKit
 
-/// Singleton service handling all StoreKit 2 operations:
-/// product loading and purchasing for consumable donations.
+// Singleton service handling all StoreKit 2 operations:
+// product loading and purchasing for consumable donations.
 @MainActor
 class StoreService: ObservableObject {
     
@@ -34,8 +34,8 @@ class StoreService: ObservableObject {
     
     // MARK: - Transaction Listener
     
-    /// Start listening for transaction updates.
-    /// Call this once at app launch from SpritfillApp.
+    // Start listening for transaction updates.
+    // Call this once at app launch from SpritfillApp.
     func startTransactionListener() {
         transactionListener?.cancel()
         transactionListener = Task.detached { [weak self] in
@@ -50,7 +50,7 @@ class StoreService: ObservableObject {
     
     // MARK: - Load Products
     
-    /// Fetch products from the App Store (or StoreKit config for testing).
+    // Fetch products from the App Store (or StoreKit config for testing).
     func loadProducts() async {
         guard !isLoading else { return }
         guard products.isEmpty else { return }
@@ -70,7 +70,7 @@ class StoreService: ObservableObject {
     
     // MARK: - Purchase
     
-    /// Purchase a product. Returns true if purchase succeeded.
+    // Purchase a product. Returns true if purchase succeeded.
     @discardableResult
     func purchase(_ product: Product) async throws -> Bool {
         let result = try await product.purchase()

@@ -9,7 +9,7 @@ import SwiftUI
 import StoreKit
 import Combine
 
-/// ViewModel wrapping StoreService for use in SwiftUI views.
+// ViewModel wrapping StoreService for use in SwiftUI views.
 @MainActor
 class StoreViewModel: ObservableObject {
     

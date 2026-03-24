@@ -317,8 +317,8 @@ struct ColorAdderSheetView: View {
 
 // MARK: - Hue/Saturation Grid
 
-/// Isolated equatable view so the spectrum only re-draws when brightness changes,
-/// not on every hue/saturation drag.
+// Isolated equatable view so the spectrum only re-draws when brightness changes,
+// not on every hue/saturation drag.
 private struct HueSaturationGrid: View, Equatable {
     
     let brightness: Double

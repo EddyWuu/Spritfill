@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Centralized product ID constants for StoreKit 2
+// Centralized product ID constants for StoreKit 2
 enum StoreProducts {
     
     // MARK: - Consumable (Donations)
@@ -18,7 +18,7 @@ enum StoreProducts {
     
     // MARK: - Grouped IDs for loading
     
-    /// All product IDs — pass to Product.products(for:)
+    // All product IDs — pass to Product.products(for:)
     static let allProductIDs: Set<String> = [
         tipSmall,
         tipMedium,

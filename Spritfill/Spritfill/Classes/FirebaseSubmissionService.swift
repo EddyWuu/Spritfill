@@ -23,18 +23,18 @@ class FirebaseSubmissionService {
     
     // MARK: - Daily submission limit
     
-    /// Number of submissions made today.
+    // Number of submissions made today.
     var todaySubmissionCount: Int {
         resetIfNewDay()
         return UserDefaults.standard.integer(forKey: Self.dailyLimitKey)
     }
     
-    /// Whether the user has reached the daily submission limit.
+    // Whether the user has reached the daily submission limit.
     var hasReachedDailyLimit: Bool {
         todaySubmissionCount >= Self.maxDailySubmissions
     }
     
-    /// Remaining submissions available today.
+    // Remaining submissions available today.
     var remainingSubmissions: Int {
         max(0, Self.maxDailySubmissions - todaySubmissionCount)
     }
