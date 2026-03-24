@@ -24,6 +24,11 @@ struct LayerPanelView: View {
     @State private var draggingLayerID: UUID? = nil
     @State private var dragOffset: CGFloat = 0
     
+    // Pro gating
+    @ObservedObject private var storeService = StoreService.shared
+    @State private var showProAlert = false
+    @State private var showStoreSheet = false
+    
     // Adaptive sizing
     private var isCompact: Bool { sizeClass != .regular }
     private var rowHeight: CGFloat { isCompact ? 50 : 60 }
@@ -51,15 +56,27 @@ struct LayerPanelView: View {
                 
                 Spacer()
                 
-                Text("\(viewModel.layers.count)/\(CanvasViewModel.maxLayers)")
+                let maxDisplay = storeService.isPro ? CanvasViewModel.maxLayers : StoreProducts.freeLayerLimit
+                Text("\(viewModel.layers.count)/\(maxDisplay)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 
                 Button(action: {
-                    viewModel.addLayer()
+                    if StoreProducts.layerRequiresPro(currentCount: viewModel.layers.count) && !storeService.isPro {
+                        showProAlert = true
+                    } else {
+                        viewModel.addLayer()
+                    }
                 }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(isCompact ? .subheadline : .body)
+                    HStack(spacing: 2) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(isCompact ? .subheadline : .body)
+                        if StoreProducts.layerRequiresPro(currentCount: viewModel.layers.count) && !storeService.isPro {
+                            Image(systemName: "lock.fill")
+                                .font(.caption2)
+                                .foregroundColor(.yellow)
+                        }
+                    }
                     .foregroundColor(viewModel.layers.count < CanvasViewModel.maxLayers ? .blue : .gray)
                 }
                 .disabled(viewModel.layers.count >= CanvasViewModel.maxLayers)
@@ -130,6 +147,15 @@ struct LayerPanelView: View {
             if deleteIndex >= 0, deleteIndex < viewModel.layers.count {
                 Text("This layer has content on it. Are you sure you want to delete \"\(viewModel.layers[deleteIndex].name)\"?")
             }
+        }
+        .alert("Pro Feature", isPresented: $showProAlert) {
+            Button("Unlock Pro") { showStoreSheet = true }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Free users can use up to \(StoreProducts.freeLayerLimit) layers. Unlock Spritfill Pro for up to \(CanvasViewModel.maxLayers) layers.")
+        }
+        .sheet(isPresented: $showStoreSheet) {
+            StoreView()
         }
     }
     
@@ -233,7 +259,11 @@ struct LayerPanelView: View {
                 }
                 
                 Button(action: {
-                    viewModel.duplicateLayer(at: index)
+                    if StoreProducts.layerRequiresPro(currentCount: viewModel.layers.count) && !storeService.isPro {
+                        showProAlert = true
+                    } else {
+                        viewModel.duplicateLayer(at: index)
+                    }
                 }) {
                     Label("Duplicate", systemImage: "plus.square.on.square")
                 }

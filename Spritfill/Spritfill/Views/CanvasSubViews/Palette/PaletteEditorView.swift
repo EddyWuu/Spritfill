@@ -9,6 +9,11 @@ struct PaletteEditorView: View {
     
     @FocusState private var hexFieldFocused: Bool
     
+    // Pro gating
+    @ObservedObject private var storeService = StoreService.shared
+    @State private var showProAlert = false
+    @State private var showStoreSheet = false
+    
     private let columns = [GridItem(.adaptive(minimum: 36), spacing: 6)]
     
     init(existingPalette: CustomPaletteData? = nil, onSave: ((CustomPaletteData) -> Void)? = nil) {
@@ -127,7 +132,13 @@ struct PaletteEditorView: View {
                     
                     Spacer()
                     
-                    Button(action: { viewModel.addCurrentColor() }) {
+                    Button(action: {
+                        if !storeService.isPro && viewModel.colors.count >= StoreProducts.freeCustomPaletteColorLimit {
+                            showProAlert = true
+                        } else {
+                            viewModel.addCurrentColor()
+                        }
+                    }) {
                         HStack(spacing: 4) {
                             Image(systemName: "plus")
                             Text("Add")
@@ -207,10 +218,17 @@ struct PaletteEditorView: View {
                     .frame(height: 60)
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(viewModel.colors.count) colors")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("\(viewModel.colors.count) colors")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            if !storeService.isPro {
+                                Text("(\(StoreProducts.freeCustomPaletteColorLimit) max)")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .padding(.horizontal)
                         
                         LazyVGrid(columns: columns, spacing: 6) {
                             ForEach(Array(viewModel.colors.enumerated()), id: \.offset) { index, hex in
@@ -257,6 +275,15 @@ struct PaletteEditorView: View {
                     }
                     .disabled(!viewModel.canSave)
                 }
+            }
+            .alert("Pro Feature", isPresented: $showProAlert) {
+                Button("Unlock Pro") { showStoreSheet = true }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Free users can add up to \(StoreProducts.freeCustomPaletteColorLimit) colors in a custom palette. Unlock Spritfill Pro for unlimited colors.")
+            }
+            .sheet(isPresented: $showStoreSheet) {
+                StoreView()
             }
         }
     }

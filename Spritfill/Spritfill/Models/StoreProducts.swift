@@ -7,21 +7,49 @@
 
 import Foundation
 
-// Centralized product ID constants for StoreKit 2
+// Centralized product ID constants and pro-gating helpers for StoreKit 2
 enum StoreProducts {
     
-    // MARK: - Consumable (Donations)
+    // MARK: - Non-Consumable
     
-    static let tipSmall  = "com.eddy-wu.Spritfill.tip.small"
-    static let tipMedium = "com.eddy-wu.Spritfill.tip.medium"
-    static let tipLarge  = "com.eddy-wu.Spritfill.tip.large"
+    // One-time purchase to unlock all pro features
+    static let proUnlock = "com.eddywu.Spritfill.unlock.pro"
     
-    // MARK: - Grouped IDs for loading
+    // MARK: - Grouped IDs
     
-    // All product IDs — pass to Product.products(for:)
-    static let allProductIDs: Set<String> = [
-        tipSmall,
-        tipMedium,
-        tipLarge
-    ]
+    static let allProductIDs: Set<String> = [proUnlock]
+    
+    // MARK: - Pro Gating: Layers
+    
+    // Maximum layers for free users
+    static let freeLayerLimit = 2
+    
+    static func layerRequiresPro(currentCount: Int) -> Bool {
+        currentCount >= freeLayerLimit
+    }
+    
+    // MARK: - Pro Gating: Canvas Sizes
+    
+    static let proCanvasSizes: Set<CanvasSizes> = [.extraLargeSquare, .hugeSquare]
+    
+    static func requiresPro(_ canvasSize: CanvasSizes) -> Bool {
+        proCanvasSizes.contains(canvasSize)
+    }
+    
+    // MARK: - Pro Gating: Extra Palette Colors
+    
+    // Free users can add up to 5 extra colors on top of their chosen palette
+    static let freeExtraColorLimit = 5
+    
+    // MARK: - Pro Gating: Custom Palette
+    
+    // Free users can add up to 64 colors in a custom palette
+    static let freeCustomPaletteColorLimit = 64
+    
+    // MARK: - Pro Gating: Spritfill Palette
+    
+    // The Spritfill 128 palette requires pro
+    static func paletteRequiresPro(_ palette: ColorPalettes) -> Bool {
+        palette == .spritfill
+    }
 }

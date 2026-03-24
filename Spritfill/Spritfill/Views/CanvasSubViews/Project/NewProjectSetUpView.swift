@@ -26,6 +26,12 @@ struct NewProjectSetUpView: View {
     @State private var navigateToProject = false
     @State private var canvasViewModel: CanvasViewModel?
     
+    // Pro gating
+    @ObservedObject private var storeService = StoreService.shared
+    @State private var showProAlert = false
+    @State private var showProAlertMessage = ""
+    @State private var showStoreSheet = false
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -129,9 +135,15 @@ struct NewProjectSetUpView: View {
                         let w = canvas.dimensions.width
                         let h = canvas.dimensions.height
                         let aspectRatio = CGFloat(w) / CGFloat(h)
+                        let needsPro = StoreProducts.requiresPro(canvas) && !storeService.isPro
                         
                         Button {
-                            selectedCanvasSize = canvas
+                            if needsPro {
+                                showProAlertMessage = "128×128 and 256×256 canvas sizes are available with Spritfill Pro."
+                                showProAlert = true
+                            } else {
+                                selectedCanvasSize = canvas
+                            }
                         } label: {
                             VStack(spacing: 8) {
                                 // Aspect-ratio preview box inside a fixed container
@@ -139,19 +151,33 @@ struct NewProjectSetUpView: View {
                                 let previewW = aspectRatio >= 1 ? maxDim : maxDim * aspectRatio
                                 let previewH = aspectRatio <= 1 ? maxDim : maxDim / aspectRatio
                                 
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
-                                    .frame(width: max(previewW, 20), height: max(previewH, 20))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
-                                    )
-                                    .frame(width: maxDim, height: maxDim)
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(isSelected ? Color.white.opacity(0.3) : Color(.tertiarySystemBackground))
+                                        .frame(width: max(previewW, 20), height: max(previewH, 20))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .stroke(isSelected ? Color.white.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                                        )
+                                    if needsPro {
+                                        Image(systemName: "lock.fill")
+                                            .font(.caption)
+                                            .foregroundColor(.yellow)
+                                    }
+                                }
+                                .frame(width: maxDim, height: maxDim)
                                 
-                                Text("\(w)×\(h)")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(isSelected ? .white : .primary)
+                                HStack(spacing: 4) {
+                                    Text("\(w)×\(h)")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(isSelected ? .white : (needsPro ? .secondary : .primary))
+                                    if needsPro {
+                                        Image(systemName: "lock.fill")
+                                            .font(.caption2)
+                                            .foregroundColor(.yellow)
+                                    }
+                                }
                                 
                                 Text(canvasSizeLabel(w: w, h: h))
                                     .font(.caption2)
@@ -182,13 +208,19 @@ struct NewProjectSetUpView: View {
                 
                 VStack(spacing: 10) {
                     ForEach(ColorPalettes.builtInCases, id: \.self) { palette in
+                        let needsPro = StoreProducts.paletteRequiresPro(palette) && !storeService.isPro
                         paletteButton(
-                            name: palette.displayName,
+                            name: palette.displayName + (needsPro ? " 🔒" : ""),
                             colorCount: palette.colors.count,
                             isSelected: selectedPalette == palette,
                             colors: palette.colors
                         ) {
-                            selectedPalette = palette
+                            if needsPro {
+                                showProAlertMessage = "The Spritfill 128 palette is exclusive to Spritfill Pro."
+                                showProAlert = true
+                            } else {
+                                selectedPalette = palette
+                            }
                         }
                     }
                     
@@ -294,6 +326,15 @@ struct NewProjectSetUpView: View {
                 customPalettes = CustomPaletteService.shared.fetchAllPalettes()
                 selectedPalette = .custom(id: savedPalette.id)
             }
+        }
+        .alert("Pro Feature", isPresented: $showProAlert) {
+            Button("Unlock Pro") { showStoreSheet = true }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text(showProAlertMessage)
+        }
+        .sheet(isPresented: $showStoreSheet) {
+            StoreView()
         }
 
     }

@@ -21,7 +21,9 @@ class StoreViewModel: ObservableObject {
     @Published var isPurchasing = false
     
     var products: [Product] { storeService.products }
+    var isPro: Bool { storeService.isPro }
     var isLoading: Bool { storeService.isLoading }
+    var proProduct: Product? { storeService.proProduct() }
     
     init() {
         // Forward StoreService changes to trigger SwiftUI updates
@@ -51,5 +53,11 @@ class StoreViewModel: ObservableObject {
         } catch {
             purchaseError = error.localizedDescription
         }
+    }
+    
+    func restorePurchases() async {
+        isPurchasing = true
+        defer { isPurchasing = false }
+        await storeService.restorePurchases()
     }
 }

@@ -20,6 +20,11 @@ struct ColorAdderSheetView: View {
     @State private var addedFlash: Bool = false
     @State private var overrideHex: String? = nil  // Exact hex from typed input — avoids HSB roundtrip loss
     
+    // Pro gating
+    @ObservedObject private var storeService = StoreService.shared
+    @State private var showProAlert = false
+    @State private var showStoreSheet = false
+    
     @FocusState private var hexFieldFocused: Bool
     
     private var selectedColor: Color {
@@ -217,10 +222,17 @@ struct ColorAdderSheetView: View {
                         .padding(.top, 8)
                 } else {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(toolsVM.extraColors.count) extra color\(toolsVM.extraColors.count == 1 ? "" : "s")")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
+                        HStack {
+                            Text("\(toolsVM.extraColors.count) extra color\(toolsVM.extraColors.count == 1 ? "" : "s")")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            if !storeService.isPro {
+                                Text("(\(StoreProducts.freeExtraColorLimit) max)")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .padding(.horizontal)
                         
                         ScrollView {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 6)], spacing: 6) {
@@ -267,12 +279,25 @@ struct ColorAdderSheetView: View {
                     navigateToColor(hex)
                 }
             }
+            .alert("Pro Feature", isPresented: $showProAlert) {
+                Button("Unlock Pro") { showStoreSheet = true }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Free users can add up to \(StoreProducts.freeExtraColorLimit) extra colors. Unlock Spritfill Pro for unlimited colors.")
+            }
+            .sheet(isPresented: $showStoreSheet) {
+                StoreView()
+            }
         }
     }
     
     // MARK: - Helpers
     
     private func addCurrentColor() {
+        if !storeService.isPro && toolsVM.extraColors.count >= StoreProducts.freeExtraColorLimit {
+            showProAlert = true
+            return
+        }
         let hex = selectedHex
         toolsVM.addColor(hex)
         withAnimation(.easeOut(duration: 0.2)) {

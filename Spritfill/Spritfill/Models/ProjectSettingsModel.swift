@@ -58,10 +58,11 @@ enum ColorPalettes: Hashable, Codable {
     case sweetie16
     case resurrect32
     case journey64
+    case spritfill
     case custom(id: String)
     
     static var builtInCases: [ColorPalettes] {
-        [.endesga64, .journey64, .endesga32, .zughy32, .resurrect32, .generic16, .pico8, .sweetie16]
+        [.spritfill, .endesga64, .journey64, .endesga32, .zughy32, .resurrect32, .generic16, .pico8, .sweetie16]
     }
     
     var displayName: String {
@@ -74,6 +75,7 @@ enum ColorPalettes: Hashable, Codable {
         case .sweetie16: return "Sweetie 16"
         case .resurrect32: return "Resurrect 32"
         case .journey64: return "Journey 64"
+        case .spritfill: return "Spritfill 128"
         case .custom(let id):
             return CustomPaletteService.shared.fetchPalette(by: id)?.name ?? "Custom"
         }
@@ -179,7 +181,59 @@ enum ColorPalettes: Hashable, Codable {
                 Color(hex: "#5E91D1"), Color(hex: "#4470A8"), Color(hex: "#2F5385"), Color(hex: "#1F3A65"),
                 Color(hex: "#142648"), Color(hex: "#0D1830"), Color(hex: "#080E1E"), Color(hex: "#040712"),
                 Color(hex: "#EDD57A"), Color(hex: "#D4A85B"), Color(hex: "#B57E44"), Color(hex: "#905833"),
-                Color(hex: "#6E3926"), Color(hex: "#4C221D"), Color(hex: "#301217"), Color(hex: "#1B0A10")
+                Color(hex: "#ea323c"), Color(hex: "#c42430"), Color(hex: "#891e2b"), Color(hex: "#571c27")
+            ]
+            
+        case .spritfill:
+            return [
+                // Row 1: Pure blacks → whites (8 grays)
+                Color(hex: "#000000"), Color(hex: "#1A1A1A"), Color(hex: "#333333"), Color(hex: "#4D4D4D"),
+                Color(hex: "#737373"), Color(hex: "#999999"), Color(hex: "#C0C0C0"), Color(hex: "#FFFFFF"),
+                // Row 2: Reds (8 shades dark→light)
+                Color(hex: "#330000"), Color(hex: "#660000"), Color(hex: "#990000"), Color(hex: "#CC0000"),
+                Color(hex: "#FF0000"), Color(hex: "#FF4444"), Color(hex: "#FF8888"), Color(hex: "#FFCCCC"),
+                // Row 3: Red-Orange / Vermillion (8)
+                Color(hex: "#331100"), Color(hex: "#662200"), Color(hex: "#993300"), Color(hex: "#CC4400"),
+                Color(hex: "#FF5500"), Color(hex: "#FF7744"), Color(hex: "#FF9F77"), Color(hex: "#FFCCAA"),
+                // Row 4: Orange (8)
+                Color(hex: "#332200"), Color(hex: "#664400"), Color(hex: "#996600"), Color(hex: "#CC8800"),
+                Color(hex: "#FFAA00"), Color(hex: "#FFBB44"), Color(hex: "#FFCC77"), Color(hex: "#FFDDAA"),
+                // Row 5: Yellow (8)
+                Color(hex: "#333300"), Color(hex: "#666600"), Color(hex: "#999900"), Color(hex: "#CCCC00"),
+                Color(hex: "#FFFF00"), Color(hex: "#FFFF55"), Color(hex: "#FFFF99"), Color(hex: "#FFFFCC"),
+                // Row 6: Yellow-Green / Lime (8)
+                Color(hex: "#1A3300"), Color(hex: "#336600"), Color(hex: "#4D9900"), Color(hex: "#66CC00"),
+                Color(hex: "#88FF00"), Color(hex: "#AAFF44"), Color(hex: "#CCFF88"), Color(hex: "#EEFFCC"),
+                // Row 7: Green (8)
+                Color(hex: "#003300"), Color(hex: "#006600"), Color(hex: "#009900"), Color(hex: "#00CC00"),
+                Color(hex: "#00FF00"), Color(hex: "#44FF44"), Color(hex: "#88FF88"), Color(hex: "#CCFFCC"),
+                // Row 8: Teal / Cyan-Green (8)
+                Color(hex: "#003322"), Color(hex: "#006644"), Color(hex: "#009966"), Color(hex: "#00CC88"),
+                Color(hex: "#00FFAA"), Color(hex: "#44FFBB"), Color(hex: "#88FFDD"), Color(hex: "#CCFFEE"),
+                // Row 9: Cyan (8)
+                Color(hex: "#003333"), Color(hex: "#006666"), Color(hex: "#009999"), Color(hex: "#00CCCC"),
+                Color(hex: "#00FFFF"), Color(hex: "#44FFFF"), Color(hex: "#88FFFF"), Color(hex: "#CCFFFF"),
+                // Row 10: Sky Blue (8)
+                Color(hex: "#002233"), Color(hex: "#004466"), Color(hex: "#006699"), Color(hex: "#0088CC"),
+                Color(hex: "#00AAFF"), Color(hex: "#44BBFF"), Color(hex: "#88CCFF"), Color(hex: "#CCDDFF"),
+                // Row 11: Blue (8)
+                Color(hex: "#000033"), Color(hex: "#000066"), Color(hex: "#000099"), Color(hex: "#0000CC"),
+                Color(hex: "#0000FF"), Color(hex: "#4444FF"), Color(hex: "#8888FF"), Color(hex: "#CCCCFF"),
+                // Row 12: Purple / Indigo (8)
+                Color(hex: "#110033"), Color(hex: "#220066"), Color(hex: "#330099"), Color(hex: "#4400CC"),
+                Color(hex: "#6600FF"), Color(hex: "#8844FF"), Color(hex: "#AA88FF"), Color(hex: "#DDCCFF"),
+                // Row 13: Violet / Magenta (8)
+                Color(hex: "#330033"), Color(hex: "#660066"), Color(hex: "#990099"), Color(hex: "#CC00CC"),
+                Color(hex: "#FF00FF"), Color(hex: "#FF44FF"), Color(hex: "#FF88FF"), Color(hex: "#FFCCFF"),
+                // Row 14: Pink / Rose (8)
+                Color(hex: "#330011"), Color(hex: "#660022"), Color(hex: "#990033"), Color(hex: "#CC0044"),
+                Color(hex: "#FF0066"), Color(hex: "#FF4488"), Color(hex: "#FF88AA"), Color(hex: "#FFCCDD"),
+                // Row 15: Warm Browns / Skin tones (8)
+                Color(hex: "#2B1A0E"), Color(hex: "#4A2E14"), Color(hex: "#6B4226"), Color(hex: "#8B5E3C"),
+                Color(hex: "#A67C52"), Color(hex: "#C4A882"), Color(hex: "#DEC9A8"), Color(hex: "#F5E6D0"),
+                // Row 16: Cool Grays / Blue-Grays (8)
+                Color(hex: "#1A1A2E"), Color(hex: "#2D2D44"), Color(hex: "#40405A"), Color(hex: "#5A5A78"),
+                Color(hex: "#7A7A96"), Color(hex: "#9A9AB4"), Color(hex: "#B8B8D0"), Color(hex: "#D8D8E8")
             ]
             
         case .custom(let id):
@@ -222,6 +276,7 @@ enum ColorPalettes: Hashable, Codable {
             case "Sweetie 16": self = .sweetie16
             case "Resurrect 32": self = .resurrect32
             case "Journey 64": self = .journey64
+            case "Spritfill 128": self = .spritfill
             case "custom":
                 let id = try container.decode(String.self, forKey: .customId)
                 self = .custom(id: id)
@@ -243,6 +298,7 @@ enum ColorPalettes: Hashable, Codable {
         case "Sweetie 16": self = .sweetie16
         case "Resurrect 32": self = .resurrect32
         case "Journey 64": self = .journey64
+        case "Spritfill 128": self = .spritfill
         default: self = .endesga64
         }
     }
@@ -259,6 +315,7 @@ enum ColorPalettes: Hashable, Codable {
         case .sweetie16: try container.encode("Sweetie 16", forKey: .type)
         case .resurrect32: try container.encode("Resurrect 32", forKey: .type)
         case .journey64: try container.encode("Journey 64", forKey: .type)
+        case .spritfill: try container.encode("Spritfill 128", forKey: .type)
         case .custom(let id):
             try container.encode("custom", forKey: .type)
             try container.encode(id, forKey: .customId)

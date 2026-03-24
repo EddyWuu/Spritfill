@@ -35,7 +35,7 @@ struct ContentView: View {
             
             StoreView()
                 .tabItem {
-                    Label("Support", systemImage: "heart.fill")
+                    Label("Pro", systemImage: "star.fill")
                 }
         }
     }
