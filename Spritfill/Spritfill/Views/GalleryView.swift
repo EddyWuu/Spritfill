@@ -53,6 +53,10 @@ struct GalleryView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             galleryViewModel.isEditMode.toggle()
+                            if !galleryViewModel.isEditMode {
+                                galleryViewModel.resizingItemID = nil
+                                galleryViewModel.selectedItemID = nil
+                            }
                         }
                     } label: {
                         Text(galleryViewModel.isEditMode ? "Done" : "Edit")

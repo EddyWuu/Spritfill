@@ -28,6 +28,8 @@ class RecreateCanvasViewModel: ObservableObject {
     private(set) var session: RecreateSession
     private let storage = RecreateStorageService.shared
     
+    var sessionID: UUID { session.id }
+    
     // MARK: - User state
     
     @Published var userPixels: [Color]
@@ -41,6 +43,31 @@ class RecreateCanvasViewModel: ObservableObject {
     // Monotonically increasing counter — bumped when user pixels change.
     // Used by RecreateCanvasRenderer's Equatable check instead of comparing arrays.
     @Published private(set) var pixelGeneration: UInt = 0
+    
+    // MARK: - Apple Pencil detection
+    
+    @Published var applePencilDetected: Bool = false
+    private var pencilResetTimer: Timer?
+    private static let pencilTimeout: TimeInterval = 10
+    
+    /// Called when a pencil touch is detected. Sets the flag and starts/restarts the 10-sec reset timer.
+    func registerPencilTouch() {
+        applePencilDetected = true
+        pencilResetTimer?.invalidate()
+        pencilResetTimer = Timer.scheduledTimer(withTimeInterval: Self.pencilTimeout, repeats: false) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.applePencilDetected = false
+            }
+        }
+    }
+    
+    /// Whether the given tool is a drawing tool (pencil-only when Apple Pencil is detected).
+    static func isDrawingTool(_ tool: RecreateTool) -> Bool {
+        switch tool {
+        case .paint, .eraser: return true
+        case .pan: return false
+        }
+    }
     
     // MARK: - Undo / Redo history
     

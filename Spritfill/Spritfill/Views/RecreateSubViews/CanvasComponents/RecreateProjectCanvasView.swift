@@ -13,6 +13,7 @@ struct RecreateProjectCanvasView: View {
     @State private var canvasOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var dragVisitedIndices: Set<Int> = []
+    @State private var panStartLocation: CGPoint = .zero
 
     var body: some View {
         GeometryReader { geo in
@@ -31,7 +32,8 @@ struct RecreateProjectCanvasView: View {
                     pixelGeneration: viewModel.pixelGeneration,
                     gridWidth: gridWidth,
                     gridHeight: gridHeight,
-                    zoomScale: zoomScale
+                    zoomScale: zoomScale,
+                    sessionID: viewModel.sessionID
                 )
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
@@ -64,16 +66,37 @@ struct RecreateProjectCanvasView: View {
                     },
                     onPinchEnd: {
                         dragStart = canvasOffset
-                    }
-                )
-            )
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        if viewModel.selectedTool == .pan {
+                    },
+                    onSingleTouchBegan: { location, isPencil in
+                        if isPencil {
+                            viewModel.registerPencilTouch()
+                        }
+                        
+                        let tool = viewModel.selectedTool
+                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
+                            panStartLocation = location
+                        } else {
+                            viewModel.beginAction()
+                            if let index = viewModel.gridIndex(from: location,
+                                                                geoSize: geo.size,
+                                                                canvasOffset: canvasOffset) {
+                                dragVisitedIndices.insert(index)
+                                viewModel.applyToolAtIndex(index)
+                            }
+                        }
+                    },
+                    onSingleTouchMoved: { location, isPencil in
+                        let tool = viewModel.selectedTool
+                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
+                            let dx = location.x - panStartLocation.x
+                            let dy = location.y - panStartLocation.y
                             let proposed = CGSize(
-                                width: dragStart.width + value.translation.width,
-                                height: dragStart.height + value.translation.height
+                                width: dragStart.width + dx,
+                                height: dragStart.height + dy
                             )
                             canvasOffset = viewModel.clampedOffset(
                                 for: proposed,
@@ -81,9 +104,7 @@ struct RecreateProjectCanvasView: View {
                                 canvasSize: scaledCanvasSize
                             )
                         } else {
-                            // Draw on drag for paint/eraser
-                            viewModel.beginAction()
-                            if let index = viewModel.gridIndex(from: value.location,
+                            if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
                                                                 canvasOffset: canvasOffset) {
                                 if !dragVisitedIndices.contains(index) {
@@ -92,14 +113,21 @@ struct RecreateProjectCanvasView: View {
                                 }
                             }
                         }
-                    }
-                    .onEnded { value in
-                        if viewModel.selectedTool == .pan {
+                    },
+                    onSingleTouchEnded: { location, isPencil in
+                        if isPencil {
+                            viewModel.registerPencilTouch()
+                        }
+                        
+                        let tool = viewModel.selectedTool
+                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        
+                        if fingerOnDrawTool || tool == .pan {
                             dragStart = canvasOffset
                         } else {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
-                                if let index = viewModel.gridIndex(from: value.location,
+                                if let index = viewModel.gridIndex(from: location,
                                                                     geoSize: geo.size,
                                                                     canvasOffset: canvasOffset) {
                                     viewModel.applyToolAtIndex(index)
@@ -107,10 +135,10 @@ struct RecreateProjectCanvasView: View {
                             }
                             viewModel.endAction()
                             dragVisitedIndices.removeAll()
-                            // Auto-save after each paint/erase action (debounced)
                             viewModel.debouncedSave()
                         }
                     }
+                )
             )
             .onAppear {
                 viewModel.updateViewSize(geo.size)
@@ -157,8 +185,10 @@ private struct RecreateCanvasRenderer: View, Equatable {
     let gridWidth: Int
     let gridHeight: Int
     let zoomScale: CGFloat
+    let sessionID: UUID  // Tracks which session we're rendering
     
     static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.sessionID == rhs.sessionID &&
         lhs.pixelGeneration == rhs.pixelGeneration &&
         lhs.gridWidth == rhs.gridWidth &&
         lhs.gridHeight == rhs.gridHeight &&
@@ -294,8 +324,9 @@ private struct RecreateCanvasRenderer: View, Equatable {
     
     // MARK: - Bitmap rendering
     
-    // Renders solid white background + user pixels + reference ghost into a 1:1 CGImage.
-    // Pure byte-level operations — no UIColor, no SwiftUI Color, no Path fills.
+    // Renders solid white background + user pixels + reference ghost into a bitmap.
+    // For small canvases (< 512px), the bitmap is upscaled by repeating each pixel
+    // so the GPU doesn't need extreme nearest-neighbor upscaling on real hardware.
     // Uses a plain white background (not checkerboard) so reference ghost colors
     // blend uniformly and don't show brightness differences per cell.
     private func renderBitmap() -> UIImage? {
@@ -303,46 +334,63 @@ private struct RecreateCanvasRenderer: View, Equatable {
         let h = gridHeight
         guard w > 0, h > 0 else { return nil }
         
+        // Determine upscale factor so the bitmap is at least 512px on its longest side.
+        let minBitmapSize = 512
+        let maxDim = max(w, h)
+        let scale = maxDim < minBitmapSize ? (minBitmapSize / maxDim) : 1
+        let bw = w * scale
+        let bh = h * scale
+        
         // Solid white background
         let bgR: UInt8 = 255, bgG: UInt8 = 255, bgB: UInt8 = 255
         
-        var buffer = [UInt8](repeating: 255, count: w * h * 4)
+        var buffer = [UInt8](repeating: 255, count: bw * bh * 4)
         let pixelCount = userPixelHexes.count
         
-        for i in 0..<(w * h) {
-            let bi = i * 4
-            
-            let userHex = i < pixelCount ? userPixelHexes[i] : "clear"
-            let refRGB = referenceRGB[i]
-            
-            if userHex != "clear" {
-                // User-painted pixel
-                let rgb = hexToRGB(userHex)
-                buffer[bi]     = rgb.r
-                buffer[bi + 1] = rgb.g
-                buffer[bi + 2] = rgb.b
-            } else if let ref = refRGB {
-                // Unpainted reference cell — blend reference color at 15% over white
-                // alpha blend: out = src * 0.15 + bg * 0.85
-                buffer[bi]     = UInt8(Double(ref.r) * 0.15 + Double(bgR) * 0.85)
-                buffer[bi + 1] = UInt8(Double(ref.g) * 0.15 + Double(bgG) * 0.85)
-                buffer[bi + 2] = UInt8(Double(ref.b) * 0.15 + Double(bgB) * 0.85)
-            } else {
-                // Empty cell — white
-                buffer[bi]     = bgR
-                buffer[bi + 1] = bgG
-                buffer[bi + 2] = bgB
+        for row in 0..<h {
+            for col in 0..<w {
+                let i = row * w + col
+                
+                let userHex = i < pixelCount ? userPixelHexes[i] : "clear"
+                let refRGB = referenceRGB[i]
+                
+                let r: UInt8, g: UInt8, b: UInt8
+                if userHex != "clear" {
+                    // User-painted pixel
+                    let rgb = hexToRGB(userHex)
+                    r = rgb.r; g = rgb.g; b = rgb.b
+                } else if let ref = refRGB {
+                    // Unpainted reference cell — blend reference color at 15% over white
+                    r = UInt8(Double(ref.r) * 0.15 + Double(bgR) * 0.85)
+                    g = UInt8(Double(ref.g) * 0.15 + Double(bgG) * 0.85)
+                    b = UInt8(Double(ref.b) * 0.15 + Double(bgB) * 0.85)
+                } else {
+                    // Empty cell — white
+                    r = bgR; g = bgG; b = bgB
+                }
+                
+                // Fill a scale×scale block in the output buffer
+                for dy in 0..<scale {
+                    for dx in 0..<scale {
+                        let bx = col * scale + dx
+                        let by = row * scale + dy
+                        let bi = (by * bw + bx) * 4
+                        buffer[bi]     = r
+                        buffer[bi + 1] = g
+                        buffer[bi + 2] = b
+                        buffer[bi + 3] = 255
+                    }
+                }
             }
-            buffer[bi + 3] = 255
         }
         
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let ctx = CGContext(
             data: &buffer,
-            width: w,
-            height: h,
+            width: bw,
+            height: bh,
             bitsPerComponent: 8,
-            bytesPerRow: w * 4,
+            bytesPerRow: bw * 4,
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ), let cgImage = ctx.makeImage() else { return nil }

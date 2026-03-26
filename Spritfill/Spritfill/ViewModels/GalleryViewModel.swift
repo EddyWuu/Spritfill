@@ -53,6 +53,7 @@ class GalleryViewModel: ObservableObject {
     @Published var zoomScale: CGFloat = 1.0
     @Published var boardOffset: CGSize = .zero
     @Published var selectedItemID: UUID? = nil
+    @Published var resizingItemID: UUID? = nil  // When set, dragging on the item resizes instead of moves
     @Published var expandedImage: UIImage? = nil
     @Published var showExpandedImage: Bool = false
     
@@ -116,60 +117,152 @@ class GalleryViewModel: ObservableObject {
     
     @MainActor
     func loadGallery() {
-        let projects = storage.fetchAllProjects()
+        // Load layout and project metadata quickly on main thread
         let savedLayout = loadLayout()
         let savedMap = Dictionary(uniqueKeysWithValues: savedLayout.map { ($0.id, $0) })
         
-        // Filter to projects that have content
-        let projectsWithContent = projects.filter { $0.pixelGrid.contains { $0 != "clear" } }
-        
-        var items: [GalleryBoardItem] = []
-        var col = 0
-        var row = 0
-        let spacing: CGFloat = 130
-        // Center items on the board
-        let centerX = boardSize / 2
-        let centerY = boardSize / 2
-        // Calculate grid start so items are centered
-        let maxCols = 4
-        let totalCols = min(projectsWithContent.count, maxCols)
-        let totalRows = (projectsWithContent.count + maxCols - 1) / maxCols
-        let startX = centerX - CGFloat(totalCols - 1) * spacing / 2
-        let startY = centerY - CGFloat(totalRows - 1) * spacing / 2
-        
-        for project in projectsWithContent {
-            if let saved = savedMap[project.id] {
-                items.append(saved)
-            } else {
-                // Place new items in a grid layout
-                let x = startX + CGFloat(col) * spacing
-                let y = startY + CGFloat(row) * spacing
-                items.append(GalleryBoardItem(
-                    id: project.id,
-                    position: CGPoint(x: x, y: y),
-                    displaySize: defaultItemSize,
-                    isArchived: true
-                ))
-                col += 1
-                if col >= 4 {
-                    col = 0
-                    row += 1
+        // Dispatch heavy work (fetch projects + thumbnails) to background
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            let projects = self.storage.fetchAllProjects()
+            
+            // Filter to projects that have content
+            let projectsWithContent = projects.filter { $0.pixelGrid.contains { $0 != "clear" } }
+            
+            var items: [GalleryBoardItem] = []
+            var col = 0
+            var row = 0
+            let spacing: CGFloat = 130
+            let centerX = self.boardSize / 2
+            let centerY = self.boardSize / 2
+            let maxCols = 4
+            let totalCols = min(projectsWithContent.count, maxCols)
+            let totalRows = (projectsWithContent.count + maxCols - 1) / maxCols
+            let startX = centerX - CGFloat(totalCols - 1) * spacing / 2
+            let startY = centerY - CGFloat(totalRows - 1) * spacing / 2
+            
+            // Build thumbnails in background (CPU-bound)
+            var newThumbnails: [UUID: UIImage] = [:]
+            
+            for project in projectsWithContent {
+                if let saved = savedMap[project.id] {
+                    items.append(saved)
+                } else {
+                    let x = startX + CGFloat(col) * spacing
+                    let y = startY + CGFloat(row) * spacing
+                    items.append(GalleryBoardItem(
+                        id: project.id,
+                        position: CGPoint(x: x, y: y),
+                        displaySize: self.defaultItemSize,
+                        isArchived: true
+                    ))
+                    col += 1
+                    if col >= 4 {
+                        col = 0
+                        row += 1
+                    }
+                }
+                
+                // Generate thumbnail in background if not cached
+                if self.thumbnailStore[project.id] == nil {
+                    if let image = self.generateThumbnailOffMain(for: project) {
+                        newThumbnails[project.id] = image
+                    }
                 }
             }
             
-            // Generate thumbnail
-            generateThumbnail(for: project)
+            // Remove items for deleted projects
+            let validIDs = Set(projectsWithContent.map { $0.id })
+            items = items.filter { validIDs.contains($0.id) }
+            
+            // Update UI on main thread
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                // Merge new thumbnails into cache
+                for (id, image) in newThumbnails {
+                    self.thumbnailStore[id] = image
+                }
+                self.boardItems = items
+                self.saveLayout()
+            }
         }
-        
-        // Remove items for deleted projects
-        let validIDs = Set(projectsWithContent.map { $0.id })
-        items = items.filter { validIDs.contains($0.id) }
-        
-        boardItems = items
-        saveLayout()
     }
     
     // MARK: - Thumbnails
+    
+    /// Generate thumbnail on background thread using Core Graphics (no SwiftUI ImageRenderer)
+    private func generateThumbnailOffMain(for project: ProjectData) -> UIImage? {
+        let width = project.settings.selectedCanvasSize.dimensions.width
+        let height = project.settings.selectedCanvasSize.dimensions.height
+        let thumbSize: CGFloat = 256  // Smaller for faster generation
+        let tileSize = floor(thumbSize / CGFloat(max(width, height)))
+        let renderW = Int(CGFloat(width) * tileSize)
+        let renderH = Int(CGFloat(height) * tileSize)
+        
+        guard renderW > 0, renderH > 0 else { return nil }
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        guard let ctx = CGContext(
+            data: nil,
+            width: renderW,
+            height: renderH,
+            bitsPerComponent: 8,
+            bytesPerRow: renderW * 4,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+        
+        // Flip coordinate system (CGContext is bottom-up)
+        ctx.translateBy(x: 0, y: CGFloat(renderH))
+        ctx.scaleBy(x: 1, y: -1)
+        
+        let tileSizeInt = Int(tileSize)
+        let grid = project.pixelGrid
+        
+        for row in 0..<height {
+            for col in 0..<width {
+                let index = row * width + col
+                guard index < grid.count else { continue }
+                let hex = grid[index]
+                if hex == "clear" { continue }
+                
+                // Parse hex color
+                let (r, g, b, a) = hexToRGBA(hex)
+                ctx.setFillColor(red: r, green: g, blue: b, alpha: a)
+                ctx.fill(CGRect(x: col * tileSizeInt, y: row * tileSizeInt, width: tileSizeInt, height: tileSizeInt))
+            }
+        }
+        
+        guard let cgImage = ctx.makeImage() else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
+    
+    /// Parse hex string to RGBA components (0.0-1.0)
+    private func hexToRGBA(_ hex: String) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
+        var hexStr = hex
+        if hexStr.hasPrefix("#") { hexStr.removeFirst() }
+        guard hexStr.count >= 6 else { return (0, 0, 0, 1) }
+        
+        let scanner = Scanner(string: hexStr)
+        var rgb: UInt64 = 0
+        scanner.scanHexInt64(&rgb)
+        
+        if hexStr.count == 8 {
+            return (
+                CGFloat((rgb >> 24) & 0xFF) / 255.0,
+                CGFloat((rgb >> 16) & 0xFF) / 255.0,
+                CGFloat((rgb >> 8) & 0xFF) / 255.0,
+                CGFloat(rgb & 0xFF) / 255.0
+            )
+        } else {
+            return (
+                CGFloat((rgb >> 16) & 0xFF) / 255.0,
+                CGFloat((rgb >> 8) & 0xFF) / 255.0,
+                CGFloat(rgb & 0xFF) / 255.0,
+                1.0
+            )
+        }
+    }
     
     @MainActor
     private func generateThumbnail(for project: ProjectData) {
@@ -242,13 +335,25 @@ class GalleryViewModel: ObservableObject {
     func selectItem(id: UUID) {
         if selectedItemID == id {
             selectedItemID = nil
+            resizingItemID = nil
         } else {
             selectedItemID = id
+            resizingItemID = nil
         }
     }
     
     func deselectItem() {
         selectedItemID = nil
+        resizingItemID = nil
+    }
+    
+    func toggleResize(id: UUID) {
+        if resizingItemID == id {
+            resizingItemID = nil
+        } else {
+            resizingItemID = id
+            selectedItemID = id
+        }
     }
     
     func expandSelectedItem() {

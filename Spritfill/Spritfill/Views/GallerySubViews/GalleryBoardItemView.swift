@@ -19,6 +19,10 @@ struct GalleryBoardItemView: View {
         viewModel.selectedItemID == item.id
     }
     
+    private var isResizing: Bool {
+        viewModel.resizingItemID == item.id
+    }
+    
     var body: some View {
         let size = item.displaySize
         
@@ -40,8 +44,9 @@ struct GalleryBoardItemView: View {
             // Edit mode background box (slightly larger than the image)
             if viewModel.isEditMode {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.blue.opacity(isSelected ? 0.15 : 0.08))
-                    .stroke(Color.blue.opacity(isSelected ? 0.5 : 0.2), lineWidth: isSelected ? 2 : 1)
+                    .fill(Color.blue.opacity(isResizing ? 0.25 : (isSelected ? 0.15 : 0.08)))
+                    .stroke(isResizing ? Color.white.opacity(0.8) : Color.blue.opacity(isSelected ? 0.5 : 0.2),
+                            lineWidth: isResizing ? 2.5 : (isSelected ? 2 : 1))
                     .padding(-8)
             }
         }
@@ -62,61 +67,64 @@ struct GalleryBoardItemView: View {
         }
         .overlay(alignment: .bottomTrailing) {
             if viewModel.isEditMode {
-                // Resize handle (bottom-right)
-                resizeHandle
+                // Resize toggle button
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        viewModel.toggleResize(id: item.id)
+                    }
+                }) {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(isResizing ? .blue : .white)
+                        .frame(width: 28, height: 28)
+                        .background(Circle().fill(isResizing ? Color.white : Color.blue.opacity(0.8)))
+                }
+                .offset(x: 4, y: 4)
             }
         }
         .position(
-            x: item.position.x + (viewModel.isEditMode ? dragOffset.width : 0),
-            y: item.position.y + (viewModel.isEditMode ? dragOffset.height : 0)
+            x: item.position.x + (viewModel.isEditMode && !isResizing ? dragOffset.width : 0),
+            y: item.position.y + (viewModel.isEditMode && !isResizing ? dragOffset.height : 0)
         )
         .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.15)) {
-                viewModel.selectItem(id: item.id)
+            if viewModel.isEditMode && !isResizing {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    viewModel.selectItem(id: item.id)
+                }
             }
         }
-        .highPriorityGesture(viewModel.isEditMode ? dragGesture : nil)
+        .highPriorityGesture(viewModel.isEditMode ? itemDragGesture : nil)
     }
     
-    // MARK: - Resize handle
+    // MARK: - Combined drag gesture (moves OR resizes depending on mode)
     
-    private var resizeHandle: some View {
-        Image(systemName: "arrow.up.left.and.arrow.down.right")
-            .font(.system(size: 12, weight: .bold))
-            .foregroundColor(.white)
-            .frame(width: 24, height: 24)
-            .background(Circle().fill(Color.blue.opacity(0.8)))
-            .offset(x: 4, y: 4)
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        if resizeStartSize == 0 {
-                            resizeStartSize = item.displaySize
-                        }
-                        let delta = max(value.translation.width, value.translation.height)
-                        let newSize = resizeStartSize + delta
-                        viewModel.resizeItem(id: item.id, to: newSize)
-                    }
-                    .onEnded { _ in
-                        resizeStartSize = 0
-                    }
-            )
-    }
-    
-    // MARK: - Drag gesture
-    
-    private var dragGesture: some Gesture {
+    private var itemDragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                dragOffset = value.translation
+                if isResizing {
+                    // Resize: drag right/down to grow, left/up to shrink
+                    if resizeStartSize == 0 {
+                        resizeStartSize = item.displaySize
+                    }
+                    let delta = max(value.translation.width, value.translation.height)
+                    let newSize = resizeStartSize + delta
+                    viewModel.resizeItem(id: item.id, to: newSize)
+                } else {
+                    // Move
+                    dragOffset = value.translation
+                }
             }
             .onEnded { value in
-                let newPosition = CGPoint(
-                    x: item.position.x + value.translation.width,
-                    y: item.position.y + value.translation.height
-                )
-                viewModel.moveItem(id: item.id, to: newPosition)
-                dragOffset = .zero
+                if isResizing {
+                    resizeStartSize = 0
+                } else {
+                    let newPosition = CGPoint(
+                        x: item.position.x + value.translation.width,
+                        y: item.position.y + value.translation.height
+                    )
+                    viewModel.moveItem(id: item.id, to: newPosition)
+                    dragOffset = .zero
+                }
             }
     }
 }

@@ -400,46 +400,67 @@ private struct PixelCanvasRenderer: View, Equatable {
         }
     }
 
-    // Render the pixel grid + checkerboard into a 1:1 bitmap.
+    // Render the pixel grid + checkerboard into a bitmap.
+    // For small canvases (< 512px), the bitmap is upscaled by repeating each pixel
+    // so the GPU doesn't need extreme nearest-neighbor upscaling on real hardware.
     // Parses hex strings directly to RGB bytes — no UIColor/Color conversion needed.
     private func renderBitmap() -> UIImage? {
         let w = gridWidth
         let h = gridHeight
         guard w > 0, h > 0 else { return nil }
 
+        // Determine upscale factor so the bitmap is at least 512px on its longest side.
+        // This avoids rendering artifacts on real iPhone hardware (3x Retina)
+        // where a tiny bitmap (e.g. 16×16) upscaled to 350+pt causes GPU issues.
+        let minBitmapSize = 512
+        let maxDim = max(w, h)
+        let scale = maxDim < minBitmapSize ? (minBitmapSize / maxDim) : 1
+        let bw = w * scale
+        let bh = h * scale
+
         let lightR: UInt8 = 230, lightG: UInt8 = 230, lightB: UInt8 = 230
         let darkR:  UInt8 = 204, darkG:  UInt8 = 204, darkB:  UInt8 = 204
 
-        var buffer = [UInt8](repeating: 255, count: w * h * 4)
+        var buffer = [UInt8](repeating: 255, count: bw * bh * 4)
 
-        for i in 0..<(w * h) {
-            let bi = i * 4
-            let hex = pixelHexes[i]
+        for row in 0..<h {
+            for col in 0..<w {
+                let i = row * w + col
+                let hex = pixelHexes[i]
 
-            if hex == "clear" {
-                let row = i / w
-                let col = i % w
-                let isLight = (row + col) % 2 == 0
-                buffer[bi]     = isLight ? lightR : darkR
-                buffer[bi + 1] = isLight ? lightG : darkG
-                buffer[bi + 2] = isLight ? lightB : darkB
-            } else {
-                // Parse "#RRGGBB" directly to bytes
-                let rgb = hexToRGB(hex)
-                buffer[bi]     = rgb.r
-                buffer[bi + 1] = rgb.g
-                buffer[bi + 2] = rgb.b
+                let r: UInt8, g: UInt8, b: UInt8
+                if hex == "clear" {
+                    let isLight = (row + col) % 2 == 0
+                    r = isLight ? lightR : darkR
+                    g = isLight ? lightG : darkG
+                    b = isLight ? lightB : darkB
+                } else {
+                    let rgb = hexToRGB(hex)
+                    r = rgb.r; g = rgb.g; b = rgb.b
+                }
+
+                // Fill a scale×scale block in the output buffer
+                for dy in 0..<scale {
+                    for dx in 0..<scale {
+                        let bx = col * scale + dx
+                        let by = row * scale + dy
+                        let bi = (by * bw + bx) * 4
+                        buffer[bi]     = r
+                        buffer[bi + 1] = g
+                        buffer[bi + 2] = b
+                        buffer[bi + 3] = 255
+                    }
+                }
             }
-            buffer[bi + 3] = 255
         }
 
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let ctx = CGContext(
             data: &buffer,
-            width: w,
-            height: h,
+            width: bw,
+            height: bh,
             bitsPerComponent: 8,
-            bytesPerRow: w * 4,
+            bytesPerRow: bw * 4,
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ), let cgImage = ctx.makeImage() else { return nil }

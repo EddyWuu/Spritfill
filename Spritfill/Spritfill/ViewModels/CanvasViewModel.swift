@@ -260,7 +260,8 @@ class CanvasViewModel: ObservableObject {
         
         // Load layers — backward compatible with single-layer projects
         if let savedLayers = data.layers, !savedLayers.isEmpty {
-            self.layerManager = LayerManagerViewModel(layers: savedLayers.map { Layer(from: $0) })
+            let loadedLayers = savedLayers.map { Layer(from: $0) }
+            self.layerManager = LayerManagerViewModel(layers: loadedLayers, activeLayerIndex: loadedLayers.count - 1)
         } else {
             // Legacy project — wrap pixelGrid into a single "Background" layer
             let colors = data.pixelGrid.map { hex in
