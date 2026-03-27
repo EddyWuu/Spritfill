@@ -7,6 +7,7 @@ from flask import Flask, request, send_file, render_template, redirect, url_for,
 from PIL import Image, ImageOps
 import os
 import base64
+from datetime import datetime, timezone
 
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -119,7 +120,9 @@ def review_dashboard():
             submissions.append(data)
 
     # Sort by date (newest first)
-    submissions.sort(key=lambda s: s.get("submittedAt") or s.get("approvedAt") or "", reverse=True)
+    # Use datetime.min as fallback for items without dates (comparable to DatetimeWithNanoseconds)
+    min_datetime = datetime.min.replace(tzinfo=timezone.utc)
+    submissions.sort(key=lambda s: s.get("submittedAt") or s.get("approvedAt") or min_datetime, reverse=True)
 
     # Count docs per status
     counts = {}

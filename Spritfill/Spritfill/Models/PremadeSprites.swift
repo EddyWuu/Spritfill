@@ -47,7 +47,7 @@ struct PremadeSprites {
         archerIdle32, archerAttack32, archerRun32,
         spearmanIdle32, spearmanAttack32, spearmanRun32,
         // Ducks
-        duck1, duck2, duck3, duck4, duck5, duck6, ducks1,
+        duck1, duck2, duck3, duck4, duck5, duck6, ducks7,
         // 32x32 Landscapes
         mountainRange, forest, sunset, castle, ocean, streetAtNight, studyRoom, citySkyrises,
         // 16x16 Items & Objects

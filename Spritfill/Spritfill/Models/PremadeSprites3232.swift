@@ -681,7 +681,7 @@ extension PremadeSprites {
         return PremadeSpriteData(id: "duck5", name: "Duck 5", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
 
-    static let ducks1: PremadeSpriteData = {
+    static let duck7: PremadeSpriteData = {
         let c = "clear"
         let a = "#111111"
         let b = "#ffffff"
@@ -728,7 +728,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, c, c, c, c, c, c, c, c, c,
         ]
 
-        return PremadeSpriteData(id: "ducks1", name: "Ducks 1", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
+        return PremadeSpriteData(id: "duck7", name: "Duck 7", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
 
     static let pokemonBall: PremadeSpriteData = {
