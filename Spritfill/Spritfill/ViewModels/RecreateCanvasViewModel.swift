@@ -50,7 +50,7 @@ class RecreateCanvasViewModel: ObservableObject {
     private var pencilResetTimer: Timer?
     private static let pencilTimeout: TimeInterval = 10
     
-    /// Called when a pencil touch is detected. Sets the flag and starts/restarts the 10-sec reset timer.
+    // Called when a pencil touch is detected. Sets the flag and starts/restarts the 10-sec reset timer.
     func registerPencilTouch() {
         applePencilDetected = true
         pencilResetTimer?.invalidate()
@@ -61,7 +61,7 @@ class RecreateCanvasViewModel: ObservableObject {
         }
     }
     
-    /// Whether the given tool is a drawing tool (pencil-only when Apple Pencil is detected).
+    // Whether the given tool is a drawing tool (pencil-only when Apple Pencil is detected).
     static func isDrawingTool(_ tool: RecreateTool) -> Bool {
         switch tool {
         case .paint, .eraser: return true

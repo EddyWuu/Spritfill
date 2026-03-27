@@ -47,7 +47,7 @@ struct PremadeSprites {
         archerIdle32, archerAttack32, archerRun32,
         spearmanIdle32, spearmanAttack32, spearmanRun32,
         // Ducks
-        duck1, duck2, duck3, duck4, duck5, duck6, ducks7,
+        duck1, duck2, duck3, duck4, duck5, duck6, duck7,
         // 32x32 Landscapes
         mountainRange, forest, sunset, castle, ocean, streetAtNight, studyRoom, citySkyrises,
         // 16x16 Items & Objects
@@ -60,6 +60,8 @@ struct PremadeSprites {
         moon, apple, lightning, snowflake, rocket,
         hourglass, alien, musicNote, penguin, sun,
         cupcake, frog, diamondRing, crab, candle, pawPrint,
-        watermelon, bat,
+        watermelon, bat, snowyVillage, desertPyramid, underwaterScene, spaceStation,
+        autumnForest, wizardHat, iceCream, scroll,
+        book, axe, bunny, questMark, pumpkin, wolf,
     ]
 }

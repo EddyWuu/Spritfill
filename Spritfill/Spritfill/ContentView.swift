@@ -48,8 +48,8 @@ struct ContentView: View {
     }
 }
 
-/// Defers creation of a heavy tab view until it first appears.
-/// After first load, the view stays alive (not re-created on every tab switch).
+// Defers creation of a heavy tab view until it first appears.
+// After first load, the view stays alive (not re-created on every tab switch).
 private struct LazyTab<Content: View>: View {
     let build: () -> Content
     @State private var hasAppeared = false

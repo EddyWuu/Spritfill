@@ -10,6 +10,302 @@ import Foundation
 // MARK: - All 32x32 Non-Character Sprites (Landscapes)
 
 extension PremadeSprites {
+    
+    static let snowyVillage: PremadeSpriteData = {
+        let c = "clear"
+        let sk = "#94fdff"  // sky light
+        let sb = "#00cdf9"  // sky blue
+        let sn = "#ffffff"  // snow white
+        let sg = "#c0cbdc"  // snow shadow
+        let wl = "#c0cbdc"  // wall light
+        let wd = "#92a1b9"  // wall dark
+        let rf = "#891e2b"  // roof red
+        let rd = "#571c27"  // roof dark
+        let dw = "#5d2c28"  // door wood
+        let yw = "#ffeb57"  // window glow
+        let ch = "#657392"  // chimney
+        let sm = "#3d3d3d"  // smoke
+        let pi = "#33984b"  // pine tree green
+        let pd = "#1e6f50"  // pine dark
+        let tr = "#5d2c28"  // tree trunk
+        let st = "#edab50"  // star
+ 
+        let grid: [String] = [
+            sk, sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk, sk,
+            sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk,
+            sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sm, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sm, sm, sb, sb, sb, sb, sb, sb, sk,
+            sb, sb, sb, sb, sb, sm, sm, sb, sb, sm, sm, sm, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sm, sm, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sm, sm, sb, sb, ch, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sm, sb, sb, ch, ch, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, ch, ch, ch, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, ch, ch, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, pi, sb, sb, rd, rd, rd, rd, sb, sb, sb, sb, sb, sb, sb, pi, sb, rd, rd, rd, rd, rd, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, pi, pi, pi, rd, rf, rf, rf, rf, rd, sb, sb, sb, sb, sb, pi, pi, pi, rf, rf, rf, rf, rf, rd, sb, sb, sb, sb,
+            sb, sb, sb, sb, pi, pi, pi, rd, rf, rf, rf, rf, rf, rf, rd, sb, sb, sb, pi, pi, pi, rd, rf, rf, rf, rf, rf, rf, rd, sb, sb, sb,
+            sb, sb, sb, sb, pd, pi, rd, rf, rf, rf, rf, rf, rf, rf, rf, rd, sb, sb, pd, pi, rd, rf, rf, rf, rf, rf, rf, rf, rf, rd, sb, sb,
+            sb, sb, sb, tr, pd, rd, rf, rf, rf, rf, rf, rf, rf, rf, rf, rf, rd, tr, pd, rd, rf, rf, rf, rf, rf, rf, rf, rf, rf, rf, rd, sb,
+            sb, sb, sb, tr, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, tr, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, wl, sb,
+            sb, sb, sb, tr, wl, yw, wd, wl, wl, yw, wd, wl, wl, dw, dw, wl, wl, tr, wl, yw, wd, wl, wl, yw, wd, wl, wl, dw, dw, wl, wl, sb,
+            sb, sb, sb, tr, wl, yw, wd, wl, wl, yw, wd, wl, wl, dw, dw, wl, wl, tr, wl, yw, wd, wl, wl, yw, wd, wl, wl, dw, dw, wl, wl, sb,
+            sb, sb, sb, tr, wl, wl, wl, wl, wl, wl, wl, wl, wl, dw, dw, wl, wl, tr, wl, wl, wl, wl, wl, wl, wl, wl, wl, dw, dw, wl, wl, sb,
+            sb, sb, sb, tr, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, tr, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, sb,
+            sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn,
+            sn, sg, sn, sn, sn, sn, sn, sn, sg, sn, sn, sg, sn, sn, sn, sn, sg, sn, sn, sn, sg, sn, sn, sg, sn, sn, sn, sn, sg, sn, sn, sg,
+            sg, sg, sg, sn, sn, sn, sg, sg, sg, sn, sg, sg, sg, sn, sn, sg, sg, sg, sn, sg, sg, sg, sg, sg, sn, sn, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sn, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+            sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg, sg,
+        ]
+ 
+        return PremadeSpriteData(id: "snowy_village", name: "Snowy Village", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 8)
+    }()
+ 
+    // MARK: - Desert Pyramid
+ 
+    static let desertPyramid: PremadeSpriteData = {
+        let c = "clear"
+        let sk = "#edab50"  // sunset sky
+        let s2 = "#e07438"  // sky lower
+        let s3 = "#ea323c"  // horizon red
+        let sn = "#e4d2aa"  // sand light
+        let sd = "#e4a672"  // sand mid
+        let se = "#b86f50"  // sand dark
+        let py = "#c0cbdc"  // pyramid stone light
+        let pd = "#92a1b9"  // pyramid stone mid
+        let pk = "#657392"  // pyramid stone dark
+        let pa = "#424c6e"  // pyramid shadow
+        let dc = "#0c2e44"  // door/crevice
+        let ca = "#ffeb57"  // sun yellow
+        let cb = "#ffc825"  // sun glow
+ 
+        let grid: [String] = [
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, ca, ca, ca, ca, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, cb, ca, ca, ca, ca, cb, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, cb, ca, ca, ca, ca, ca, ca, cb, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, cb, ca, ca, ca, ca, ca, ca, cb, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk,
+            s2, s2, s2, sk, sk, sk, sk, sk, sk, sk, sk, sk, cb, ca, ca, ca, ca, cb, sk, sk, sk, sk, sk, sk, sk, sk, sk, sk, s2, s2, s2, s2,
+            s2, s2, s2, s2, s2, s2, sk, sk, sk, sk, sk, sk, sk, cb, cb, cb, cb, sk, sk, sk, sk, sk, sk, sk, s2, s2, s2, s2, s2, s2, s2, s2,
+            s3, s3, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s2, s3, s3, s3,
+            s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3, s3,
+            sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, py, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn,
+            sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, py, py, py, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn,
+            sd, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, py, py, pd, py, py, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sd,
+            sd, sd, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, py, py, pd, pk, pd, py, py, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sd, sd,
+            sd, sd, sd, sn, sn, sn, sn, sn, sn, sn, sn, py, py, pd, pk, pa, pk, pd, py, py, sn, sn, sn, sn, sn, sn, sn, sn, sn, sd, sd, sd,
+            sd, sd, sd, sd, sn, sn, sn, sn, sn, sn, py, py, pd, pk, pa, pa, pa, pk, pd, py, py, sn, sn, sn, sn, sn, sn, sn, sd, sd, sd, sd,
+            sd, sd, sd, sd, sd, sn, sn, sn, sn, py, py, pd, pk, pa, pa, pa, pa, pa, pk, pd, py, py, sn, sn, sn, sn, sn, sd, sd, sd, sd, sd,
+            sd, sd, sd, sd, sd, sd, sn, sn, py, py, pd, pk, pa, pa, dc, dc, dc, pa, pa, pk, pd, py, py, sn, sn, sn, sd, sd, sd, sd, sd, sd,
+            sd, sd, sd, sd, sd, sd, sd, py, py, pd, pk, pa, pa, dc, dc, dc, dc, dc, pa, pa, pk, pd, py, py, sd, sd, sd, sd, sd, sd, sd, sd,
+            se, sd, sd, sd, sd, sd, py, py, pd, pk, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pk, pd, py, py, sd, sd, sd, sd, sd, sd, se,
+            se, se, sd, sd, sd, py, py, pd, pk, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pk, pd, py, py, sd, sd, sd, sd, se, se,
+            se, se, se, sd, py, py, pd, pk, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pk, pd, py, py, sd, sd, se, se, se,
+            se, se, se, py, py, pd, pk, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pk, pd, py, py, se, se, se, se,
+            se, se, py, py, pd, pk, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pa, pk, pd, py, py, se, se, se,
+            se, py, py, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, py, py, se, se,
+            py, py, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, pd, py, py, se,
+            sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn,
+            sn, sd, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sn, sd, sn, sn, sn, sn,
+            sd, sd, sd, sn, sn, sn, sn, sd, sn, sn, sd, sn, sn, sn, sn, sn, sn, sn, sn, sd, sn, sn, sn, sn, sd, sn, sd, sd, sd, sn, sn, sd,
+            sd, se, sd, sd, sn, sd, sd, sd, sd, sd, sd, sd, sn, sd, sn, sn, sn, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, se, sd, sd, sd, sd,
+            se, se, se, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, sn, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, se, se, se, sd, sd, se,
+            se, se, se, se, sd, se, se, sd, se, se, sd, se, se, sd, sd, sd, sd, sd, se, sd, se, se, sd, se, se, sd, se, se, se, se, se, se,
+            se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se,
+            se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se,
+            se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se, se,
+        ]
+ 
+        return PremadeSpriteData(id: "desert_pyramid", name: "Desert Pyramid", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 9)
+    }()
+ 
+    // MARK: - Underwater Scene
+ 
+    static let underwaterScene: PremadeSpriteData = {
+        let c = "clear"
+        let d1 = "#0c2e44"  // deep water dark
+        let d2 = "#00396d"  // deep water
+        let d3 = "#0069aa"  // water mid
+        let d4 = "#0099db"  // water light
+        let d5 = "#00cdf9"  // water surface
+        let ww = "#ffffff"  // light ray white
+        let cr = "#ea323c"  // coral red
+        let co = "#e07438"  // coral orange
+        let cy = "#edab50"  // coral yellow
+        let sg = "#33984b"  // seagrass green
+        let sl = "#5ac54f"  // seagrass light
+        let sa = "#e4d2aa"  // sand
+        let sb = "#b86f50"  // sand dark
+        let fb = "#0af1ff"  // fish blue
+        let ff = "#ffeb57"  // fish yellow
+        let fo = "#e07438"  // fish orange
+        let fk = "#131313"  // fish outline
+        let sh = "#c0cbdc"  // shell gray
+        let bk = "#391f21"  // rock dark
+ 
+        let grid: [String] = [
+            d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5, d5,
+            d4, d5, d4, d4, d4, d5, d4, d4, d4, d4, d5, d4, d4, d4, d4, d5, d4, d4, d4, d5, d4, d4, d4, d4, d5, d4, d4, d4, d4, d4, d5, d4,
+            d4, d4, d4, ww, d4, d4, d4, d4, d4, d4, d4, ww, d4, d4, d4, d4, d4, d4, d4, d4, ww, d4, d4, d4, d4, d4, d4, d4, ww, d4, d4, d4,
+            d3, d4, d4, ww, d4, d4, d3, d3, d4, d4, d4, ww, d4, d3, d4, d4, d4, d3, d4, d4, ww, d4, d4, d4, d4, d3, d4, d4, ww, d4, d4, d3,
+            d3, d3, d4, d4, d4, d3, d3, d3, d3, d4, d4, d4, d4, d3, d4, d4, ff, ff, ff, fk, d4, fb, fb, fk, d4, d3, d3, d4, d4, d3, d3, d3,
+            d3, d3, d3, d4, d3, d3, d3, d3, d3, d3, d4, d3, fk, ff, fk, d4, fk, ff, ff, fk, fk, fb, fb, ff, fk, d3, d3, d3, d3, d3, d3, d3,
+            d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, fk, ff, ff, fk, d3, fk, ff, fk, d3, fk, fb, fk, d3, d3, d3, d3, d3, d3, d3, d3,
+            d2, d3, d3, d3, d3, d3, d3, d3, d2, d3, d3, d3, d3, fk, fk, d3, d3, d3, fk, d3, d3, d3, fk, d3, d3, d3, d3, d3, d3, d3, d3, d2,
+            d2, d2, d3, d3, d3, d3, d3, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d2, d2,
+            d2, d2, d2, d3, d3, d3, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d2, d2, d2,
+            d2, d2, d2, d2, d3, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3, d2, d2, d2, d2,
+            d1, d2, d2, d2, d2, d2, d2, d2, d1, d2, d2, d2, d3, d2, d3, d3, d3, d3, d3, d3, d3, d3, fo, fo, fo, d3, d3, d2, d2, d2, d2, d1,
+            d1, d1, d2, d2, d2, d2, d2, d1, d1, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, fk, fo, fo, fo, fk, d3, d2, d2, d2, d1, d1,
+            d1, d1, d1, d2, d2, d2, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, fk, fo, fo, fk, d3, d3, d2, d2, d1, d1, d1,
+            d1, d1, d1, d1, d2, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, fk, fk, d3, d3, d3, d2, d1, d1, d1, d1,
+            d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d1, d1, d1, d1,
+            d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d1, d1, d1, d1, d1, d1,
+            d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1,
+            d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d1,
+            d1, d1, d1, sg, d1, d1, d1, d1, d1, sg, sg, d1, d1, d1, sg, d1, d1, d1, d1, d1, sg, d1, d1, d1, sg, sg, d1, d1, d1, sg, d1, d1,
+            d1, d1, sg, sl, sg, d1, d1, d1, sg, sl, sl, sg, d1, sg, sl, sg, d1, cr, d1, sg, sl, sg, d1, sg, sl, sl, sg, d1, sg, sl, sg, d1,
+            d1, sg, sl, sl, sl, sg, d1, sg, sl, sl, sl, sl, sg, sl, sl, sg, cr, cr, cr, sl, sl, sl, sg, sl, sl, sl, sl, sg, sl, sl, sl, sg,
+            bk, bk, d1, sl, d1, bk, bk, bk, d1, sl, sl, d1, sl, sl, d1, co, co, cr, co, d1, sl, sl, d1, sl, sl, d1, bk, d1, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, cy, cy, co, cy, cy, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            sa, sa, sa, sa, sa, bk, sa, sa, sa, sa, sa, sa, bk, sa, cy, sh, cy, sa, sa, sa, sa, sa, sa, sa, bk, sa, sa, sa, sa, bk, sa, sa,
+            sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sh, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa, sa,
+            sa, sb, sa, sa, sa, sa, sb, sa, sa, sb, sa, sa, sa, sa, sa, sa, sa, sa, sa, sb, sa, sa, sb, sa, sa, sa, sb, sa, sa, sa, sa, sa,
+            sb, sb, sb, sa, sa, sb, sb, sb, sa, sb, sb, sa, sa, sa, sa, sa, sa, sa, sb, sb, sb, sa, sb, sb, sb, sa, sb, sb, sb, sb, sa, sb,
+            sb, sb, sb, sb, sa, sb, sb, sb, sb, sb, sb, sb, sa, sa, sa, sa, sa, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sa, sa, sa, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+            sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb,
+        ]
+ 
+        return PremadeSpriteData(id: "underwater_scene", name: "Underwater Scene", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 10)
+    }()
+ 
+    // MARK: - Space Station
+ 
+    static let spaceStation: PremadeSpriteData = {
+        let c = "clear"
+        let bk = "#0c2e44"  // space black
+        let st = "#ffeb57"  // star yellow
+        let sb = "#0069aa"  // star blue
+        let m1 = "#c0cbdc"  // metal light
+        let m2 = "#92a1b9"  // metal mid
+        let m3 = "#657392"  // metal dark
+        let m4 = "#424c6e"  // metal very dark
+        let wb = "#0af1ff"  // window blue
+        let wl = "#94fdff"  // window light
+        let re = "#ea323c"  // red light
+        let gr = "#33984b"  // green light
+        let yw = "#ffeb57"  // yellow light
+        let sl = "#c32454"  // solar panel red
+        let sd = "#891e2b"  // solar panel dark
+        let sf = "#f68187"  // solar panel light
+ 
+        let grid: [String] = [
+            bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk,
+            bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sd, sd, sd, sd, sd, sd, sd, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sf, sl, sf, sl, sf, sl, sf, sd, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sd, sl, sd, sl, sd, sl, sd, sl, sd, sl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sf, sl, sf, sl, sf, sl, sf, sl, sf, sl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m4, m4, m4, m4, m4, m4, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m3, m3, m3, m3, m3, m3, m3, m3, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m3, m2, m1, m2, m1, m2, m1, m2, m1, m2, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, st, bk, bk, bk, m4, m4, m4, m4, m3, m2, wl, wb, wl, wb, wl, wb, wl, wb, m2, m3, m4, m4, m4, m4, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, m4, m3, m2, m1, m3, m2, m1, wb, wb, wl, wl, wl, wl, wb, wb, m2, m1, m3, m2, m1, m3, m4, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, m4, m3, m2, m1, m1, m1, m2, m1, wl, wb, wb, re, gr, wb, wl, wb, m2, m1, m1, m2, m1, m2, m3, m4, bk, bk, bk, bk,
+            bk, bk, bk, bk, m4, m3, m2, m1, m1, m1, m2, m1, wl, wb, wb, yw, wb, wb, wl, wb, m2, m1, m1, m2, m1, m2, m3, m4, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, m4, m3, m2, m1, m3, m2, m1, wb, wb, wl, wl, wl, wl, wb, wb, m2, m1, m3, m2, m1, m3, m4, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, m4, m4, m4, m4, m3, m2, wl, wb, wl, wb, wl, wb, wl, wb, m2, m3, m4, m4, m4, m4, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m3, m2, m1, m2, m1, m2, m1, m2, m1, m2, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m3, m3, m3, m3, m3, m3, m3, m3, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, m4, m4, m4, m4, m4, m4, m4, m4, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sf, sl, sf, sl, sf, sl, sf, sl, sf, sl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sd, sl, sd, sl, sd, sl, sd, sl, sd, sl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sl, sf, sl, sf, sl, sf, sl, sf, sl, sf, sl, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, sd, sd, sd, sd, sd, sd, sd, sd, sd, sd, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk,
+            bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+            bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, st, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk, bk,
+        ]
+ 
+        return PremadeSpriteData(id: "space_station", name: "Space Station", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 11)
+    }()
+ 
+    // MARK: - Autumn Forest
+ 
+    static let autumnForest: PremadeSpriteData = {
+        let c = "clear"
+        let sk = "#94fdff"  // sky
+        let sb = "#00cdf9"  // sky blue
+        let r1 = "#ea323c"  // red leaves
+        let r2 = "#e07438"  // orange leaves
+        let r3 = "#edab50"  // yellow leaves
+        let r4 = "#ffc825"  // bright yellow
+        let rd = "#891e2b"  // dark red
+        let od = "#8a4836"  // dark orange
+        let tr = "#5d2c28"  // trunk
+        let td = "#391f21"  // trunk dark
+        let g1 = "#33984b"  // grass green
+        let g2 = "#1e6f50"  // grass dark
+        let gl = "#5ac54f"  // grass light
+        let e1 = "#e4a672"  // earth
+        let e2 = "#b86f50"  // earth dark
+ 
+        let grid: [String] = [
+            sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk,
+            sk, sk, sk, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sk, sk, sk,
+            sk, sk, sk, sb, sb, sb, r3, r3, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, r3, r4, sb, sb, sb, sb, sk, sk, sk,
+            sk, sk, sk, sb, sb, r3, r4, r3, r3, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, sb, r1, sb, r3, r4, r3, r1, sb, sb, sb, sk, sk, sk,
+            sk, sk, sk, sb, r3, r4, r2, r4, r3, r2, sb, sb, sb, r1, r1, sb, sb, sb, r1, r1, r2, r3, r4, r2, r4, r3, r2, sb, sb, sk, sk, sk,
+            sk, sk, sk, r3, r4, r2, r1, r2, r4, r3, r2, sb, r1, r2, r2, r1, sb, r1, r2, r2, r1, r4, r2, r1, r2, r4, r3, r2, sb, sk, sk, sk,
+            sk, sk, r2, r4, r2, r1, rd, r1, r2, r4, r3, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, r3, r4, rd, r1, r2, r4, r3, r2, sk, sk, sk,
+            sk, sk, r4, r2, r1, r2, r2, r2, r1, r2, r4, r2, r1, r2, r2, r1, r2, r1, r2, r2, r1, r2, r4, r2, r2, r1, r2, r4, r3, r2, sk, sk,
+            sk, r3, r4, r1, r2, r1, r1, r1, r2, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, r1, r3, r4, r3, sk, sk,
+            r2, r4, r2, r1, r1, od, r1, r1, r1, r2, r1, r2, r1, r2, r2, r1, r2, r1, r2, r2, r1, r2, r1, od, r1, r1, r2, r4, r2, r4, r2, sk,
+            r3, r2, r1, r2, r1, r1, r2, r2, r2, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r2, r2, r1, r2, r3, r2, r4, r2,
+            r2, r3, r2, r1, r2, r2, r1, r1, r1, r2, r1, r2, r1, r2, r2, r1, r2, r1, r2, r2, r1, r2, r1, r2, r1, r1, r2, r3, r2, r3, r2, r1,
+            r1, r2, r1, r2, r1, r1, r2, r2, r1, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, r1, r2, r1, r2, r2, r1, r2, r1, r2, r1, r2,
+            r2, r1, r2, r1, tr, r1, r1, r1, r2, r1, r1, r2, r1, r2, r2, r1, r2, r1, r2, r2, r1, r2, tr, r1, r1, r1, r2, r1, r2, r1, r2, r1,
+            r1, r2, r1, r2, tr, td, r2, r2, r1, r2, r2, r1, r2, r1, r1, r2, r1, r2, r1, r1, r2, tr, td, r2, r2, r1, r2, r2, r1, r1, r2, r1,
+            g1, gl, g1, g1, tr, td, g1, g1, gl, g1, g1, gl, g1, g1, g1, gl, g1, g1, g1, g1, gl, tr, td, g1, gl, g1, g1, gl, g1, g1, gl, g1,
+            g1, g1, gl, g1, tr, td, g1, gl, g1, g1, g1, g1, gl, g1, g1, g1, g1, gl, g1, gl, g1, tr, td, g1, g1, gl, g1, g1, g1, gl, g1, g1,
+            g2, g1, g1, g1, tr, td, g1, g1, g1, g2, g1, g1, g1, g2, g1, g1, g2, g1, g2, g1, g1, tr, td, g1, g1, g1, g2, g1, g1, g2, g1, g2,
+            g2, g2, g1, g2, tr, td, g2, g1, g2, g2, g1, g2, g2, g2, g1, g2, g2, g1, g2, g2, g1, tr, td, g2, g1, g2, g2, g2, g1, g2, g2, g2,
+            e1, g2, g2, g2, tr, td, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, tr, td, g2, g2, g2, g2, g2, g2, g2, g2, g2,
+            e1, e1, g2, g2, tr, td, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, tr, td, g2, g2, g2, g2, g2, g2, g2, g2, e1,
+            e1, e1, e1, g2, tr, td, g2, g2, g2, e1, g2, g2, g2, g2, g2, g2, g2, g2, g2, g2, e1, tr, td, g2, g2, g2, e1, g2, g2, g2, e1, e1,
+            e1, e1, e1, e1, td, td, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, td, td, e1, e1, e1, e1, e1, e1, e1, e1, e1,
+            e2, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e1, e2,
+            e2, e2, e1, e1, e1, e1, e1, e1, e2, e1, e1, e1, e2, e1, e1, e1, e1, e1, e2, e1, e1, e1, e2, e1, e1, e1, e2, e1, e1, e1, e2, e2,
+            e2, e2, e2, e2, e1, e2, e2, e2, e2, e2, e1, e2, e2, e2, e1, e2, e2, e1, e2, e2, e2, e2, e2, e2, e1, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+            e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2, e2,
+        ]
+ 
+        return PremadeSpriteData(id: "autumn_forest", name: "Autumn Forest", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Landscapes", groupOrder: 12)
+    }()
 
     // MARK: - Mountain Range
     

@@ -644,6 +644,30 @@ class CanvasViewModel: ObservableObject {
         return row * gridWidth + col
     }
     
+    // Convert a screen-space point to grid (row, col) — used by shape tools
+    func gridRowCol(from screenPoint: CGPoint, geoSize: CGSize, canvasOffset: CGSize, zoomScale: CGFloat) -> (row: Int, col: Int)? {
+        let gridWidth = projectSettings.selectedCanvasSize.dimensions.width
+        let gridHeight = projectSettings.selectedCanvasSize.dimensions.height
+        
+        let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
+                                       height: CGFloat(gridHeight) * zoomScale)
+        
+        let canvasCenter = CGPoint(
+            x: geoSize.width / 2 + canvasOffset.width,
+            y: geoSize.height / 2 + canvasOffset.height
+        )
+        let canvasOrigin = CGPoint(
+            x: canvasCenter.x - scaledCanvasSize.width / 2,
+            y: canvasCenter.y - scaledCanvasSize.height / 2
+        )
+        
+        let col = Int((screenPoint.x - canvasOrigin.x) / zoomScale)
+        let row = Int((screenPoint.y - canvasOrigin.y) / zoomScale)
+        
+        guard row >= 0, row < gridHeight, col >= 0, col < gridWidth else { return nil }
+        return (row, col)
+    }
+    
     // MARK: - Shift
     
     enum ShiftDirection {
@@ -956,6 +980,336 @@ class CanvasViewModel: ObservableObject {
             }
         }
     }
+    
+    // MARK: - Shape Tool Preview System
+    
+    // Stores (index, hexColor) pairs for the live preview overlay while dragging
+    @Published var shapePreviewPixels: [(index: Int, hex: String)] = []
+    
+    // Grid coordinate of the shape start point (touch began)
+    var shapeStartRow: Int = 0
+    var shapeStartCol: Int = 0
+    
+    // Called on touch began for shape tools — records the anchor point
+    func beginShapeDrag(row: Int, col: Int) {
+        shapeStartRow = row
+        shapeStartCol = col
+        shapePreviewPixels = []
+    }
+    
+    // Called on touch moved for shape tools — recomputes the preview
+    func updateShapePreview(row: Int, col: Int) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        let tool = toolsVM.selectedTool
+        
+        switch tool {
+        case .line:
+            shapePreviewPixels = linePixels(
+                r0: shapeStartRow, c0: shapeStartCol,
+                r1: row, c1: col,
+                width: width, height: height,
+                hex: toolsVM.effectiveDrawingHex
+            )
+        case .rectangle:
+            shapePreviewPixels = rectanglePixels(
+                r0: shapeStartRow, c0: shapeStartCol,
+                r1: row, c1: col,
+                width: width, height: height,
+                hex: toolsVM.effectiveDrawingHex,
+                filled: toolsVM.rectangleFilled
+            )
+        case .circle:
+            shapePreviewPixels = circlePixels(
+                r0: shapeStartRow, c0: shapeStartCol,
+                r1: row, c1: col,
+                width: width, height: height,
+                hex: toolsVM.effectiveDrawingHex,
+                filled: toolsVM.circleFilled
+            )
+        case .gradient:
+            shapePreviewPixels = gradientPixels(
+                r0: shapeStartRow, c0: shapeStartCol,
+                r1: row, c1: col,
+                width: width, height: height,
+                colorA: toolsVM.gradientColorA,
+                colorB: toolsVM.gradientColorB,
+                steps: toolsVM.gradientSteps,
+                thickness: toolsVM.gradientThickness
+            )
+        case .dither:
+            shapePreviewPixels = ditherPixels(
+                r0: shapeStartRow, c0: shapeStartCol,
+                r1: row, c1: col,
+                width: width, height: height,
+                colorA: toolsVM.ditherColorA,
+                colorB: toolsVM.ditherColorB,
+                pattern: toolsVM.ditherPattern
+            )
+        default:
+            break
+        }
+    }
+    
+    // Called on touch ended — commits the preview pixels to the active layer
+    func commitShapePreview() {
+        guard !shapePreviewPixels.isEmpty else { return }
+        beginAction()
+        
+        var localPixels = pixels
+        var localHexes = pixelHexes
+        for (index, hex) in shapePreviewPixels {
+            guard index >= 0, index < localPixels.count else { continue }
+            localPixels[index] = hex == "clear" ? .clear : Color(hex: hex)
+            localHexes[index] = hex
+        }
+        pixels = localPixels
+        pixelHexes = localHexes
+        
+        actionDidChange = true
+        shapePreviewPixels = []
+        pixelGeneration &+= 1
+        endAction()
+    }
+    
+    // Cancel / clear preview without committing
+    func cancelShapePreview() {
+        shapePreviewPixels = []
+    }
+    
+    // MARK: - Line (Bresenham)
+    
+    private func linePixels(r0: Int, c0: Int, r1: Int, c1: Int,
+                            width: Int, height: Int, hex: String) -> [(index: Int, hex: String)] {
+        var result: [(Int, String)] = []
+        
+        var x0 = c0, y0 = r0, x1 = c1, y1 = r1
+        let dx = abs(x1 - x0)
+        let dy = -abs(y1 - y0)
+        let sx = x0 < x1 ? 1 : -1
+        let sy = y0 < y1 ? 1 : -1
+        var err = dx + dy
+        
+        while true {
+            if x0 >= 0 && x0 < width && y0 >= 0 && y0 < height {
+                result.append((y0 * width + x0, hex))
+            }
+            if x0 == x1 && y0 == y1 { break }
+            let e2 = 2 * err
+            if e2 >= dy { err += dy; x0 += sx }
+            if e2 <= dx { err += dx; y0 += sy }
+        }
+        return result
+    }
+    
+    // MARK: - Rectangle
+    
+    private func rectanglePixels(r0: Int, c0: Int, r1: Int, c1: Int,
+                                  width: Int, height: Int, hex: String,
+                                  filled: Bool) -> [(index: Int, hex: String)] {
+        let minR = max(0, min(r0, r1))
+        let maxR = min(height - 1, max(r0, r1))
+        let minC = max(0, min(c0, c1))
+        let maxC = min(width - 1, max(c0, c1))
+        
+        var result: [(Int, String)] = []
+        
+        for r in minR...maxR {
+            for c in minC...maxC {
+                if filled || r == minR || r == maxR || c == minC || c == maxC {
+                    result.append((r * width + c, hex))
+                }
+            }
+        }
+        return result
+    }
+    
+    // MARK: - Circle / Ellipse (Midpoint)
+    
+    private func circlePixels(r0: Int, c0: Int, r1: Int, c1: Int,
+                               width: Int, height: Int, hex: String,
+                               filled: Bool) -> [(index: Int, hex: String)] {
+        // Bounding box defines the ellipse
+        let minR = min(r0, r1)
+        let maxR = max(r0, r1)
+        let minC = min(c0, c1)
+        let maxC = max(c0, c1)
+        
+        let cx = Double(minC + maxC) / 2.0
+        let cy = Double(minR + maxR) / 2.0
+        let rx = Double(maxC - minC) / 2.0
+        let ry = Double(maxR - minR) / 2.0
+        
+        guard rx > 0 || ry > 0 else {
+            // Single pixel
+            let r = minR, c = minC
+            if r >= 0 && r < height && c >= 0 && c < width {
+                return [(r * width + c, hex)]
+            }
+            return []
+        }
+        
+        var result: [(Int, String)] = []
+        var addedSet = Set<Int>()
+        
+        func addPixel(_ r: Int, _ c: Int) {
+            guard r >= 0, r < height, c >= 0, c < width else { return }
+            let idx = r * width + c
+            if addedSet.insert(idx).inserted {
+                result.append((idx, hex))
+            }
+        }
+        
+        if filled {
+            // Scan each row, find extent of ellipse
+            for r in max(0, minR)...min(height - 1, maxR) {
+                let dy = Double(r) - cy
+                if ry == 0 {
+                    // Horizontal line
+                    for c in max(0, minC)...min(width - 1, maxC) {
+                        addPixel(r, c)
+                    }
+                } else {
+                    let ratio = (1.0 - (dy * dy) / (ry * ry))
+                    guard ratio >= 0 else { continue }
+                    let halfWidth = rx * sqrt(ratio)
+                    let startC = Int(floor(cx - halfWidth + 0.5))
+                    let endC = Int(floor(cx + halfWidth + 0.5))
+                    for c in max(0, startC)...min(width - 1, endC) {
+                        addPixel(r, c)
+                    }
+                }
+            }
+        } else {
+            // Outline — sample around the ellipse at fine intervals
+            let perimeter = max(4, Int(2.0 * Double.pi * max(rx, ry)))
+            let steps = perimeter * 4  // oversample for clean edges
+            for i in 0..<steps {
+                let angle = (Double(i) / Double(steps)) * 2.0 * Double.pi
+                let px = cx + rx * cos(angle)
+                let py = cy + ry * sin(angle)
+                let c = Int(floor(px + 0.5))
+                let r = Int(floor(py + 0.5))
+                addPixel(r, c)
+            }
+        }
+        
+        return result
+    }
+    
+    // MARK: - Gradient
+    
+    private func gradientPixels(r0: Int, c0: Int, r1: Int, c1: Int,
+                                 width: Int, height: Int,
+                                 colorA: Color, colorB: Color,
+                                 steps: Int, thickness: Int) -> [(index: Int, hex: String)] {
+        let dr = Double(r1 - r0)
+        let dc = Double(c1 - c0)
+        let length = sqrt(dr * dr + dc * dc)
+        guard length > 0.5 else { return [] }
+        
+        // Direction unit vector from A to B
+        let dirR = dr / length
+        let dirC = dc / length
+        
+        // Perpendicular unit vector (rotated 90°)
+        let perpR = -dirC
+        let perpC = dirR
+        
+        // Half-thickness for perpendicular distance check (0 = full canvas)
+        let halfThick = thickness > 0 ? Double(thickness) / 2.0 : Double.greatestFiniteMagnitude
+        
+        // Pre-compute gradient color band hex values
+        let clampedSteps = max(2, min(steps, 32))
+        var bandHexes: [String] = []
+        
+        var rA: CGFloat = 0, gA: CGFloat = 0, bA: CGFloat = 0, aA: CGFloat = 0
+        var rB: CGFloat = 0, gB: CGFloat = 0, bB: CGFloat = 0, aB: CGFloat = 0
+        UIColor(colorA).getRed(&rA, green: &gA, blue: &bA, alpha: &aA)
+        UIColor(colorB).getRed(&rB, green: &gB, blue: &bB, alpha: &aB)
+        
+        for i in 0..<clampedSteps {
+            let t = clampedSteps == 1 ? 0.0 : Double(i) / Double(clampedSteps - 1)
+            let r = rA + CGFloat(t) * (rB - rA)
+            let g = gA + CGFloat(t) * (gB - gA)
+            let b = bA + CGFloat(t) * (bB - bA)
+            let color = Color(red: Double(r), green: Double(g), blue: Double(b))
+            bandHexes.append(color.toHex() ?? "#000000")
+        }
+        
+        var result: [(Int, String)] = []
+        
+        for r in 0..<height {
+            for c in 0..<width {
+                let vr = Double(r - r0)
+                let vc = Double(c - c0)
+                
+                // Project onto gradient direction
+                let proj = vr * dirR + vc * dirC
+                
+                // Normalize to 0...1 along the drag distance
+                let t = proj / length
+                guard t >= 0 && t <= 1.0 else { continue }
+                
+                // Check perpendicular distance from the gradient line
+                let perpDist = abs(vr * perpR + vc * perpC)
+                guard perpDist <= halfThick else { continue }
+                
+                // Map to band index
+                let bandIndex = min(clampedSteps - 1, Int(t * Double(clampedSteps)))
+                result.append((r * width + c, bandHexes[bandIndex]))
+            }
+        }
+        
+        return result
+    }
+    
+    // MARK: - Dither
+    
+    private func ditherPixels(r0: Int, c0: Int, r1: Int, c1: Int,
+                               width: Int, height: Int,
+                               colorA: Color, colorB: Color,
+                               pattern: ToolsViewModel.DitherPattern) -> [(index: Int, hex: String)] {
+        let minR = max(0, min(r0, r1))
+        let maxR = min(height - 1, max(r0, r1))
+        let minC = max(0, min(c0, c1))
+        let maxC = min(width - 1, max(c0, c1))
+        
+        let hexA = colorA.toHex() ?? "#000000"
+        let hexB = colorB.toHex() ?? "#FFFFFF"
+        
+        var result: [(Int, String)] = []
+        
+        for r in minR...maxR {
+            for c in minC...maxC {
+                let useA: Bool
+                switch pattern {
+                case .checkerboard:
+                    useA = (r + c) % 2 == 0
+                case .bayer2x2:
+                    // 25% color B: only the darkest cell in each 2×2 block
+                    let threshold = Self.bayer2x2[r % 2][c % 2]
+                    useA = threshold < 1  // only cell 0 → A; cells 1,2,3 → B
+                case .horizontal:
+                    useA = r % 2 == 0
+                case .vertical:
+                    useA = c % 2 == 0
+                case .diagonal:
+                    useA = (r + c) % 3 != 0
+                }
+                
+                result.append((r * width + c, useA ? hexA : hexB))
+            }
+        }
+        
+        return result
+    }
+    
+    // Bayer dither matrices
+    private static let bayer2x2: [[Int]] = [
+        [0, 2],
+        [3, 1]
+    ]
 }
 
 extension Comparable {

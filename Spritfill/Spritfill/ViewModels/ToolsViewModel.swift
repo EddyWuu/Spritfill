@@ -11,7 +11,7 @@ class ToolsViewModel: ObservableObject {
     
     enum ToolType: CaseIterable {
         
-        case pencil, eraser, fill, eyedropper, shift, flip, pan
+        case pencil, eraser, fill, eyedropper, line, rectangle, circle, gradient, dither, shift, flip, pan
 
         var iconName: String {
             switch self {
@@ -19,9 +19,22 @@ class ToolsViewModel: ObservableObject {
             case .eraser: return "eraser"
             case .fill: return "drop.halffull"
             case .eyedropper: return "eyedropper"
+            case .line: return "line.diagonal"
+            case .rectangle: return "rectangle"
+            case .circle: return "circle"
+            case .gradient: return "square.stack.3d.forward.dottedline"
+            case .dither: return "checkerboard.rectangle"
             case .shift: return "arrow.up.and.down.and.arrow.left.and.right"
             case .flip: return "arrow.left.and.right.righttriangle.left.righttriangle.right"
             case .pan: return "hand.draw"
+            }
+        }
+        
+        // Whether this tool uses drag-to-define shape preview
+        var isShapeTool: Bool {
+            switch self {
+            case .line, .rectangle, .circle, .gradient, .dither: return true
+            default: return false
             }
         }
     }
@@ -44,6 +57,28 @@ class ToolsViewModel: ObservableObject {
     // Fill mode: false = fill with color, true = fill erase (clear connected area)
     @Published var fillEraseMode: Bool = false
     
+    // Shape tool options
+    @Published var rectangleFilled: Bool = false  // false = outline, true = filled
+    @Published var circleFilled: Bool = false      // false = outline, true = filled
+    
+    // Gradient tool options
+    @Published var gradientColorA: Color = .black
+    @Published var gradientColorB: Color = .white
+    @Published var gradientSteps: Int = 4  // number of color bands (2 = just the two colors, up to 32)
+    @Published var gradientThickness: Int = 0  // 0 = full canvas perpendicular, 1-16 = pixel thickness
+    
+    // Dither tool options
+    enum DitherPattern: String, CaseIterable {
+        case checkerboard = "Checkerboard"
+        case bayer2x2 = "Bayer 2×2 (25%)"
+        case horizontal = "Horizontal Lines"
+        case vertical = "Vertical Lines"
+        case diagonal = "Diagonal"
+    }
+    @Published var ditherPattern: DitherPattern = .checkerboard
+    @Published var ditherColorA: Color = .black
+    @Published var ditherColorB: Color = .white
+    
     // Apple Pencil detection — when true, only pencil can draw/erase/fill on canvas.
     // Finger touches are treated as pan. Resets automatically when no pencil touch
     // is detected for 10 seconds (i.e. pencil put back in holder).
@@ -65,7 +100,7 @@ class ToolsViewModel: ObservableObject {
     // Whether the given tool is a "drawing" tool that should be pencil-only when detected.
     static func isDrawingTool(_ tool: ToolType) -> Bool {
         switch tool {
-        case .pencil, .eraser, .fill, .eyedropper: return true
+        case .pencil, .eraser, .fill, .eyedropper, .line, .rectangle, .circle, .gradient, .dither: return true
         case .pan, .shift, .flip: return false
         }
     }
@@ -206,15 +241,8 @@ class ToolsViewModel: ObservableObject {
             pixel = effectiveDrawingColor
         case .eraser:
             pixel = .clear
-        case .fill:
-            break
-        case .eyedropper:
-            break
-        case .shift:
-            break
-        case .flip:
-            break
-        case .pan:
+        case .fill, .eyedropper, .shift, .flip, .pan,
+             .line, .rectangle, .circle, .gradient, .dither:
             break
         }
     }
@@ -226,7 +254,7 @@ class ToolsViewModel: ObservableObject {
     func selectColor(_ color: Color, at index: Int = -1) {
         selectedColor = color
         selectedColorIndex = index
-        if selectedTool != .fill && selectedTool != .pencil {
+        if selectedTool != .fill && selectedTool != .pencil && !selectedTool.isShapeTool {
             selectedTool = .pencil
         }
     }

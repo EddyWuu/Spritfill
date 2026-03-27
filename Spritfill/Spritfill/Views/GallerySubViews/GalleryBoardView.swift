@@ -185,9 +185,9 @@ struct GalleryGestureView: UIViewRepresentable {
     }
 }
 
-/// Custom UIView that passes through ALL touches in edit mode,
-/// so SwiftUI item drag/resize/tap gestures work underneath.
-/// In view mode, it intercepts touches for smooth UIKit panning.
+// Custom UIView that passes through ALL touches in edit mode,
+// so SwiftUI item drag/resize/tap gestures work underneath.
+// In view mode, it intercepts touches for smooth UIKit panning.
 class GalleryPassthroughView: UIView {
     weak var coordinator: GalleryGestureView.Coordinator?
     

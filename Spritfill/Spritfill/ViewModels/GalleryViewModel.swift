@@ -190,7 +190,7 @@ class GalleryViewModel: ObservableObject {
     
     // MARK: - Thumbnails
     
-    /// Generate thumbnail on background thread using Core Graphics (no SwiftUI ImageRenderer)
+    // Generate thumbnail on background thread using Core Graphics (no SwiftUI ImageRenderer)
     private func generateThumbnailOffMain(for project: ProjectData) -> UIImage? {
         let width = project.settings.selectedCanvasSize.dimensions.width
         let height = project.settings.selectedCanvasSize.dimensions.height
@@ -237,7 +237,7 @@ class GalleryViewModel: ObservableObject {
         return UIImage(cgImage: cgImage)
     }
     
-    /// Parse hex string to RGBA components (0.0-1.0)
+    // Parse hex string to RGBA components (0.0-1.0)
     private func hexToRGBA(_ hex: String) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
         var hexStr = hex
         if hexStr.hasPrefix("#") { hexStr.removeFirst() }

@@ -87,6 +87,19 @@ struct ProjectCanvasView: View {
                     )
                 }
             }
+            .overlay {
+                // Shape tool live preview overlay
+                if !viewModel.shapePreviewPixels.isEmpty {
+                    ShapePreviewOverlay(
+                        previewPixels: viewModel.shapePreviewPixels,
+                        gridWidth: gridWidth,
+                        gridHeight: gridHeight,
+                        zoomScale: zoomScale,
+                        canvasOffset: canvasOffset,
+                        geoSize: geo.size
+                    )
+                }
+            }
             .overlay(
                 TwoFingerDoubleTapView(
                     doubleTapAction: { viewModel.undo() },
@@ -136,6 +149,15 @@ struct ProjectCanvasView: View {
                                 magnifierColor = viewModel.colorAtIndex(index)
                             }
                             showMagnifier = true
+                        } else if tool.isShapeTool {
+                            // Shape tools: record start point
+                            if let (row, col) = viewModel.gridRowCol(from: location,
+                                                                      geoSize: geo.size,
+                                                                      canvasOffset: canvasOffset,
+                                                                      zoomScale: zoomScale) {
+                                viewModel.beginShapeDrag(row: row, col: col)
+                                viewModel.updateShapePreview(row: row, col: col)
+                            }
                         } else if tool != .shift && tool != .flip {
                             viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: location,
@@ -179,6 +201,14 @@ struct ProjectCanvasView: View {
                                 magnifierIndex = nil
                                 magnifierColor = nil
                             }
+                        } else if tool.isShapeTool {
+                            // Shape tools: update live preview
+                            if let (row, col) = viewModel.gridRowCol(from: location,
+                                                                      geoSize: geo.size,
+                                                                      canvasOffset: canvasOffset,
+                                                                      zoomScale: zoomScale) {
+                                viewModel.updateShapePreview(row: row, col: col)
+                            }
                         } else if tool != .shift && tool != .flip {
                             if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
@@ -216,6 +246,9 @@ struct ProjectCanvasView: View {
                             showMagnifier = false
                             magnifierColor = nil
                             magnifierIndex = nil
+                        } else if tool.isShapeTool {
+                            // Shape tools: commit the preview to the canvas
+                            viewModel.commitShapePreview()
                         } else if tool != .shift && tool != .flip {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
@@ -339,6 +372,39 @@ struct ProjectCanvasView: View {
             .frame(width: rectW, height: rectH)
             .position(x: rectX + rectW / 2, y: rectY + rectH / 2)
             .allowsHitTesting(false)
+    }
+}
+
+// Shape tool preview overlay — renders preview pixels as semi-transparent overlay
+private struct ShapePreviewOverlay: View {
+    let previewPixels: [(index: Int, hex: String)]
+    let gridWidth: Int
+    let gridHeight: Int
+    let zoomScale: CGFloat
+    let canvasOffset: CGSize
+    let geoSize: CGSize
+    
+    var body: some View {
+        let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
+                                      height: CGFloat(gridHeight) * zoomScale)
+        let cellSize = zoomScale
+        
+        let canvasOriginX = (geoSize.width - scaledCanvasSize.width) / 2 + canvasOffset.width
+        let canvasOriginY = (geoSize.height - scaledCanvasSize.height) / 2 + canvasOffset.height
+        
+        Canvas { context, size in
+            for (index, hex) in previewPixels {
+                let row = index / gridWidth
+                let col = index % gridWidth
+                let x = canvasOriginX + CGFloat(col) * cellSize
+                let y = canvasOriginY + CGFloat(row) * cellSize
+                
+                let color: Color = hex == "clear" ? .clear : Color(hex: hex)
+                let rect = CGRect(x: x, y: y, width: cellSize, height: cellSize)
+                context.fill(Path(rect), with: .color(color.opacity(0.75)))
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 
