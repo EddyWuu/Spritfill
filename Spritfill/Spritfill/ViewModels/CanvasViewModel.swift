@@ -1290,12 +1290,33 @@ class CanvasViewModel: ObservableObject {
                     // 25% color B: only the darkest cell in each 2×2 block
                     let threshold = Self.bayer2x2[r % 2][c % 2]
                     useA = threshold < 1  // only cell 0 → A; cells 1,2,3 → B
+                case .bayer4x4:
+                    useA = (r % 4 == 0 && c % 4 == 0) || (r % 4 == 2 && c % 4 == 2)
                 case .horizontal:
                     useA = r % 2 == 0
                 case .vertical:
                     useA = c % 2 == 0
                 case .diagonal:
                     useA = (r + c) % 3 != 0
+                case .diagonalReversed:
+                    useA = ((r - c) % 3 + 3) % 3 != 0
+                case .zigzag:
+                    useA = (r + c * 2) % 4 != 0
+                case .sparse:
+                    useA = r % 3 == 0 && c % 3 == 0
+                case .zigzagReversed:
+                    useA = !( (r % 2 == 0 && c % 4 == 0) || (r % 2 == 1 && c % 4 == 2) )
+                case .diamond:
+                    switch r % 4 {
+                    case 0: // xxx0xxx0
+                        useA = c % 4 != 3
+                    case 1, 3: // 0x0x0x0x
+                        useA = c % 2 == 1
+                    case 2: // x0xxx0x
+                        useA = c % 4 != 1
+                    default:
+                        useA = true
+                    }
                 }
                 
                 result.append((r * width + c, useA ? hexA : hexB))

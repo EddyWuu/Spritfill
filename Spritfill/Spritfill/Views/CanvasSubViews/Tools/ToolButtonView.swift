@@ -594,9 +594,25 @@ private struct DitherOptionsView: View {
                     switch pattern {
                     case .checkerboard: useA = (r + c) % 2 == 0
                     case .bayer2x2: useA = [[0,2],[3,1]][r % 2][c % 2] < 1
+                    case .bayer4x4: useA = (r % 4 == 0 && c % 4 == 0) || (r % 4 == 2 && c % 4 == 2)
                     case .horizontal: useA = r % 2 == 0
                     case .vertical: useA = c % 2 == 0
                     case .diagonal: useA = (r + c) % 3 != 0
+                    case .diagonalReversed: useA = ((r - c) % 3 + 3) % 3 != 0
+                    case .diamond:
+                        switch r % 4 {
+                        case 0: // xxx0xxx0
+                            useA = c % 4 != 3
+                        case 1, 3: // 0x0x0x0x
+                            useA = c % 2 == 1
+                        case 2: // x0xxx0x
+                            useA = c % 4 != 1
+                        default:
+                            useA = true
+                        }
+                    case .zigzag: useA = (r + c * 2) % 4 != 0
+                    case .sparse: useA = r % 3 == 0 && c % 3 == 0
+                    case .zigzagReversed: useA = !( (r % 2 == 0 && c % 4 == 0) || (r % 2 == 1 && c % 4 == 2) )
                     }
                     let rect = CGRect(x: CGFloat(c) * cellW, y: CGFloat(r) * cellH, width: cellW, height: cellH)
                     context.fill(Path(rect), with: .color(useA ? .black : .white))

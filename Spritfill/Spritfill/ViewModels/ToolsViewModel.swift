@@ -70,10 +70,16 @@ class ToolsViewModel: ObservableObject {
     // Dither tool options
     enum DitherPattern: String, CaseIterable {
         case checkerboard = "Checkerboard"
-        case bayer2x2 = "Bayer 2×2 (25%)"
+        case bayer2x2 = "Bayer 2×2"
+        case bayer4x4 = "Bayer 4×4"
         case horizontal = "Horizontal Lines"
         case vertical = "Vertical Lines"
         case diagonal = "Diagonal"
+        case diagonalReversed = "Diagonal Reversed"
+        case diamond = "Diamond"
+        case zigzag = "Zigzag"
+        case zigzagReversed = "Zigzag Reversed"
+        case sparse = "Sparse"
     }
     @Published var ditherPattern: DitherPattern = .checkerboard
     @Published var ditherColorA: Color = .black
