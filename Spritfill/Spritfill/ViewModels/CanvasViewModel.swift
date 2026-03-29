@@ -503,46 +503,35 @@ class CanvasViewModel: ObservableObject {
             }
         }
         
-        // Apply symmetry mirrors
-        let hSym = toolsVM.horizontalSymmetry
-        let vSym = toolsVM.verticalSymmetry
+        // Apply symmetry mirrors EXCEPT for fill tool (doesn't make semantic sense)
+        let shouldApplySymmetry = (tool != .fill)
         
-        if hSym {
-            let mirrorCol = width - 1 - col
-            let mirrorIndices = brushIndices(centerRow: row, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
-            for idx in mirrorIndices where idx != index {
-                if tool == .fill {
-                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
-                    floodFill(at: idx, with: fillColor)
-                } else {
+        if shouldApplySymmetry {
+            let hSym = toolsVM.horizontalSymmetry
+            let vSym = toolsVM.verticalSymmetry
+            
+            if hSym {
+                let mirrorCol = width - 1 - col
+                let mirrorIndices = brushIndices(centerRow: row, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
+                for idx in mirrorIndices where idx != index {
                     applyToolToPixel(at: idx)
                 }
             }
-        }
-        
-        if vSym {
-            let mirrorRow = height - 1 - row
-            let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: col, brushSize: brushSize, width: width, height: height)
-            for idx in mirrorIndices where idx != index {
-                if tool == .fill {
-                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
-                    floodFill(at: idx, with: fillColor)
-                } else {
+            
+            if vSym {
+                let mirrorRow = height - 1 - row
+                let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: col, brushSize: brushSize, width: width, height: height)
+                for idx in mirrorIndices where idx != index {
                     applyToolToPixel(at: idx)
                 }
             }
-        }
-        
-        // Diagonal mirror when both symmetries are active
-        if hSym && vSym {
-            let mirrorRow = height - 1 - row
-            let mirrorCol = width - 1 - col
-            let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
-            for idx in mirrorIndices where idx != index {
-                if tool == .fill {
-                    let fillColor = toolsVM.fillEraseMode ? Color.clear : toolsVM.effectiveDrawingColor
-                    floodFill(at: idx, with: fillColor)
-                } else {
+            
+            // Diagonal mirror when both symmetries are active
+            if hSym && vSym {
+                let mirrorRow = height - 1 - row
+                let mirrorCol = width - 1 - col
+                let mirrorIndices = brushIndices(centerRow: mirrorRow, centerCol: mirrorCol, brushSize: brushSize, width: width, height: height)
+                for idx in mirrorIndices where idx != index {
                     applyToolToPixel(at: idx)
                 }
             }
