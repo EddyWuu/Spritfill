@@ -166,7 +166,7 @@ struct ProjectCreateView: View {
                 .buttonStyle(.plain)
                 
                 // MARK: - Tool buttons (always visible)
-                ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder)
+                ToolsBarView(toolsVM: toolsVM, canvasVM: viewModel, showColorAdder: $showColorAdder, bottomPanelCollapsed: bottomPanelCollapsed)
                     .padding(.bottom, bottomPanelCollapsed ? 6 : 0)
                     .background(Color(.secondarySystemBackground))
                 
@@ -182,7 +182,7 @@ struct ProjectCreateView: View {
                         
                         Divider()
                         
-                        // Bottom panel (palette / shift / flip)
+                        // Bottom panel (palette / shift / flip / gradient / dither)
                         ZStack {
                             ColorPaletteView(toolsVM: toolsVM)
                             
@@ -192,6 +192,14 @@ struct ProjectCreateView: View {
                             
                             if toolsVM.selectedTool == .flip {
                                 FlipControlView(canvasVM: viewModel)
+                            }
+                            
+                            if toolsVM.selectedTool == .gradient {
+                                GradientControlView(toolsVM: toolsVM)
+                            }
+                            
+                            if toolsVM.selectedTool == .dither {
+                                DitherControlView(toolsVM: toolsVM)
                             }
                         }
                         .frame(maxHeight: .infinity)

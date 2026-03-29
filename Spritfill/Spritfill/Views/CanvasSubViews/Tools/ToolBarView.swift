@@ -11,6 +11,7 @@ struct ToolsBarView: View {
     @ObservedObject var toolsVM: ToolsViewModel
     @ObservedObject var canvasVM: CanvasViewModel
     @Binding var showColorAdder: Bool
+    let bottomPanelCollapsed: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -20,7 +21,7 @@ struct ToolsBarView: View {
                     HStack(spacing: 6) {
                         // Drawing tools (excluding pan)
                         ForEach(toolsVM.availableTools.filter { $0 != .pan }, id: \.self) { tool in
-                            ToolButtonView(tool: tool, toolsVM: toolsVM)
+                            ToolButtonView(tool: tool, toolsVM: toolsVM, bottomPanelCollapsed: bottomPanelCollapsed)
                         }
                         
                         // Symmetry toggles (thin divider separates them from tools)
@@ -88,7 +89,7 @@ struct ToolsBarView: View {
                 .disabled(!canvasVM.canUndo)
                 
                 // Pan / move screen button
-                ToolButtonView(tool: .pan, toolsVM: toolsVM)
+                ToolButtonView(tool: .pan, toolsVM: toolsVM, bottomPanelCollapsed: bottomPanelCollapsed)
                 
                 // Add colors to palette
                 Button(action: { showColorAdder = true }) {
