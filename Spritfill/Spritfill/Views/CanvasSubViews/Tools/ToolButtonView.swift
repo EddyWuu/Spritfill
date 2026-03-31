@@ -22,7 +22,7 @@ struct ToolButtonView: View {
         let isSelected = toolsVM.isSelected(tool: tool)
         let isBrushTool = (tool == .pencil || tool == .eraser)
         let isFillTool = (tool == .fill)
-        let hasOptions = isBrushTool || isFillTool || tool == .rectangle || tool == .circle
+        let hasOptions = isBrushTool || isFillTool || tool == .rectangle || tool == .circle || tool == .line
         let toolBrushSize = toolsVM.brushSize(for: tool)
         let hasBrushSize = isBrushTool && toolBrushSize > 1
         
@@ -87,6 +87,17 @@ struct ToolButtonView: View {
                         .clipShape(Circle())
                         .offset(x: 2, y: -2)
                 }
+                
+                // Thickness badge for line/rectangle outline/circle outline when > 1
+                if thicknessBadgeValue > 1 {
+                    Text("\(thicknessBadgeValue)")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 14, height: 14)
+                        .background(Color.purple)
+                        .clipShape(Circle())
+                        .offset(x: 2, y: -2)
+                }
             }
         }
         
@@ -126,7 +137,7 @@ struct ToolButtonView: View {
                     FillModePickerView(toolsVM: toolsVM)
                         .presentationCompactAdaptation(.popover)
                 }
-        } else if tool == .rectangle || tool == .circle {
+        } else if tool == .rectangle || tool == .circle || tool == .line {
             button
                 .simultaneousGesture(
                     LongPressGesture(minimumDuration: 0.4)
@@ -146,6 +157,16 @@ struct ToolButtonView: View {
         }
     }
     
+    // Thickness badge value — only show for outline modes
+    private var thicknessBadgeValue: Int {
+        switch tool {
+        case .line: return toolsVM.lineThickness
+        case .rectangle: return toolsVM.rectangleFilled ? 1 : toolsVM.rectangleThickness
+        case .circle: return toolsVM.circleFilled ? 1 : toolsVM.circleThickness
+        default: return 1
+        }
+    }
+    
     // Dynamic icon name for tools with mode variants
     private var toolIconName: String {
         switch tool {
@@ -160,10 +181,12 @@ struct ToolButtonView: View {
         }
     }
     
-    // Shape options popover content (only for rectangle/circle now)
+    // Shape options popover content
     @ViewBuilder
     private var shapeOptionsPopover: some View {
         switch tool {
+        case .line:
+            LineOptionsView(toolsVM: toolsVM)
         case .rectangle:
             RectangleOptionsView(toolsVM: toolsVM)
         case .circle:
@@ -319,13 +342,67 @@ private struct BrushSizePickerView: View {
     }
 }
 
+// MARK: - Thickness Picker Row (shared by line, rectangle outline, circle outline)
+
+private struct ThicknessPickerRow: View {
+    @Binding var thickness: Int
+    
+    var body: some View {
+        VStack(spacing: 6) {
+            Text("Thickness")
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+            
+            HStack(spacing: 6) {
+                ForEach(1...5, id: \.self) { size in
+                    let isSelected = thickness == size
+                    Button(action: {
+                        thickness = size
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(isSelected ? Color.purple : Color(.systemGray5))
+                                .frame(width: 36, height: 36)
+                            // Horizontal bar whose height visually represents the thickness
+                            Rectangle()
+                                .fill(isSelected ? Color.white : Color.purple)
+                                .frame(width: 20, height: CGFloat(size) * 2.5)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            
+            Text("\(thickness)px")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+// MARK: - Line Options Popover
+
+private struct LineOptionsView: View {
+    @ObservedObject var toolsVM: ToolsViewModel
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            ThicknessPickerRow(thickness: $toolsVM.lineThickness)
+        }
+        .padding(12)
+        .frame(width: 220)
+    }
+}
+
 // MARK: - Rectangle Options Popover
 
 private struct RectangleOptionsView: View {
     @ObservedObject var toolsVM: ToolsViewModel
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Text("Rectangle Mode")
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -339,9 +416,15 @@ private struct RectangleOptionsView: View {
                     toolsVM.rectangleFilled = true
                 }
             }
+            
+            Divider()
+            
+            ThicknessPickerRow(thickness: $toolsVM.rectangleThickness)
+                .disabled(toolsVM.rectangleFilled)
+                .opacity(toolsVM.rectangleFilled ? 0.35 : 1)
         }
         .padding(12)
-        .frame(width: 180)
+        .frame(width: 220)
     }
 }
 
@@ -351,7 +434,7 @@ private struct CircleOptionsView: View {
     @ObservedObject var toolsVM: ToolsViewModel
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Text("Circle Mode")
                 .font(.caption2)
                 .fontWeight(.semibold)
@@ -365,9 +448,15 @@ private struct CircleOptionsView: View {
                     toolsVM.circleFilled = true
                 }
             }
+            
+            Divider()
+            
+            ThicknessPickerRow(thickness: $toolsVM.circleThickness)
+                .disabled(toolsVM.circleFilled)
+                .opacity(toolsVM.circleFilled ? 0.35 : 1)
         }
         .padding(12)
-        .frame(width: 180)
+        .frame(width: 220)
     }
 }
 

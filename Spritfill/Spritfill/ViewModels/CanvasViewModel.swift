@@ -1066,11 +1066,11 @@ class CanvasViewModel: ObservableObject {
         shapePreviewPixels = []
     }
     
-    // MARK: - Line (Bresenham)
+    // MARK: - Line (Bresenham + thickness)
     
     private func linePixels(r0: Int, c0: Int, r1: Int, c1: Int,
                             width: Int, height: Int, hex: String) -> [(index: Int, hex: String)] {
-        var result: [(Int, String)] = []
+        var spine: [(Int, String)] = []
         
         var x0 = c0, y0 = r0, x1 = c1, y1 = r1
         let dx = abs(x1 - x0)
@@ -1081,17 +1081,34 @@ class CanvasViewModel: ObservableObject {
         
         while true {
             if x0 >= 0 && x0 < width && y0 >= 0 && y0 < height {
-                result.append((y0 * width + x0, hex))
+                spine.append((y0 * width + x0, hex))
             }
             if x0 == x1 && y0 == y1 { break }
             let e2 = 2 * err
             if e2 >= dy { err += dy; x0 += sx }
             if e2 <= dx { err += dx; y0 += sy }
         }
-        return result
+        
+        // Expand spine by stroke thickness using the shared brush kernel
+        let thickness = toolsVM.lineThickness
+        guard thickness > 1 else { return spine }
+        
+        var seen = Set<Int>(spine.map { $0.0 })
+        var expanded = spine
+        for (idx, _) in spine {
+            let row = idx / width
+            let col = idx % width
+            for i in brushIndices(centerRow: row, centerCol: col,
+                                  brushSize: thickness, width: width, height: height) {
+                if seen.insert(i).inserted {
+                    expanded.append((i, hex))
+                }
+            }
+        }
+        return expanded
     }
     
-    // MARK: - Rectangle
+    // MARK: - Rectangle (thickness-aware)
     
     private func rectanglePixels(r0: Int, c0: Int, r1: Int, c1: Int,
                                   width: Int, height: Int, hex: String,
@@ -1101,19 +1118,29 @@ class CanvasViewModel: ObservableObject {
         let minC = max(0, min(c0, c1))
         let maxC = min(width - 1, max(c0, c1))
         
+        // Thickness only applies to the outline mode; filled ignores it
+        let thickness = filled ? 1 : toolsVM.rectangleThickness
+        
         var result: [(Int, String)] = []
         
         for r in minR...maxR {
             for c in minC...maxC {
-                if filled || r == minR || r == maxR || c == minC || c == maxC {
+                if filled {
                     result.append((r * width + c, hex))
+                } else {
+                    // Draw a band of `thickness` pixels inward from each edge
+                    let onBorder = r < minR + thickness || r > maxR - thickness
+                                || c < minC + thickness || c > maxC - thickness
+                    if onBorder {
+                        result.append((r * width + c, hex))
+                    }
                 }
             }
         }
         return result
     }
     
-    // MARK: - Circle / Ellipse (Midpoint)
+    // MARK: - Circle / Ellipse (Midpoint, thickness-aware)
     
     private func circlePixels(r0: Int, c0: Int, r1: Int, c1: Int,
                                width: Int, height: Int, hex: String,
@@ -1170,7 +1197,7 @@ class CanvasViewModel: ObservableObject {
                 }
             }
         } else {
-            // Outline — sample around the ellipse at fine intervals
+            // Build the 1-pixel outline ring via angle sampling
             let perimeter = max(4, Int(2.0 * Double.pi * max(rx, ry)))
             let steps = perimeter * 4  // oversample for clean edges
             for i in 0..<steps {
@@ -1180,6 +1207,22 @@ class CanvasViewModel: ObservableObject {
                 let c = Int(floor(px + 0.5))
                 let r = Int(floor(py + 0.5))
                 addPixel(r, c)
+            }
+            
+            // Expand the 1px ring by stroke thickness using the shared brush kernel
+            let thickness = toolsVM.circleThickness
+            if thickness > 1 {
+                let spine = result
+                for (idx, _) in spine {
+                    let row = idx / width
+                    let col = idx % width
+                    for i in brushIndices(centerRow: row, centerCol: col,
+                                         brushSize: thickness, width: width, height: height) {
+                        if addedSet.insert(i).inserted {
+                            result.append((i, hex))
+                        }
+                    }
+                }
             }
         }
         

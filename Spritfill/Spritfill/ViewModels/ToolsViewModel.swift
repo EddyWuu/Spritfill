@@ -61,6 +61,11 @@ class ToolsViewModel: ObservableObject {
     @Published var rectangleFilled: Bool = false  // false = outline, true = filled
     @Published var circleFilled: Bool = false      // false = outline, true = filled
     
+    // Stroke thickness for outline shapes (1–5 pixels). Only applies when not filled.
+    @Published var lineThickness: Int = 1
+    @Published var rectangleThickness: Int = 1
+    @Published var circleThickness: Int = 1
+    
     // Gradient tool options
     @Published var gradientColorA: Color = .black
     @Published var gradientColorB: Color = .white
