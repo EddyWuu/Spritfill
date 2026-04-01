@@ -52,4 +52,13 @@ enum StoreProducts {
     static func paletteRequiresPro(_ palette: ColorPalettes) -> Bool {
         palette == .spritfill
     }
+    
+    // MARK: - Pro Gating: Tools
+    
+    // Gradient and Dither tools require Pro
+    static let proTools: Set<ToolsViewModel.ToolType> = [.gradient, .dither]
+    
+    static func toolRequiresPro(_ tool: ToolsViewModel.ToolType) -> Bool {
+        proTools.contains(tool)
+    }
 }

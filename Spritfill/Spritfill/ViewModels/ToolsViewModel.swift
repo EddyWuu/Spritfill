@@ -37,6 +37,23 @@ class ToolsViewModel: ObservableObject {
             default: return false
             }
         }
+        
+        var displayName: String {
+            switch self {
+            case .pencil: return "Pencil"
+            case .eraser: return "Eraser"
+            case .fill: return "Fill"
+            case .eyedropper: return "Eyedropper"
+            case .line: return "Line"
+            case .rectangle: return "Rectangle"
+            case .circle: return "Circle"
+            case .gradient: return "Gradient"
+            case .dither: return "Dither"
+            case .shift: return "Shift"
+            case .flip: return "Flip"
+            case .pan: return "Pan"
+            }
+        }
     }
 
     weak var canvasVM: CanvasViewModel?
@@ -221,20 +238,43 @@ class ToolsViewModel: ObservableObject {
     
     // Add a user-picked color to the extra colors list
     func addColor(_ hex: String) {
-        let normalized = hex.uppercased()
+        let raw = hex.uppercased()
+        let normalized = raw.hasPrefix("#") ? raw : "#\(raw)"
         // Avoid duplicates across base + extras
-        let allHexes = baseColors.map { $0.toHex()?.uppercased() ?? "" } + extraColors.map { $0.uppercased() }
+        let baseHexes = baseColors.map { $0.toHex()?.uppercased() ?? "" }
+        let extraHexes = extraColors.map { h -> String in
+            let u = h.uppercased()
+            return u.hasPrefix("#") ? u : "#\(u)"
+        }
+        let allHexes = baseHexes + extraHexes
         guard !allHexes.contains(normalized) else { return }
         extraColors.append(normalized)
         _cachedAvailableColors = nil  // invalidate cache
+        
+        // Auto-select the newly added color so toolbar indicator reflects it
+        let newIndex = basePaletteCount + extraColors.count - 1
+        selectedColor = Color(hex: normalized)
+        selectedColorIndex = newIndex
+        
         canvasVM?.syncExtraColors(extraColors)
     }
     
     // Remove a user-added extra color by index (relative to extraColors array)
     func removeExtraColor(at index: Int) {
         guard index >= 0, index < extraColors.count else { return }
+        let absoluteIndex = basePaletteCount + index
         extraColors.remove(at: index)
         _cachedAvailableColors = nil  // invalidate cache
+        
+        // Keep selectedColor as-is (last picked color stays), but fix the palette highlight
+        if selectedColorIndex == absoluteIndex {
+            // The selected color was deleted — remove highlight but keep the color
+            selectedColorIndex = -1
+        } else if selectedColorIndex > absoluteIndex {
+            // A color before the selected one was removed — shift index
+            selectedColorIndex -= 1
+        }
+        
         canvasVM?.syncExtraColors(extraColors)
     }
     

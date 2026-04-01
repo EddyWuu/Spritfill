@@ -16,6 +16,11 @@ struct ToolButtonView: View {
     @State private var showShapePicker = false
     @State private var longPressTriggered = false
     
+    // Pro gating
+    @ObservedObject private var storeService = StoreService.shared
+    @State private var showProAlert = false
+    @State private var showStoreSheet = false
+    
     let bottomPanelCollapsed: Bool
 
     var body: some View {
@@ -26,10 +31,18 @@ struct ToolButtonView: View {
         let toolBrushSize = toolsVM.brushSize(for: tool)
         let hasBrushSize = isBrushTool && toolBrushSize > 1
         
+        let needsPro = StoreProducts.toolRequiresPro(tool) && !storeService.isPro
+        
         let button = Button(action: {
             // Skip if long press just opened a picker
             if longPressTriggered {
                 longPressTriggered = false
+                return
+            }
+            
+            // Pro gating — show alert instead of selecting
+            if needsPro {
+                showProAlert = true
                 return
             }
             
@@ -98,6 +111,17 @@ struct ToolButtonView: View {
                         .clipShape(Circle())
                         .offset(x: 2, y: -2)
                 }
+                
+                // Pro lock badge for gated tools
+                if needsPro {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(width: 14, height: 14)
+                        .background(Color.yellow)
+                        .clipShape(Circle())
+                        .offset(x: 2, y: -2)
+                }
             }
         }
         
@@ -107,6 +131,7 @@ struct ToolButtonView: View {
         let arrowEdge: Edge = bottomPanelCollapsed ? .bottom : .top
         
         // Attach long-press + popover
+        Group {
         if isBrushTool {
             button
                 .simultaneousGesture(
@@ -154,6 +179,16 @@ struct ToolButtonView: View {
                 }
         } else {
             button
+        }
+        }
+        .alert("Pro Feature", isPresented: $showProAlert) {
+            Button("Unlock Pro") { showStoreSheet = true }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("The \(tool.displayName) tool requires Spritfill Pro. Unlock Pro to access all tools.")
+        }
+        .sheet(isPresented: $showStoreSheet) {
+            StoreView()
         }
     }
     

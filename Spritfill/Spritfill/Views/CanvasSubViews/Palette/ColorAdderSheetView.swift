@@ -18,7 +18,7 @@ struct ColorAdderSheetView: View {
     @State private var brightness: Double = 1.0
     @State private var hexInput: String = ""
     @State private var addedFlash: Bool = false
-    @State private var overrideHex: String? = nil  // Exact hex from typed input — avoids HSB roundtrip loss
+    @State private var overrideHex: String? = nil
     
     // Pro gating
     @ObservedObject private var storeService = StoreService.shared
@@ -42,8 +42,13 @@ struct ColorAdderSheetView: View {
     }
     
     private var isDuplicate: Bool {
-        let normalized = selectedHex.uppercased()
-        return toolsVM.availableColors.contains { ($0.toHex() ?? "").uppercased() == normalized }
+        let raw = selectedHex.uppercased()
+        let normalized = raw.hasPrefix("#") ? raw : "#\(raw)"
+        // Check base palette colors via toHex() roundtrip
+        let baseMatch = toolsVM.baseColors.contains { ($0.toHex() ?? "").uppercased() == normalized }
+        // Check extra colors directly as stored hex strings (avoids double roundtrip loss)
+        let extraMatch = toolsVM.extraColors.contains { $0.uppercased() == normalized || "#\($0)".uppercased() == normalized }
+        return baseMatch || extraMatch
     }
     
     @State private var gridSize: CGSize = .zero
@@ -125,7 +130,7 @@ struct ColorAdderSheetView: View {
                 }
                 .padding(.horizontal)
                 
-                // Preview + Add button
+                // Preview swatch + hex + Add button
                 HStack(spacing: 12) {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(selectedColor)
@@ -137,24 +142,28 @@ struct ColorAdderSheetView: View {
                         .scaleEffect(addedFlash ? 1.15 : 1.0)
                         .animation(.easeOut(duration: 0.2), value: addedFlash)
                     
-                    Text(selectedHex)
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(selectedHex)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundColor(.secondary)
+                        
+                        if isDuplicate {
+                            Text("Already in palette")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                        }
+                    }
                     
                     Spacer()
                     
-                    Button(action: addCurrentColor) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus")
-                            Text("Add")
-                        }
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        .background(isDuplicate ? Color.gray : Color.blue)
-                        .clipShape(Capsule())
+                    Button {
+                        addCurrentColor()
+                    } label: {
+                        Label("Add", systemImage: "plus.circle.fill")
+                            .font(.callout.weight(.semibold))
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
                     .disabled(isDuplicate)
                 }
                 .padding(.horizontal)
@@ -215,7 +224,7 @@ struct ColorAdderSheetView: View {
                 
                 // Show user-added extra colors with remove option
                 if toolsVM.extraColors.isEmpty {
-                    Text("Pick a color above, then tap Add to extend your palette")
+                    Text("Pick a color above and press Add")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .frame(maxWidth: .infinity)
@@ -270,11 +279,12 @@ struct ColorAdderSheetView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("Done") {
+                        dismiss()
+                    }
                 }
             }
             .onAppear {
-                // Initialize the picker to the current drawing color
                 if let hex = toolsVM.selectedColor.toHex() {
                     navigateToColor(hex)
                 }
@@ -294,12 +304,20 @@ struct ColorAdderSheetView: View {
     // MARK: - Helpers
     
     private func addCurrentColor() {
+        let hex = selectedHex
+        guard !isDuplicate else { return }
+        
+        // Pro limit check
         if !storeService.isPro && toolsVM.extraColors.count >= StoreProducts.freeExtraColorLimit {
             showProAlert = true
             return
         }
-        let hex = selectedHex
+        
         toolsVM.addColor(hex)
+        flashPreview()
+    }
+    
+    private func flashPreview() {
         withAnimation(.easeOut(duration: 0.2)) {
             addedFlash = true
         }

@@ -68,67 +68,64 @@ struct GradientControlView: View {
                 Divider()
                     .padding(.horizontal)
                 
-                // Steps
-                VStack(spacing: 6) {
-                    HStack {
-                        Text("Steps")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Text("\(toolsVM.gradientSteps)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Stepper("", value: $toolsVM.gradientSteps, in: 2...32)
-                        .labelsHidden()
-                }
-                .padding(.horizontal)
-                
-                // Thickness
-                VStack(spacing: 6) {
-                    HStack {
+                // Thickness then Steps stacked vertically
+                VStack(spacing: 12) {
+                    // Thickness
+                    VStack(spacing: 6) {
                         Text("Thickness")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                        Spacer()
-                        Text(toolsVM.gradientThickness == 0 ? "Full Canvas" : "\(toolsVM.gradientThickness)px")
+                        Text(toolsVM.gradientThickness == 0 ? "Full" : "\(toolsVM.gradientThickness)px")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                    }
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            // Full canvas option
-                            Button(action: {
-                                toolsVM.gradientThickness = 0
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            }) {
-                                Text("Full")
-                                    .font(.system(size: 11, weight: .medium))
-                                    .frame(height: 32)
-                                    .paddingHorizontal(10)
-                                    .background(toolsVM.gradientThickness == 0 ? Color.blue : Color(.systemGray5))
-                                    .foregroundColor(toolsVM.gradientThickness == 0 ? .white : .primary)
-                                    .cornerRadius(8)
-                            }
-                            .buttonStyle(.plain)
-                            
-                            // 1-16 pixel options
-                            ForEach(1...16, id: \.self) { px in
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 4) {
+                                // Full canvas option
                                 Button(action: {
-                                    toolsVM.gradientThickness = px
+                                    toolsVM.gradientThickness = 0
                                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 }) {
-                                    Text("\(px)")
+                                    Text("∞")
                                         .font(.system(size: 11, weight: .medium))
-                                        .frame(width: 32, height: 32)
-                                        .background(toolsVM.gradientThickness == px ? Color.blue : Color(.systemGray5))
-                                        .foregroundColor(toolsVM.gradientThickness == px ? .white : .primary)
-                                        .cornerRadius(8)
+                                        .frame(width: 28, height: 28)
+                                        .background(toolsVM.gradientThickness == 0 ? Color.blue : Color(.systemGray5))
+                                        .foregroundColor(toolsVM.gradientThickness == 0 ? .white : .primary)
+                                        .cornerRadius(6)
                                 }
                                 .buttonStyle(.plain)
+                                
+                                // 1-16 pixel options
+                                ForEach(1...16, id: \.self) { px in
+                                    Button(action: {
+                                        toolsVM.gradientThickness = px
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    }) {
+                                        Text("\(px)")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .frame(width: 28, height: 28)
+                                            .background(toolsVM.gradientThickness == px ? Color.blue : Color(.systemGray5))
+                                            .foregroundColor(toolsVM.gradientThickness == px ? .white : .primary)
+                                            .cornerRadius(6)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
                         }
+                    }
+                    
+                    Divider()
+                    
+                    // Steps
+                    VStack(spacing: 6) {
+                        Text("Steps")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text("\(toolsVM.gradientSteps)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Stepper("", value: $toolsVM.gradientSteps, in: 2...32)
+                            .labelsHidden()
                     }
                 }
                 .padding(.horizontal)

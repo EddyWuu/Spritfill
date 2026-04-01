@@ -156,7 +156,7 @@ struct SubmitArtView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("I agree to submit my artwork for review")
                         .font(.subheadline)
-                    Text("I understand this is a voluntary donation. My artwork may be featured in the Spritfill catalog for all users to view and recreate. I will not receive compensation. I confirm this is my original work and does not contain copyrighted, offensive, or inappropriate content.")
+                    Text("I understand this is a voluntary contribution. My artwork may be featured in the Spritfill catalog for all users to view and recreate. I will not receive compensation. I confirm this is my original work and does not contain copyrighted, offensive, or inappropriate content.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -167,7 +167,7 @@ struct SubmitArtView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("I agree to make my artwork publicly available")
                         .font(.subheadline)
-                    Text("Once approved, my artwork and the artist name I provide will be visible to all Spritfill users. I can request removal at any time by contacting the developer.")
+                    Text("Once approved, my artwork and the artist name I provide will be visible to all Spritfill users. I can request removal at any time by contacting me at ducksss777@gmail.com.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -189,7 +189,7 @@ struct SubmitArtView: View {
                 privacyRow(icon: "envelope.badge.shield.half.filled", text: "No email, phone number, or personal information is collected.")
                 privacyRow(icon: "externaldrive.badge.icloud", text: "Only your artwork image, pixel data, and the artist name you provide are uploaded.")
                 privacyRow(icon: "server.rack", text: "Submitted data is stored securely on Firebase (Google Cloud) for review purposes only.")
-                privacyRow(icon: "trash.circle", text: "You may request deletion of your submission at any time by contacting the developer.")
+                privacyRow(icon: "trash.circle", text: "You may request deletion of your submission at any time by contacting me at ducksss777@gmail.com.")
                 privacyRow(icon: "dollarsign.circle", text: "Your data will never be sold to third parties.")
             }
         }

@@ -90,7 +90,7 @@ struct NewProjectSetUpView: View {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.orange)
                                     .font(.caption)
-                                Text("This export size is very small and may look blurry when saved to your phone's photo library. If you plan to export to a computer, this is fine.")
+                                Text("This export size is very small and may look blurry when saved to your phone's photo library. You can upscale it later when exporting or downloading. If you plan to export to a computer, this is fine.")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }

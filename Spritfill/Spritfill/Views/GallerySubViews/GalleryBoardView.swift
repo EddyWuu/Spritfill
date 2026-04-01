@@ -36,28 +36,48 @@ struct GalleryBoardView: View {
                 y: panOffset.height + (viewModel.boardOffset.height - viewModel.boardSize / 2 + geo.size.height / 2)
             )
             .overlay(
-                GalleryGestureView(
-                    isEditMode: viewModel.isEditMode,
-                    onPan: { delta in
-                        panOffset = CGSize(
-                            width: panStart.width + delta.width,
-                            height: panStart.height + delta.height
+                // Only use UIKit gesture overlay in view mode (smooth 1-finger pan + pinch)
+                // In edit mode, this is hidden so single-finger touches reach SwiftUI item gestures
+                Group {
+                    if !viewModel.isEditMode {
+                        GalleryGestureView(
+                            isEditMode: false,
+                            onPan: { delta in
+                                panOffset = CGSize(
+                                    width: panStart.width + delta.width,
+                                    height: panStart.height + delta.height
+                                )
+                            },
+                            onPanEnd: {
+                                panStart = panOffset
+                            },
+                            onPinch: { scale in
+                                pinchScale = scale
+                            },
+                            onPinchEnd: { scale in
+                                viewModel.applyPinchEnd(scale: scale)
+                                pinchScale = 1.0
+                            }
                         )
-                    },
-                    onPanEnd: {
-                        panStart = panOffset
-                    },
-                    onPinch: { scale in
-                        pinchScale = scale
-                    },
-                    onPinchEnd: { scale in
-                        viewModel.applyPinchEnd(scale: scale)
-                        pinchScale = 1.0
                     }
-                )
+                }
             )
+            // Edit mode: SwiftUI pinch gesture for zoom (2-finger, doesn't conflict with single-finger item drags)
+            .simultaneousGesture(viewModel.isEditMode ? editModePinchGesture : nil)
             .clipped()
         }
+    }
+    
+    // Pinch gesture for edit mode
+    private var editModePinchGesture: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                pinchScale = value.magnification
+            }
+            .onEnded { value in
+                viewModel.applyPinchEnd(scale: value.magnification)
+                pinchScale = 1.0
+            }
     }
     
     // MARK: - Board background
@@ -134,7 +154,6 @@ struct GalleryGestureView: UIViewRepresentable {
         context.coordinator.onPanEnd = onPanEnd
         context.coordinator.onPinch = onPinch
         context.coordinator.onPinchEnd = onPinchEnd
-        context.coordinator.isEditMode = isEditMode
     }
     
     class Coordinator: NSObject, UIGestureRecognizerDelegate {
@@ -185,17 +204,9 @@ struct GalleryGestureView: UIViewRepresentable {
     }
 }
 
-// Custom UIView that passes through ALL touches in edit mode,
-// so SwiftUI item drag/resize/tap gestures work underneath.
-// In view mode, it intercepts touches for smooth UIKit panning.
+// Custom UIView that hosts UIKit gesture recognizers for smooth panning/pinching.
+// In edit mode, the pan gesture requires 2 fingers so single-finger touches pass
+// through to SwiftUI item drag/resize gestures underneath.
 class GalleryPassthroughView: UIView {
     weak var coordinator: GalleryGestureView.Coordinator?
-    
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        // In edit mode, pass all touches through to SwiftUI views beneath
-        if coordinator?.isEditMode == true {
-            return nil
-        }
-        return super.hitTest(point, with: event)
-    }
 }

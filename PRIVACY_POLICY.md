@@ -1,13 +1,13 @@
 # Spritfill - Privacy Policy
 
-**Last updated: March 24, 2026**
+**Last updated: April 1, 2026**
 
 **Live Policy:** [https://gilded-troodon-368.notion.site/Spritfill-Privacy-Policy-328009ccfd1b8024a242e01b3c37d77b](https://gilded-troodon-368.notion.site/Spritfill-Privacy-Policy-328009ccfd1b8024a242e01b3c37d77b)
 
 ---
 
 ## 1. Overview
-Spritfill is a pixel art creation app. I respect your privacy and collect minimal data. This policy explains what I collect and why.
+Spritfill is a pixel art creation app developed by me, Edmond Wu, as an independent solo developer. I respect your privacy and collect minimal data. This policy explains what I collect and why.
 
 ## 2. Data I Collect
 When you voluntarily submit artwork for community review, I collect:
@@ -18,19 +18,19 @@ When you voluntarily submit artwork for community review, I collect:
 That's it. I do not collect emails, device IDs, location data, analytics, or any other personal information.
 
 ## 3. How I Use Your Data
-- Submitted artwork is manually reviewed by the developer
+- Submitted artwork is manually reviewed by me
 - If approved, the artwork and artist name may be featured in the app's community catalog for all users to enjoy
 - I do not sell, share, or transfer your data to third parties
 
 ## 4. In-App Purchases
-Spritfill offers optional consumable in-app purchases (contributions/donations). These are processed entirely by Apple through StoreKit. I do not collect, store, or have access to any payment information, Apple ID details, or transaction receipts. All purchase processing is handled by Apple in accordance with their terms and privacy policy.
+Spritfill offers an optional one-time in-app purchase (Spritfill Pro) that unlocks additional features. This purchase is processed entirely by Apple through StoreKit. I do not collect, store, or have access to any payment information, Apple ID details, or transaction receipts. All purchase processing is handled by Apple in accordance with their terms and privacy policy.
 
 ## 5. Data Storage
 Submitted artwork is stored on Google Firebase (Firestore), hosted on Google Cloud Platform servers. Data is transmitted securely via HTTPS.
 
 ## 6. Data Retention & Deletion
 - Rejected submissions are deleted immediately
-- You may request deletion of your submitted artwork at any time by contacting us
+- You may request deletion of your submitted artwork at any time by contacting me
 - All app data (projects, settings) is stored locally on your device and never uploaded unless you choose to submit
 
 ## 7. Children's Privacy
@@ -50,31 +50,32 @@ You may:
 I may update this policy from time to time. Changes will be reflected in the "Last updated" date above.
 
 ## 11. Contact
-For privacy questions or deletion requests, contact: ducksss777@gmail.com
+For privacy questions or deletion requests, contact me at: ducksss777@gmail.com
 
 ---
 
 # Spritfill - Terms of Use (EULA)
 
-**Last updated: March 24, 2026**
+**Last updated: April 1, 2026**
 
 ## 1. Acceptance of Terms
 By downloading or using Spritfill, you agree to these terms. If you do not agree, do not use the app.
 
 ## 2. Use of the App
 - Spritfill is a pixel art creation tool for personal and creative use
-- All features are free. Optional contributions (in-app purchases) are voluntary donations that do not unlock additional features
+- Core features are free. An optional one-time purchase (Spritfill Pro) unlocks additional layers, canvas sizes, palette colors, and the exclusive Spritfill 128 palette
 - You are responsible for any content you create and submit
 
 ## 3. In-App Purchases
-- All in-app purchases are consumable contributions processed by Apple
-- Contributions are voluntary, non-refundable (per Apple's standard refund policy), and do not unlock any features
-- All payment processing is handled by Apple. We do not collect payment information
+- Spritfill Pro is a non-consumable in-app purchase processed by Apple
+- Once purchased, it is yours forever and can be restored on any device with the same Apple ID
+- All payment processing is handled by Apple. I do not collect payment information
+- Refunds are handled by Apple per their standard refund policy
 
 ## 4. Community Submissions
 - By submitting artwork, you grant Spritfill a non-exclusive license to display your artwork within the app's community catalog
 - You retain ownership of your artwork
-- Submissions are reviewed manually and may be rejected at the developer's discretion
+- Submissions are reviewed manually and may be rejected at my discretion
 - You may request removal of your submitted artwork at any time
 
 ## 5. User Conduct
@@ -84,10 +85,10 @@ You agree not to submit content that is:
 - Inappropriate for a general audience
 
 ## 6. Disclaimer
-Spritfill is provided "as is" without warranties of any kind. The developer is not liable for any loss of data or damages arising from use of the app.
+Spritfill is provided "as is" without warranties of any kind. I am not liable for any loss of data or damages arising from use of the app.
 
 ## 7. Changes to These Terms
 These terms may be updated from time to time. Continued use of the app constitutes acceptance of updated terms.
 
 ## 8. Contact
-For questions about these terms, contact: ducksss777@gmail.com
+For questions about these terms, contact me at: ducksss777@gmail.com
