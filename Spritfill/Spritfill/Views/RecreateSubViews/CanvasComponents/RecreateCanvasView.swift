@@ -12,9 +12,11 @@ struct RecreateCanvasView: View {
     @Binding var selectedTab: RecreateView.RecreateTab
     
     @StateObject private var viewModel: RecreateCanvasViewModel
+    @ObservedObject private var settings = SettingsService.shared
     @Environment(\.dismiss) private var dismiss
     @State private var showCompletionAlert = false
     @State private var showDeleteAlert = false
+    @State private var showSettingsSheet = false
     @State private var bottomPanelCollapsed = false
     
     init(session: RecreateSession, selectedTab: Binding<RecreateView.RecreateTab>) {
@@ -48,6 +50,10 @@ struct RecreateCanvasView: View {
                     if viewModel.isComplete {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
+                    }
+                    
+                    Button(action: { showSettingsSheet = true }) {
+                        Image(systemName: "gearshape")
                     }
                     
                     Button(action: { showDeleteAlert = true }) {
@@ -92,12 +98,20 @@ struct RecreateCanvasView: View {
                 
                 // MARK: - Collapsible color palette
                 if !bottomPanelCollapsed {
-                    Divider()
-                    
-                    RecreateColorPaletteView(viewModel: viewModel)
-                        .frame(maxHeight: .infinity)
-                        .background(Color(.secondarySystemBackground))
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    VStack(spacing: 0) {
+                        // Zoom slider (toggled via Settings)
+                        if settings.zoomDragBar {
+                            RecreateZoomSliderView(viewModel: viewModel)
+                                .background(Color(.secondarySystemBackground))
+                        }
+                        
+                        Divider()
+                        
+                        RecreateColorPaletteView(viewModel: viewModel)
+                            .frame(maxHeight: .infinity)
+                            .background(Color(.secondarySystemBackground))
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)
@@ -131,6 +145,11 @@ struct RecreateCanvasView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This will delete all progress for \(session.spriteName). This cannot be undone.")
+        }
+        .sheet(isPresented: $showSettingsSheet) {
+            SettingsSheetView(showCanvasAppearance: false)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
 }

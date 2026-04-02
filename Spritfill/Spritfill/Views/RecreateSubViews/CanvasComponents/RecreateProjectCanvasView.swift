@@ -44,7 +44,11 @@ struct RecreateProjectCanvasView: View {
             .contentShape(Rectangle())
             .overlay(
                 TwoFingerDoubleTapView(
-                    doubleTapAction: { viewModel.undo() },
+                    doubleTapAction: {
+                        if SettingsService.shared.doubleTapToUndo {
+                            viewModel.undo()
+                        }
+                    },
                     onPan: { delta in
                         let proposed = CGSize(
                             width: canvasOffset.width + delta.width,
@@ -73,7 +77,8 @@ struct RecreateProjectCanvasView: View {
                         }
                         
                         let tool = viewModel.selectedTool
-                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || viewModel.applePencilDetected) && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             panStartLocation = location
@@ -89,7 +94,8 @@ struct RecreateProjectCanvasView: View {
                     },
                     onSingleTouchMoved: { location, isPencil in
                         let tool = viewModel.selectedTool
-                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || viewModel.applePencilDetected) && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             let dx = location.x - panStartLocation.x
@@ -120,7 +126,8 @@ struct RecreateProjectCanvasView: View {
                         }
                         
                         let tool = viewModel.selectedTool
-                        let fingerOnDrawTool = viewModel.applePencilDetected && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || viewModel.applePencilDetected) && !isPencil && RecreateCanvasViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             dragStart = canvasOffset
@@ -211,7 +218,7 @@ private struct RecreateCanvasRenderer: View, Equatable {
             // and the per-pixel loop is pure waste.
             let cellSize = zoomScale
             let showNumbers = cellSize >= 18  // numbers unreadable below ~18pt
-            let showGrid = cellSize > 8
+            let showGrid = cellSize > 8 && SettingsService.shared.gridLines
             
             if showNumbers || showGrid {
                 Canvas { context, size in

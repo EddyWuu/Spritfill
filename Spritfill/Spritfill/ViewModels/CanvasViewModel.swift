@@ -93,9 +93,22 @@ class CanvasViewModel: ObservableObject {
     
     private var autoSaveTimer: Timer?
     private let storage = LocalStorageService.shared
+    private var strokesSinceSave: Int = 0
     
-    // Debounced auto-save — coalesces rapid pixel changes into a single background disk write.
+    // Debounced auto-save — respects the user's auto-save interval setting.
     private func debouncedAutoSave() {
+        let interval = SettingsService.shared.autoSaveInterval
+        switch interval {
+        case .onExitOnly:
+            // Don't auto-save at all — flushSave() handles it on dismiss
+            return
+        case .every5Strokes:
+            strokesSinceSave += 1
+            guard strokesSinceSave >= 5 else { return }
+            strokesSinceSave = 0
+        case .everyMove:
+            break
+        }
         autoSaveTimer?.invalidate()
         autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
             self?.saveInBackground()
@@ -392,8 +405,38 @@ class CanvasViewModel: ObservableObject {
     
     func toggleLayerVisibility(at index: Int) {
         layerManager.toggleLayerVisibility(at: index)
+        
+        // If we just hid the active layer, switch to the nearest visible one
+        if !layers[activeLayerIndex].isVisible {
+            if let nearest = nearestVisibleLayerIndex() {
+                layerManager.switchToLayer(at: nearest)
+                syncUndoRedoState()
+            }
+        }
+        
+        // If we just made a layer visible and the current active layer is hidden,
+        // switch to the newly-visible layer
+        if layers[index].isVisible && !layers[activeLayerIndex].isVisible {
+            layerManager.switchToLayer(at: index)
+            syncUndoRedoState()
+        }
+        
         pixelGeneration &+= 1
         debouncedAutoSave()
+    }
+    
+    // Returns the index of the nearest visible layer to the current active layer, or nil if all hidden.
+    private func nearestVisibleLayerIndex() -> Int? {
+        let current = activeLayerIndex
+        let count = layers.count
+        // Search outward from the current index
+        for offset in 1..<count {
+            let above = current + offset
+            let below = current - offset
+            if above < count && layers[above].isVisible { return above }
+            if below >= 0 && layers[below].isVisible { return below }
+        }
+        return nil
     }
     
     func setLayerOpacity(at index: Int, _ opacity: Double) {
@@ -421,6 +464,70 @@ class CanvasViewModel: ObservableObject {
         actionDidChange = true
         pixelGeneration &+= 1
         debouncedAutoSave()
+    }
+    
+    // MARK: - Import Project as Layer
+    
+    // Imports another project's composite artwork as a new layer, centered on this canvas.
+    // Returns nil on success, or an error message string on failure.
+    func importProject(_ data: ProjectData) -> String? {
+        // Check layer limit
+        guard layers.count < LayerManagerViewModel.maxLayers else {
+            return "You already have \(LayerManagerViewModel.maxLayers) layers. Delete or merge a layer first."
+        }
+        
+        let currentW = projectSettings.selectedCanvasSize.dimensions.width
+        let currentH = projectSettings.selectedCanvasSize.dimensions.height
+        let importW = data.settings.selectedCanvasSize.dimensions.width
+        let importH = data.settings.selectedCanvasSize.dimensions.height
+        
+        // The imported canvas must fit within the current canvas
+        guard importW <= currentW && importH <= currentH else {
+            return "The imported project (\(importW)×\(importH)) is larger than this canvas (\(currentW)×\(currentH))."
+        }
+        
+        // Get the imported project's composite pixel grid
+        let importedHexes = data.pixelGrid
+        guard importedHexes.count == importW * importH else {
+            return "The imported project's pixel data is corrupted."
+        }
+        
+        // Build the new layer: center the imported art onto this canvas
+        let totalPixels = currentW * currentH
+        var newHexes = Array(repeating: "clear", count: totalPixels)
+        
+        let offsetX = (currentW - importW) / 2
+        let offsetY = (currentH - importH) / 2
+        
+        for row in 0..<importH {
+            for col in 0..<importW {
+                let srcIndex = row * importW + col
+                let hex = importedHexes[srcIndex]
+                guard hex != "clear" else { continue }
+                
+                let dstRow = row + offsetY
+                let dstCol = col + offsetX
+                let dstIndex = dstRow * currentW + dstCol
+                newHexes[dstIndex] = hex
+            }
+        }
+        
+        let newColors = newHexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
+        let importedLayer = Layer(
+            name: "Import: \(data.name)",
+            pixels: newColors,
+            pixelHexes: newHexes
+        )
+        
+        // Insert above the current active layer
+        let insertIndex = activeLayerIndex + 1
+        layers.insert(importedLayer, at: insertIndex)
+        layerManager.activeLayerIndex = insertIndex
+        syncUndoRedoState()
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+        
+        return nil  // success
     }
     
     func updatePixel(row: Int, col: Int) {
@@ -655,6 +762,221 @@ class CanvasViewModel: ObservableObject {
         
         guard row >= 0, row < gridHeight, col >= 0, col < gridWidth else { return nil }
         return (row, col)
+    }
+    
+    // MARK: - Selection (Select tool)
+    
+    // Indices of pixels currently selected by the Select tool.
+    @Published var selectedIndices: Set<Int> = []
+    
+    // How far the selected pixels have been shifted (preview, not yet committed).
+    @Published var selectionOffset: (dRow: Int, dCol: Int) = (0, 0)
+    
+    // Whether a selection is active and has pixels.
+    var hasSelection: Bool { !selectedIndices.isEmpty }
+    
+    // Toggle a pixel into/out of the selection (used during drag-to-select).
+    func addToSelection(_ index: Int) {
+        guard index >= 0, index < pixels.count else { return }
+        selectedIndices.insert(index)
+    }
+    
+    // Add pixels using the current select brush size (NxN centered on the touched pixel).
+    func addToSelectionWithBrush(_ index: Int) {
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        guard index >= 0, index < pixels.count else { return }
+        let row = index / width
+        let col = index % width
+        let size = toolsVM.selectBrushSize
+        let indices = brushIndices(centerRow: row, centerCol: col, brushSize: size, width: width, height: height)
+        for idx in indices {
+            selectedIndices.insert(idx)
+        }
+    }
+    
+    // Fill-select: given the current selectedIndices as a drawn boundary,
+    // flood-fill the interior so all enclosed pixels become selected.
+    // Uses an "inverse flood fill from edges" approach: any pixel NOT reachable
+    // from the canvas border without crossing the boundary is interior.
+    // If the boundary doesn't enclose anything, the selection is cleared.
+    func fillEnclosedSelection() {
+        guard !selectedIndices.isEmpty else { return }
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        let total = width * height
+        
+        let boundaryPixels = selectedIndices   // remember original boundary
+        
+        // BFS from every edge pixel that is NOT part of the boundary.
+        // Everything reached is "outside". Everything not reached is "inside".
+        var outside = Set<Int>()
+        outside.reserveCapacity(total)
+        var queue: [Int] = []
+        queue.reserveCapacity(total)
+        
+        // Seed with all canvas-border pixels that aren't in the selection boundary
+        for col in 0..<width {
+            let top = col
+            let bot = (height - 1) * width + col
+            if !boundaryPixels.contains(top)  && outside.insert(top).inserted  { queue.append(top) }
+            if !boundaryPixels.contains(bot)  && outside.insert(bot).inserted  { queue.append(bot) }
+        }
+        for row in 0..<height {
+            let left  = row * width
+            let right = row * width + (width - 1)
+            if !boundaryPixels.contains(left)  && outside.insert(left).inserted  { queue.append(left) }
+            if !boundaryPixels.contains(right) && outside.insert(right).inserted { queue.append(right) }
+        }
+        
+        // BFS — spread to all reachable non-boundary pixels
+        var head = 0
+        while head < queue.count {
+            let current = queue[head]
+            head += 1
+            let r = current / width
+            let c = current % width
+            
+            let neighbors = [
+                r > 0         ? (r - 1) * width + c       : -1,
+                r < height-1  ? (r + 1) * width + c       : -1,
+                c > 0         ? r * width + (c - 1)       : -1,
+                c < width-1   ? r * width + (c + 1)       : -1
+            ]
+            
+            for n in neighbors {
+                guard n >= 0, n < total else { continue }
+                guard !outside.contains(n), !boundaryPixels.contains(n) else { continue }
+                outside.insert(n)
+                queue.append(n)
+            }
+        }
+        
+        // Collect interior pixels (not outside, not boundary)
+        var interiorCount = 0
+        for idx in 0..<total {
+            if !outside.contains(idx) && !boundaryPixels.contains(idx) {
+                interiorCount += 1
+            }
+        }
+        
+        // If nothing is enclosed, do nothing — preserve existing selection
+        if interiorCount == 0 {
+            return
+        }
+        
+        // Add all interior pixels to the selection (boundary stays selected too)
+        for idx in 0..<total {
+            if !outside.contains(idx) {
+                selectedIndices.insert(idx)
+            }
+        }
+    }
+    
+    // Clear the selection entirely (no undo snapshot).
+    func clearSelection() {
+        selectedIndices.removeAll()
+        selectionOffset = (0, 0)
+    }
+    
+    // Preview-shift the selection by 1 pixel in the given direction.
+    func shiftSelection(_ direction: ShiftDirection) {
+        switch direction {
+        case .up:    selectionOffset.dRow -= 1
+        case .down:  selectionOffset.dRow += 1
+        case .left:  selectionOffset.dCol -= 1
+        case .right: selectionOffset.dCol += 1
+        }
+    }
+    
+    // Commit the shifted selection to the canvas: lift selected pixels from their
+    // original positions, place them at the offset positions, clear originals.
+    func confirmSelection() {
+        guard hasSelection, (selectionOffset.dRow != 0 || selectionOffset.dCol != 0) else {
+            clearSelection()
+            return
+        }
+        
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        
+        saveSnapshot()
+        
+        // 1. Collect selected pixels and their hex values
+        var selected: [(origIndex: Int, hex: String, color: Color)] = []
+        for idx in selectedIndices {
+            selected.append((origIndex: idx, hex: pixelHexes[idx], color: pixels[idx]))
+        }
+        
+        // 2. Clear original positions
+        for idx in selectedIndices {
+            pixels[idx] = .clear
+            pixelHexes[idx] = "clear"
+        }
+        
+        // 3. Place at new positions
+        for item in selected {
+            let origRow = item.origIndex / width
+            let origCol = item.origIndex % width
+            let newRow = origRow + selectionOffset.dRow
+            let newCol = origCol + selectionOffset.dCol
+            
+            guard newRow >= 0, newRow < height, newCol >= 0, newCol < width else { continue }
+            let newIdx = newRow * width + newCol
+            pixels[newIdx] = item.color
+            pixelHexes[newIdx] = item.hex
+        }
+        
+        actionDidChange = true
+        pixelGeneration &+= 1
+        debouncedAutoSave()
+        clearSelection()
+    }
+    
+    // Cancel the selection without applying any shift.
+    func cancelSelection() {
+        clearSelection()
+    }
+    
+    // Move selected pixels to a new layer (if room). Returns nil on success, error string on failure.
+    func moveSelectionToNewLayer() -> String? {
+        guard hasSelection else { return "No pixels selected." }
+        guard layers.count < LayerManagerViewModel.maxLayers else {
+            return "Layer limit reached (\(LayerManagerViewModel.maxLayers)). Delete or merge a layer first."
+        }
+        
+        let width = projectSettings.selectedCanvasSize.dimensions.width
+        let height = projectSettings.selectedCanvasSize.dimensions.height
+        let totalPixels = width * height
+        
+        saveSnapshot()
+        
+        // Build new layer pixels from selection
+        var newHexes = Array(repeating: "clear", count: totalPixels)
+        for idx in selectedIndices {
+            newHexes[idx] = pixelHexes[idx]
+            // Clear from current layer
+            pixels[idx] = .clear
+            pixelHexes[idx] = "clear"
+        }
+        
+        let newColors = newHexes.map { $0 == "clear" ? Color.clear : Color(hex: $0) }
+        let newLayer = Layer(
+            name: "Selection",
+            pixels: newColors,
+            pixelHexes: newHexes
+        )
+        
+        let insertIndex = activeLayerIndex + 1
+        layers.insert(newLayer, at: insertIndex)
+        layerManager.activeLayerIndex = insertIndex
+        
+        actionDidChange = true
+        pixelGeneration &+= 1
+        syncUndoRedoState()
+        debouncedAutoSave()
+        clearSelection()
+        return nil
     }
     
     // MARK: - Shift

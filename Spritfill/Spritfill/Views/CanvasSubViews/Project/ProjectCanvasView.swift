@@ -10,6 +10,7 @@ import SwiftUI
 struct ProjectCanvasView: View {
     @ObservedObject var viewModel: CanvasViewModel
     @ObservedObject var toolsVM: ToolsViewModel
+    @ObservedObject private var settings = SettingsService.shared
 
     // All offsets are in screen-space (points on screen)
     @State private var canvasOffset: CGSize = .zero
@@ -50,7 +51,9 @@ struct ProjectCanvasView: View {
                     gridHeight: gridHeight,
                     zoomScale: zoomScale,
                     hSymmetry: hSymmetry,
-                    vSymmetry: vSymmetry
+                    vSymmetry: vSymmetry,
+                    backgroundTileSize: settings.backgroundTileSize,
+                    showGridLines: settings.gridLines
                 )
                 .equatable()
                 .frame(width: scaledCanvasSize.width, height: scaledCanvasSize.height)
@@ -100,9 +103,28 @@ struct ProjectCanvasView: View {
                     )
                 }
             }
+            .overlay {
+                // Selection highlight overlay
+                if viewModel.hasSelection {
+                    SelectionOverlay(
+                        selectedIndices: viewModel.selectedIndices,
+                        selectionOffset: viewModel.selectionOffset,
+                        pixelHexes: viewModel.activeLayer.pixelHexes,
+                        gridWidth: gridWidth,
+                        gridHeight: gridHeight,
+                        zoomScale: zoomScale,
+                        canvasOffset: canvasOffset,
+                        geoSize: geo.size
+                    )
+                }
+            }
             .overlay(
                 TwoFingerDoubleTapView(
-                    doubleTapAction: { viewModel.undo() },
+                    doubleTapAction: {
+                        if SettingsService.shared.doubleTapToUndo {
+                            viewModel.undo()
+                        }
+                    },
                     onPan: { delta in
                         let proposed = CGSize(
                             width: canvasOffset.width + delta.width,
@@ -133,9 +155,10 @@ struct ProjectCanvasView: View {
                         
                         let tool = toolsVM.selectedTool
                         
-                        // When Apple Pencil is detected and this is a finger touch,
-                        // treat drawing tools as pan instead
-                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        // When Apple Pencil Only is enabled, or Apple Pencil was recently used,
+                        // finger touches on drawing tools are treated as pan
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || toolsVM.applePencilDetected) && !isPencil && ToolsViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             panStartLocation = location
@@ -158,6 +181,16 @@ struct ProjectCanvasView: View {
                                 viewModel.beginShapeDrag(row: row, col: col)
                                 viewModel.updateShapePreview(row: row, col: col)
                             }
+                        } else if tool == .select {
+                            // Select tool: only add pixels in Pick mode; Fill mode is tap-only (handled on touch end)
+                            if !toolsVM.selectFillMode {
+                                if let index = viewModel.gridIndex(from: location,
+                                                                    geoSize: geo.size,
+                                                                    canvasOffset: canvasOffset,
+                                                                    zoomScale: zoomScale) {
+                                    viewModel.addToSelectionWithBrush(index)
+                                }
+                            }
                         } else if tool != .shift && tool != .flip {
                             viewModel.beginAction()
                             if let index = viewModel.gridIndex(from: location,
@@ -175,7 +208,8 @@ struct ProjectCanvasView: View {
                     },
                     onSingleTouchMoved: { location, isPencil in
                         let tool = toolsVM.selectedTool
-                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || toolsVM.applePencilDetected) && !isPencil && ToolsViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             let dx = location.x - panStartLocation.x
@@ -209,6 +243,16 @@ struct ProjectCanvasView: View {
                                                                       zoomScale: zoomScale) {
                                 viewModel.updateShapePreview(row: row, col: col)
                             }
+                        } else if tool == .select {
+                            // Select tool: only drag-select in Pick mode
+                            if !toolsVM.selectFillMode {
+                                if let index = viewModel.gridIndex(from: location,
+                                                                    geoSize: geo.size,
+                                                                    canvasOffset: canvasOffset,
+                                                                    zoomScale: zoomScale) {
+                                    viewModel.addToSelectionWithBrush(index)
+                                }
+                            }
                         } else if tool != .shift && tool != .flip {
                             if let index = viewModel.gridIndex(from: location,
                                                                 geoSize: geo.size,
@@ -232,7 +276,8 @@ struct ProjectCanvasView: View {
                         }
                         
                         let tool = toolsVM.selectedTool
-                        let fingerOnDrawTool = toolsVM.applePencilDetected && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        let pencilOnly = SettingsService.shared.applePencilOnly
+                        let fingerOnDrawTool = (pencilOnly || toolsVM.applePencilDetected) && !isPencil && ToolsViewModel.isDrawingTool(tool)
                         
                         if fingerOnDrawTool || tool == .pan {
                             dragStart = canvasOffset
@@ -249,6 +294,11 @@ struct ProjectCanvasView: View {
                         } else if tool.isShapeTool {
                             // Shape tools: commit the preview to the canvas
                             viewModel.commitShapePreview()
+                        } else if tool == .select {
+                            // Select tool: if fill mode, flood-fill the interior of the drawn boundary
+                            if toolsVM.selectFillMode {
+                                viewModel.fillEnclosedSelection()
+                            }
                         } else if tool != .shift && tool != .flip {
                             if dragVisitedIndices.isEmpty {
                                 viewModel.beginAction()
@@ -408,6 +458,67 @@ private struct ShapePreviewOverlay: View {
     }
 }
 
+// Overlay that highlights selected pixels with a blue tint,
+// and shows a ghost preview of where they'll land if shifted.
+private struct SelectionOverlay: View {
+    let selectedIndices: Set<Int>
+    let selectionOffset: (dRow: Int, dCol: Int)
+    let pixelHexes: [String]
+    let gridWidth: Int
+    let gridHeight: Int
+    let zoomScale: CGFloat
+    let canvasOffset: CGSize
+    let geoSize: CGSize
+    
+    var body: some View {
+        let scaledCanvasSize = CGSize(width: CGFloat(gridWidth) * zoomScale,
+                                      height: CGFloat(gridHeight) * zoomScale)
+        let cellSize = zoomScale
+        let canvasOriginX = (geoSize.width - scaledCanvasSize.width) / 2 + canvasOffset.width
+        let canvasOriginY = (geoSize.height - scaledCanvasSize.height) / 2 + canvasOffset.height
+        let hasOffset = selectionOffset.dRow != 0 || selectionOffset.dCol != 0
+        
+        Canvas { context, size in
+            for idx in selectedIndices {
+                let row = idx / gridWidth
+                let col = idx % gridWidth
+                let x = canvasOriginX + CGFloat(col) * cellSize
+                let y = canvasOriginY + CGFloat(row) * cellSize
+                let rect = CGRect(x: x, y: y, width: cellSize, height: cellSize)
+                
+                // Highlight selected pixels with blue tint
+                context.fill(Path(rect), with: .color(Color.blue.opacity(0.35)))
+                
+                // Draw a marching-ants-style border on each cell
+                context.stroke(Path(rect), with: .color(Color.blue.opacity(0.7)),
+                               style: StrokeStyle(lineWidth: max(0.5, cellSize * 0.04),
+                                                  dash: [cellSize * 0.2, cellSize * 0.2]))
+                
+                // Ghost preview at shifted position
+                if hasOffset {
+                    let newRow = row + selectionOffset.dRow
+                    let newCol = col + selectionOffset.dCol
+                    guard newRow >= 0, newRow < gridHeight, newCol >= 0, newCol < gridWidth else { continue }
+                    
+                    let hex = pixelHexes[idx]
+                    let nx = canvasOriginX + CGFloat(newCol) * cellSize
+                    let ny = canvasOriginY + CGFloat(newRow) * cellSize
+                    let nRect = CGRect(x: nx, y: ny, width: cellSize, height: cellSize)
+                    
+                    if hex != "clear" {
+                        let color = Color(hex: hex)
+                        context.fill(Path(nRect), with: .color(color.opacity(0.55)))
+                    }
+                    context.stroke(Path(nRect), with: .color(Color.green.opacity(0.6)),
+                                   style: StrokeStyle(lineWidth: max(0.5, cellSize * 0.04),
+                                                      dash: [cellSize * 0.15, cellSize * 0.15]))
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
 // Isolated canvas renderer — only re-renders when pixels, zoom, or symmetry change.
 // Because it takes value types (not ObservedObject), changes to unrelated @Published
 // properties like drawingOpacity do NOT cause a re-draw.
@@ -419,6 +530,8 @@ private struct PixelCanvasRenderer: View, Equatable {
     let zoomScale: CGFloat
     let hSymmetry: Bool
     let vSymmetry: Bool
+    let backgroundTileSize: Int
+    let showGridLines: Bool
 
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.pixelGeneration == rhs.pixelGeneration &&
@@ -426,17 +539,41 @@ private struct PixelCanvasRenderer: View, Equatable {
         lhs.gridHeight == rhs.gridHeight &&
         lhs.zoomScale == rhs.zoomScale &&
         lhs.hSymmetry == rhs.hSymmetry &&
-        lhs.vSymmetry == rhs.vSymmetry
+        lhs.vSymmetry == rhs.vSymmetry &&
+        lhs.backgroundTileSize == rhs.backgroundTileSize &&
+        lhs.showGridLines == rhs.showGridLines
     }
 
     var body: some View {
         let image = renderBitmap()
+        let cellSize = zoomScale
+        let drawGrid = showGridLines && cellSize > 8
 
         ZStack {
             if let image {
                 Image(uiImage: image)
                     .interpolation(.none)
                     .resizable()
+            }
+            
+            // Grid lines overlay
+            if drawGrid {
+                Canvas { context, size in
+                    var gridPath = Path()
+                    let totalWidth = CGFloat(gridWidth) * cellSize
+                    let totalHeight = CGFloat(gridHeight) * cellSize
+                    for row in 0...gridHeight {
+                        let y = CGFloat(row) * cellSize
+                        gridPath.move(to: CGPoint(x: 0, y: y))
+                        gridPath.addLine(to: CGPoint(x: totalWidth, y: y))
+                    }
+                    for col in 0...gridWidth {
+                        let x = CGFloat(col) * cellSize
+                        gridPath.move(to: CGPoint(x: x, y: 0))
+                        gridPath.addLine(to: CGPoint(x: x, y: totalHeight))
+                    }
+                    context.stroke(gridPath, with: .color(Color.gray.opacity(0.15)), lineWidth: 0.5)
+                }
             }
 
             if hSymmetry || vSymmetry {
@@ -496,7 +633,8 @@ private struct PixelCanvasRenderer: View, Equatable {
 
                 let r: UInt8, g: UInt8, b: UInt8
                 if hex == "clear" {
-                    let isLight = (row + col) % 2 == 0
+                    let tileSize = max(1, backgroundTileSize)
+                    let isLight = (row / tileSize + col / tileSize) % 2 == 0
                     r = isLight ? lightR : darkR
                     g = isLight ? lightG : darkG
                     b = isLight ? lightB : darkB

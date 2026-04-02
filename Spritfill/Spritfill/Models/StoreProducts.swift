@@ -55,8 +55,8 @@ enum StoreProducts {
     
     // MARK: - Pro Gating: Tools
     
-    // Gradient and Dither tools require Pro
-    static let proTools: Set<ToolsViewModel.ToolType> = [.gradient, .dither]
+    // Gradient, Dither, and Select tools require Pro
+    static let proTools: Set<ToolsViewModel.ToolType> = [.gradient, .dither, .select]
     
     static func toolRequiresPro(_ tool: ToolsViewModel.ToolType) -> Bool {
         proTools.contains(tool)

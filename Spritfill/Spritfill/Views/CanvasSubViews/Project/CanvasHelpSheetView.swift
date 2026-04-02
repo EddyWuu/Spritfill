@@ -27,6 +27,7 @@ struct CanvasHelpSheetView: View {
                         toolRow(icon: "circle", name: "Circle", description: "Drag to draw a circle/ellipse within a bounding box. Tap again while selected to switch between Outline and Filled mode")
                         toolRow(icon: "square.stack.3d.forward.dottedline", name: "Gradient", description: "Drag to fill a gradient band across the canvas. Tap again while selected to set two colors and the number of gradient steps")
                         toolRow(icon: "checkerboard.rectangle", name: "Dither", description: "Drag to fill an area with a structured dither pattern. Tap again while selected to pick two colors and a pattern (checkerboard, Bayer, lines, diagonal)")
+                        toolRow(icon: "lasso", name: "Select", description: "Pick pixels on the canvas to move them (Pro). Use the bottom panel to adjust brush size (1×1 to 5×5) and switch between Pick mode (drag to select) and Fill mode (draw a closed shape to select everything inside). Shift the selection with the arrow pad, then Confirm, Cancel, or move selected pixels to a new layer")
                         toolRow(icon: "arrow.up.and.down.and.arrow.left.and.right", name: "Shift", description: "Move the entire artwork up, down, left, or right")
                         toolRow(icon: "arrow.left.and.right.righttriangle.left.righttriangle.right", name: "Flip", description: "Mirror the artwork horizontally or vertically")
                         toolRow(icon: "hand.draw", name: "Pan", description: "Drag to move around the canvas without drawing")
@@ -44,7 +45,7 @@ struct CanvasHelpSheetView: View {
                                 Text("Pencil-Only Drawing")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                Text("When Apple Pencil is detected, only the pencil can draw, erase, and fill on the canvas. Your finger automatically becomes a pan tool so you can move around without accidentally painting. When the pencil is put away, finger drawing is re-enabled.")
+                                Text("When Apple Pencil is detected, only the pencil can draw, erase, and fill on the canvas. Your finger automatically becomes a pan tool so you can move around without accidentally painting. When the pencil is put away, finger drawing is re-enabled after 10 seconds. You can also enable \"Apple Pencil Only\" in Settings to always require the pencil for drawing.")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -73,7 +74,7 @@ struct CanvasHelpSheetView: View {
                     helpSection(title: "Gestures & Shortcuts", icon: "hand.tap") {
                         gestureRow(icon: "hand.draw", name: "Two-Finger Pan", description: "Drag with two fingers to pan around the canvas, no matter which tool is selected")
                         gestureRow(icon: "arrow.up.left.and.arrow.down.right", name: "Pinch to Zoom", description: "Pinch with two fingers to zoom in and out of the canvas")
-                        gestureRow(icon: "arrow.uturn.backward", name: "Two-Finger Double-Tap", description: "Double-tap with two fingers to undo the last action")
+                        gestureRow(icon: "arrow.uturn.backward", name: "Two-Finger Double-Tap", description: "Double-tap with two fingers to undo the last action. This can be toggled off in Settings")
                         gestureRow(icon: "arrow.uturn.forward", name: "Redo / Undo Buttons", description: "Use the arrow buttons in the toolbar to redo or undo actions")
                     }
                     
@@ -81,18 +82,31 @@ struct CanvasHelpSheetView: View {
                     helpSection(title: "Top Bar", icon: "rectangle.topthird.inset.filled") {
                         toolRow(icon: "questionmark.circle", name: "Help", description: "You're here!")
                         toolRow(icon: "trash", name: "Delete", description: "Permanently delete this project")
+                        toolRow(icon: "xmark.rectangle", name: "Clear Layer", description: "Erase all pixels on the current layer. This can be undone")
                         toolRow(icon: "info.circle", name: "Details", description: "View project info — canvas size, palette, pixel count")
                         toolRow(icon: "square.3.layers.3d", name: "Layers", description: "Toggle the layer panel — add, reorder, and manage drawing layers")
+                        toolRow(icon: "square.and.arrow.down.on.square", name: "Import", description: "Import another project's artwork as a new layer. The imported canvas must be the same size or smaller than this project")
                         toolRow(icon: "pencil", name: "Rename", description: "Change the project name")
                         toolRow(icon: "square.and.arrow.down", name: "Export to Photos", description: "Save the artwork as a PNG image to your photo library")
                         toolRow(icon: "square.and.arrow.up", name: "Share", description: "Share the artwork via AirDrop, Messages, and more")
+                        toolRow(icon: "gearshape", name: "Settings", description: "Configure canvas preferences — Apple Pencil Only, zoom slider, double-tap to undo, grid lines, background tile size, and auto-save interval")
                         toolRow(icon: "checkmark.seal", name: "Finish", description: "Mark the project as finished and move it to the Finished tab")
+                    }
+                    
+                    // MARK: - Settings
+                    helpSection(title: "Settings", icon: "gearshape") {
+                        toolRow(icon: "applepencil.tip", name: "Apple Pencil Only", description: "When enabled, only Apple Pencil can draw — finger touches always pan. When disabled, the app auto-detects pencil use and reverts to finger drawing after 10 seconds of pencil inactivity")
+                        toolRow(icon: "hand.tap", name: "Double Tap to Undo", description: "Toggle the two-finger double-tap undo gesture on or off. Useful if you accidentally trigger undo while panning")
+                        toolRow(icon: "slider.horizontal.below.rectangle", name: "Zoom Slider", description: "Show a zoom drag bar below the toolbar as an alternative to pinch-to-zoom. Pinch-to-zoom always works regardless of this setting")
+                        toolRow(icon: "grid", name: "Grid Lines", description: "Show pixel grid lines on the canvas when zoomed in. Helps distinguish individual pixel boundaries")
+                        toolRow(icon: "checkerboard.rectangle", name: "Background Tile Size", description: "Change the size of each checkerboard square behind transparent pixels. 1×1 matches the pixel grid (default), 2×2 makes each checker cover 4 pixels, 3×3 covers 9, etc.")
+                        toolRow(icon: "externaldrive", name: "Auto-Save", description: "Control how often your work saves to disk. \"Every Move\" is safest, \"Every 5 Strokes\" reduces disk writes, and \"On Exit Only\" only saves when you leave the canvas")
                     }
                     
                     // MARK: - Tips
                     helpSection(title: "Tips", icon: "lightbulb") {
                         tipRow("Pinch with two fingers or use the zoom slider to zoom in and see individual pixels clearly.")
-                        tipRow("Your project auto-saves after every change — you'll never lose progress.")
+                        tipRow("Your project auto-saves based on your Settings preference. The default saves after every change so you never lose progress.")
                         tipRow("Use the eyedropper to match colors already on your canvas.")
                         tipRow("Long press a project on the main screen to delete it.")
                     }

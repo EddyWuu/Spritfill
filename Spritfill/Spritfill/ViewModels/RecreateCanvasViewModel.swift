@@ -293,6 +293,7 @@ class RecreateCanvasViewModel: ObservableObject {
     }
     
     private var saveTimer: Timer?
+    private var strokesSinceSave: Int = 0
     
     deinit {
         saveTimer?.invalidate()
@@ -408,8 +409,19 @@ class RecreateCanvasViewModel: ObservableObject {
         }
     }
 
-    // Debounced save — coalesces rapid paint actions into a single disk write
+    // Debounced save — respects the user's auto-save interval setting.
     func debouncedSave() {
+        let interval = SettingsService.shared.autoSaveInterval
+        switch interval {
+        case .onExitOnly:
+            return
+        case .every5Strokes:
+            strokesSinceSave += 1
+            guard strokesSinceSave >= 5 else { return }
+            strokesSinceSave = 0
+        case .everyMove:
+            break
+        }
         saveTimer?.invalidate()
         saveTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
             self?.saveProgress()

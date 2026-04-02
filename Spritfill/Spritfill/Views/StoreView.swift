@@ -114,6 +114,10 @@ struct StoreView: View {
                                 
                                 proFeatureRow(icon: "square.3.layers.3d", color: .purple, text: "Up to 8 layers (free: 2)")
                                 proFeatureRow(icon: "square.grid.2x2", color: .blue, text: "128×128 and 256×256 canvas sizes")
+                                proFeatureRow(icon: "square.stack.3d.forward.dottedline", color: .green, text: "Gradient tool")
+                                proFeatureRow(icon: "checkerboard.rectangle", color: .teal, text: "Dither tool")
+                                proFeatureRow(icon: "lasso", color: .cyan, text: "Select & move pixels tool")
+                                proFeatureRow(icon: "square.and.arrow.down.on.square", color: .indigo, text: "Import projects as layers")
                                 proFeatureRow(icon: "paintpalette.fill", color: .orange, text: "Unlimited extra palette colors (free: 5)")
                                 proFeatureRow(icon: "swatchpalette.fill", color: .pink, text: "Unlimited custom palette colors (free: 64)")
                                 proFeatureRow(icon: "sparkles", color: .yellow, text: "Exclusive Spritfill 128 palette")
