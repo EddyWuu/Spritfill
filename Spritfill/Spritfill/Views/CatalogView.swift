@@ -306,8 +306,12 @@ struct CatalogView: View {
                     guard index < sprite.pixelGrid.count else { continue }
                     let hex = sprite.pixelGrid[index]
                     guard hex != "clear" else { continue }
-                    let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
-                                      width: tileSize, height: tileSize)
+                    // Snap to pixel boundaries to eliminate subpixel gaps
+                    let x = floor(CGFloat(col) * tileSize)
+                    let y = floor(CGFloat(row) * tileSize)
+                    let nextX = floor(CGFloat(col + 1) * tileSize)
+                    let nextY = floor(CGFloat(row + 1) * tileSize)
+                    let rect = CGRect(x: x, y: y, width: nextX - x, height: nextY - y)
                     context.fill(Path(rect), with: .color(Color(hex: hex)))
                 }
             }

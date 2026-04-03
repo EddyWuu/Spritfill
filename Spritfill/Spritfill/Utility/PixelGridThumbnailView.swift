@@ -31,12 +31,13 @@ struct PixelGridThumbnailView: View {
                     let hex = pixelGrid[index]
                     guard hex != "clear" else { continue }
                     
-                    let rect = CGRect(
-                        x: offsetX + CGFloat(col) * tileSize,
-                        y: offsetY + CGFloat(row) * tileSize,
-                        width: tileSize,
-                        height: tileSize
-                    )
+                    // Snap to pixel boundaries to eliminate subpixel gaps between tiles
+                    let x = floor(offsetX + CGFloat(col) * tileSize)
+                    let y = floor(offsetY + CGFloat(row) * tileSize)
+                    let nextX = floor(offsetX + CGFloat(col + 1) * tileSize)
+                    let nextY = floor(offsetY + CGFloat(row + 1) * tileSize)
+                    
+                    let rect = CGRect(x: x, y: y, width: nextX - x, height: nextY - y)
                     context.fill(Path(rect), with: .color(Color(hex: hex)))
                 }
             }
