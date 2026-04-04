@@ -113,7 +113,7 @@ struct StoreView: View {
                                     .fontWeight(.semibold)
                                 
                                 proFeatureRow(icon: "square.3.layers.3d", color: .purple, text: "Up to 8 layers (free: 2)")
-                                proFeatureRow(icon: "square.grid.2x2", color: .blue, text: "128×128 and 256×256 canvas sizes")
+                                proFeatureRow(icon: "square.grid.2x2", color: .blue, text: "128×128, 256×256, and 512×512 canvas sizes")
                                 proFeatureRow(icon: "square.stack.3d.forward.dottedline", color: .green, text: "Gradient tool")
                                 proFeatureRow(icon: "checkerboard.rectangle", color: .teal, text: "Dither tool")
                                 proFeatureRow(icon: "lasso", color: .cyan, text: "Select & move pixels tool")

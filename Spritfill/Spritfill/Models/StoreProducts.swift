@@ -30,7 +30,7 @@ enum StoreProducts {
     
     // MARK: - Pro Gating: Canvas Sizes
     
-    static let proCanvasSizes: Set<CanvasSizes> = [.extraLargeSquare, .hugeSquare]
+    static let proCanvasSizes: Set<CanvasSizes> = [.extraLargeSquare, .hugeSquare, .massiveSquare]
     
     static func requiresPro(_ canvasSize: CanvasSizes) -> Bool {
         proCanvasSizes.contains(canvasSize)

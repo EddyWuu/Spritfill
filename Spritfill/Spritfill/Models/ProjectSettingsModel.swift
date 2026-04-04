@@ -333,6 +333,7 @@ enum CanvasSizes: String, CaseIterable, Codable {
     case largeSquare  // 64x64
     case extraLargeSquare // 128x128
     case hugeSquare   // 256x256
+    case massiveSquare // 512x512
     case wide // 64x32
     case tall // 32x64
     case landscape // 80x60
@@ -363,6 +364,9 @@ enum CanvasSizes: String, CaseIterable, Codable {
             
         case .hugeSquare:
             return (256, 256)
+            
+        case .massiveSquare:
+            return (512, 512)
             
         case .wide:
             return (64, 32)

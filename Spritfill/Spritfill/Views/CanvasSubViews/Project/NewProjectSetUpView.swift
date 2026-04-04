@@ -139,7 +139,7 @@ struct NewProjectSetUpView: View {
                         
                         Button {
                             if needsPro {
-                                showProAlertMessage = "128×128 and 256×256 canvas sizes are available with Spritfill Pro."
+                                showProAlertMessage = "128×128, 256×256, and 512×512 canvas sizes are available with Spritfill Pro."
                                 showProAlert = true
                             } else {
                                 selectedCanvasSize = canvas
