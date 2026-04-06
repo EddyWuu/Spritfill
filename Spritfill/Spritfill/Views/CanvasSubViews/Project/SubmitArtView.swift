@@ -15,6 +15,7 @@ struct SubmitArtView: View {
     @State private var artistName: String = ""
     @State private var agreeToTerms: Bool = false
     @State private var agreeToPublic: Bool = false
+    @State private var agreeToLicense: Bool = false
     @State private var showSuccessAlert: Bool = false
     @State private var showErrorAlert: Bool = false
     
@@ -30,6 +31,7 @@ struct SubmitArtView: View {
         !artistName.trimmingCharacters(in: .whitespaces).isEmpty
         && agreeToTerms
         && agreeToPublic
+        && agreeToLicense
         && !viewModel.isSubmitting
         && !dailyLimitReached
     }
@@ -120,9 +122,10 @@ struct SubmitArtView: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 bulletPoint("Submit your finished pixel art for review by the Spritfill team.")
-                bulletPoint("If approved, your artwork will be featured in the community catalog for all users to see and recreate.")
+                bulletPoint("If approved, your artwork will be featured in the community catalog for all users to see, download, and recreate.")
                 bulletPoint("Your artist name will be displayed alongside your artwork to give you credit.")
                 bulletPoint("This is a voluntary donation of your artwork — there is no compensation or profile system.")
+                bulletPoint("Other users may download and use your artwork freely within Spritfill.")
             }
         }
     }
@@ -156,7 +159,7 @@ struct SubmitArtView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("I agree to submit my artwork for review")
                         .font(.subheadline)
-                    Text("I understand this is a voluntary contribution. My artwork may be featured in the Spritfill catalog for all users to view and recreate. I will not receive compensation. I confirm this is my original work and does not contain copyrighted, offensive, or inappropriate content.")
+                    Text("I understand this is a voluntary contribution. My artwork may be featured in the Spritfill community catalog for all users to view, download, and recreate. I will not receive compensation. I confirm this is my original work and does not contain copyrighted, offensive, or inappropriate content.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -167,7 +170,18 @@ struct SubmitArtView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("I agree to make my artwork publicly available")
                         .font(.subheadline)
-                    Text("Once approved, my artwork and the artist name I provide will be visible to all Spritfill users. I can request removal at any time by contacting me at ducksss777@gmail.com.")
+                    Text("Once approved, my artwork and the artist name I provide will be visible to all Spritfill users. Other users will be able to download, save, and recreate my artwork. I can request removal at any time by contacting ducksss777@gmail.com.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .toggleStyle(CheckToggleStyle())
+            
+            Toggle(isOn: $agreeToLicense) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("I grant a license for my artwork to be used freely")
+                        .font(.subheadline)
+                    Text("By submitting, I grant Spritfill and its users a perpetual, royalty-free, non-exclusive license to display, download, and recreate my artwork within the app. I waive any claims against the developer for how other users may use my submitted artwork. I understand this is voluntary and I retain ownership of my original work.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

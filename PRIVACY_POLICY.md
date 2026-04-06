@@ -1,6 +1,6 @@
 # Spritfill - Privacy Policy
 
-**Last updated: April 1, 2026**
+**Last updated: April 6, 2026**
 
 **Live Policy:** [https://gilded-troodon-368.notion.site/Spritfill-Privacy-Policy-328009ccfd1b8024a242e01b3c37d77b](https://gilded-troodon-368.notion.site/Spritfill-Privacy-Policy-328009ccfd1b8024a242e01b3c37d77b)
 
@@ -19,7 +19,7 @@ That's it. I do not collect emails, device IDs, location data, analytics, or any
 
 ## 3. How I Use Your Data
 - Submitted artwork is manually reviewed by me
-- If approved, the artwork and artist name may be featured in the app's community catalog for all users to enjoy
+- If approved, the artwork and artist name may be featured in the app's community catalog for all users to view, download, and recreate
 - I do not sell, share, or transfer your data to third parties
 
 ## 4. In-App Purchases
@@ -36,27 +36,34 @@ Submitted artwork is stored on Google Firebase (Firestore), hosted on Google Clo
 ## 7. Children's Privacy
 Spritfill does not knowingly collect personal information from children under 13. The artist name field accepts pseudonyms and does not require real identifying information.
 
-## 8. Third-Party Services
+## 8. User-Generated Content
+- Artwork submitted to the community catalog is made publicly available to all Spritfill users upon approval
+- Other users may view, download, save, and recreate submitted artwork within the app
+- By submitting, you grant a perpetual, royalty-free, non-exclusive license for your artwork to be used within Spritfill by the developer and other users
+- The developer is not responsible for how other users interact with or use submitted artwork
+- If you do not want your artwork to be publicly accessible, do not submit it — all app features work without submitting
+
+## 9. Third-Party Services
 - **Google Firebase** — Used for submission storage. Google's privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy)
 - **Apple StoreKit** — Used for in-app purchase processing. Apple's privacy policy: [https://www.apple.com/privacy/](https://www.apple.com/privacy/)
 
-## 9. Your Rights
+## 10. Your Rights
 You may:
 - Choose not to submit artwork (the app is fully functional without submitting)
 - Use a pseudonym for your artist name
 - Request deletion of your submitted data at any time
 
-## 10. Changes to This Policy
+## 11. Changes to This Policy
 I may update this policy from time to time. Changes will be reflected in the "Last updated" date above.
 
-## 11. Contact
+## 12. Contact
 For privacy questions or deletion requests, contact me at: ducksss777@gmail.com
 
 ---
 
 # Spritfill - Terms of Use (EULA)
 
-**Last updated: April 1, 2026**
+**Last updated: April 6, 2026**
 
 ## 1. Acceptance of Terms
 By downloading or using Spritfill, you agree to these terms. If you do not agree, do not use the app.
@@ -73,10 +80,13 @@ By downloading or using Spritfill, you agree to these terms. If you do not agree
 - Refunds are handled by Apple per their standard refund policy
 
 ## 4. Community Submissions
-- By submitting artwork, you grant Spritfill a non-exclusive license to display your artwork within the app's community catalog
-- You retain ownership of your artwork
+- By submitting artwork, you grant Spritfill and its users a perpetual, royalty-free, non-exclusive license to display, download, save, and recreate your artwork within the app
+- You retain ownership of your original artwork, but you acknowledge that other users will be able to freely download, save, and recreate it
+- Submitting artwork is entirely voluntary. By submitting, you understand and accept that your artwork will be publicly available to all Spritfill users
 - Submissions are reviewed manually and may be rejected at my discretion
-- You may request removal of your submitted artwork at any time
+- You may request removal of your submitted artwork at any time by contacting me, but copies already downloaded by other users cannot be recalled
+- The developer (Edmond Wu) is not liable for how other users may use, share, or interact with your submitted artwork
+- You confirm that your submission is your original work and does not infringe on the intellectual property rights of any third party
 
 ## 5. User Conduct
 You agree not to submit content that is:

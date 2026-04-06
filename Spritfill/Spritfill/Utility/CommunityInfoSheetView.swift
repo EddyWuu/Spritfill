@@ -26,7 +26,7 @@ struct CommunityInfoSheetView: View {
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
                         
-                        Text("Submit your pixel art for a chance to be featured in the community section for everyone to see and recreate!")
+                        Text("Submit your pixel art for a chance to be featured in the community section for everyone to see, download, and recreate!")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -57,7 +57,7 @@ struct CommunityInfoSheetView: View {
                         stepRow(number: 4,
                                 icon: "eyes",
                                 title: "Review Process",
-                                description: "Your submission is manually reviewed. If approved, it'll appear in the Community section for all users to enjoy and recreate!")
+                                description: "Your submission is manually reviewed. If approved, it'll appear in the Community section for all users to view, download, and recreate!")
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
