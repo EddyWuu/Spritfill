@@ -766,6 +766,12 @@ class CanvasViewModel: ObservableObject {
     
     // MARK: - Selection (Select tool)
     
+    // Current pixel coordinate being touched (for coordinate overlay)
+    @Published var currentPixelCoordinate: (col: Int, row: Int)? = nil
+    
+    // Current grid index being touched (for pencil highlight overlay)
+    @Published var currentDrawingIndex: Int? = nil
+    
     // Indices of pixels currently selected by the Select tool.
     @Published var selectedIndices: Set<Int> = []
     

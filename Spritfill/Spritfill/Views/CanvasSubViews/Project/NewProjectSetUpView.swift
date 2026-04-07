@@ -139,7 +139,7 @@ struct NewProjectSetUpView: View {
                         
                         Button {
                             if needsPro {
-                                showProAlertMessage = "128×128, 256×256, and 512×512 canvas sizes are available with Spritfill Pro."
+                                showProAlertMessage = "Large canvas sizes and sprite sheets are available with Spritfill Pro."
                                 showProAlert = true
                             } else {
                                 selectedCanvasSize = canvas
@@ -363,6 +363,16 @@ struct NewProjectSetUpView: View {
     // MARK: - Canvas Size Label
     
     private func canvasSizeLabel(w: Int, h: Int) -> String {
+        // Sprite sheet labels
+        switch (w, h) {
+        case (64, 16):  return "Sheet 4×16"
+        case (128, 16): return "Sheet 8×16"
+        case (128, 32): return "Sheet 4×32"
+        case (256, 32): return "Sheet 8×32"
+        case (256, 64): return "Sheet 4×64"
+        case (512, 64): return "Sheet 8×64"
+        default: break
+        }
         if w == h { return "Square" }
         if w > h { return "Landscape" }
         return "Portrait"

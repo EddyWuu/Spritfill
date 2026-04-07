@@ -208,83 +208,85 @@ struct ProjectCreateView: View {
 
             Spacer()
 
-            HStack(spacing: 16) {
-                Button(role: .destructive) {
-                    showDeleteAlert = true
-                } label: {
-                    Image(systemName: "trash")
-                }
-                
-                Button(action: { showClearLayerAlert = true }) {
-                    Image(systemName: "xmark.rectangle")
-                        .foregroundColor(.orange)
-                }
-                
-                Button(action: { showHelpSheet = true }) {
-                    Image(systemName: "questionmark.circle")
-                }
-                
-                Button(action: { showProjectDetails = true }) {
-                    Image(systemName: "info.circle")
-                }
-                
-                Button(action: {
-                    showLayerPanel.toggle()
-                    if showLayerPanel {
-                        layerPanelOffset = .zero
-                        layerPanelDragStart = .zero
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        Image(systemName: "trash")
                     }
-                }) {
-                    Image(systemName: "square.3.layers.3d")
-                        .foregroundColor(showLayerPanel ? .primary : .blue)
-                }
-                
-                Button(action: {
-                    if !StoreService.shared.isPro {
-                        showImportProAlert = true
-                    } else if viewModel.layers.count >= LayerManagerViewModel.maxLayers {
-                        showImportLayerLimitAlert = true
-                    } else {
-                        showImportSheet = true
+                    
+                    Button(action: { showClearLayerAlert = true }) {
+                        Image(systemName: "xmark.rectangle")
+                            .foregroundColor(.orange)
                     }
-                }) {
-                    Image(systemName: "square.and.arrow.down.on.square")
-                }
-                
-                Button(action: {
-                    newProjectName = viewModel.projectName
-                    showRenameAlert = true
-                }) {
-                    Image(systemName: "pencil")
-                }
-                
-                Button(action: {
-                    if viewModel.exportNeedsUpscale {
-                        showSaveSizeSheet = true
-                    } else {
-                        viewModel.saveToPhotos(upscale: false) { showExportedAlert = true }
+                    
+                    Button(action: { showHelpSheet = true }) {
+                        Image(systemName: "questionmark.circle")
                     }
-                }) {
-                    Image(systemName: "square.and.arrow.down")
-                }
-                
-                Button(action: {
-                    if viewModel.exportNeedsUpscale {
-                        showShareSizeSheet = true
-                    } else {
-                        viewModel.exportAndGetShareImage { image in shareImage = image }
+                    
+                    Button(action: { showProjectDetails = true }) {
+                        Image(systemName: "info.circle")
                     }
-                }) {
-                    Image(systemName: "square.and.arrow.up")
-                }
-                
-                Button(action: { showSettingsSheet = true }) {
-                    Image(systemName: "gearshape")
-                }
-                
-                Button(action: { showFinishAlert = true }) {
-                    Image(systemName: "checkmark.seal")
-                        .foregroundColor(.green)
+                    
+                    Button(action: {
+                        showLayerPanel.toggle()
+                        if showLayerPanel {
+                            layerPanelOffset = .zero
+                            layerPanelDragStart = .zero
+                        }
+                    }) {
+                        Image(systemName: "square.3.layers.3d")
+                            .foregroundColor(showLayerPanel ? .primary : .blue)
+                    }
+                    
+                    Button(action: {
+                        if !StoreService.shared.isPro {
+                            showImportProAlert = true
+                        } else if viewModel.layers.count >= LayerManagerViewModel.maxLayers {
+                            showImportLayerLimitAlert = true
+                        } else {
+                            showImportSheet = true
+                        }
+                    }) {
+                        Image(systemName: "square.and.arrow.down.on.square")
+                    }
+                    
+                    Button(action: {
+                        newProjectName = viewModel.projectName
+                        showRenameAlert = true
+                    }) {
+                        Image(systemName: "pencil")
+                    }
+                    
+                    Button(action: {
+                        if viewModel.exportNeedsUpscale {
+                            showSaveSizeSheet = true
+                        } else {
+                            viewModel.saveToPhotos(upscale: false) { showExportedAlert = true }
+                        }
+                    }) {
+                        Image(systemName: "square.and.arrow.down")
+                    }
+                    
+                    Button(action: {
+                        if viewModel.exportNeedsUpscale {
+                            showShareSizeSheet = true
+                        } else {
+                            viewModel.exportAndGetShareImage { image in shareImage = image }
+                        }
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    
+                    Button(action: { showSettingsSheet = true }) {
+                        Image(systemName: "gearshape")
+                    }
+                    
+                    Button(action: { showFinishAlert = true }) {
+                        Image(systemName: "checkmark.seal")
+                            .foregroundColor(.green)
+                    }
                 }
             }
         }

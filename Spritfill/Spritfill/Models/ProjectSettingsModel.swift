@@ -341,6 +341,14 @@ enum CanvasSizes: String, CaseIterable, Codable {
     case wideCinematic // 96x128
     case landscapeBanner // 128x96
     
+    // Sprite sheet sizes (width × height, laid out horizontally)
+    case sheet4x16  // 64x16  — 4 frames of 16×16
+    case sheet8x16  // 128x16 — 8 frames of 16×16
+    case sheet4x32  // 128x32 — 4 frames of 32×32
+    case sheet8x32  // 256x32 — 8 frames of 32×32
+    case sheet4x64  // 256x64 — 4 frames of 64×64
+    case sheet8x64  // 512x64 — 8 frames of 64×64
+    
     
     // (width, height)
     var dimensions: (width: Int, height: Int) {
@@ -385,6 +393,24 @@ enum CanvasSizes: String, CaseIterable, Codable {
             
         case .landscapeBanner:
             return (128, 96)
+            
+        case .sheet4x16:
+            return (64, 16)
+            
+        case .sheet8x16:
+            return (128, 16)
+            
+        case .sheet4x32:
+            return (128, 32)
+            
+        case .sheet8x32:
+            return (256, 32)
+            
+        case .sheet4x64:
+            return (256, 64)
+            
+        case .sheet8x64:
+            return (512, 64)
             
         }
     }
