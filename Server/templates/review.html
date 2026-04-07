@@ -220,6 +220,9 @@
                 <div class="card-body">
                     <div class="card-title">{{ sub.projectName or 'Untitled' }}</div>
                     <div class="card-artist">by {{ sub.artistName or 'Anonymous' }}</div>
+                    {% if sub.personalLink %}
+                    <div class="card-artist"><a href="{{ sub.personalLink }}" target="_blank" rel="noopener noreferrer" style="color: #58a6ff; text-decoration: none;">🔗 {{ sub.personalLink }}</a></div>
+                    {% endif %}
                     <div class="card-meta">
                         {{ sub.canvasWidth }}×{{ sub.canvasHeight }} · {{ sub.submittedAtFormatted }}
                     </div>

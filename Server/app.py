@@ -155,15 +155,17 @@ def approve_submission(doc_id):
         "imageBase64": data.get("imageBase64", ""),
         "approvedAt": firestore.SERVER_TIMESTAMP,
         "submissionId": doc_id,
-        # Preserve original fields for unapprove restore
         "projectName": data.get("projectName", "Untitled"),
         "artistName": data.get("artistName", "Anonymous"),
         "submittedAt": data.get("submittedAt"),
         "id": data.get("id", doc_id),
     }
-    db.collection("community_sprites").document(doc_id).set(community_data)
 
-    # Remove from submissions — data now lives only in community_sprites
+    # Include personal link if provided
+    if data.get("personalLink"):
+        community_data["personalLink"] = data["personalLink"]
+
+    db.collection("community_sprites").document(doc_id).set(community_data)
     db.collection("submissions").document(doc_id).delete()
     return redirect(url_for("review_dashboard", tab="pending_review"))
 
@@ -191,6 +193,11 @@ def unapprove_submission(doc_id):
         "submittedAt": data.get("submittedAt"),
         "status": "pending_review",
     }
+
+    # Preserve personal link if present
+    if data.get("personalLink"):
+        submission_data["personalLink"] = data["personalLink"]
+
     db.collection("submissions").document(doc_id).set(submission_data)
     db.collection("community_sprites").document(doc_id).delete()
     return redirect(url_for("review_dashboard", tab="approved"))

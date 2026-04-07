@@ -175,6 +175,12 @@
                     <div class="info-label">Artist</div>
                     <div class="info-value">{{ submission.artistName or 'Anonymous' }}</div>
                 </div>
+                {% if submission.personalLink %}
+                <div class="info-row">
+                    <div class="info-label">Personal Link</div>
+                    <div class="info-value"><a href="{{ submission.personalLink }}" target="_blank" rel="noopener noreferrer" style="color: #58a6ff;">{{ submission.personalLink }}</a></div>
+                </div>
+                {% endif %}
                 <div class="info-row">
                     <div class="info-label">Canvas Size</div>
                     <div class="info-value">{{ submission.canvasWidth }}×{{ submission.canvasHeight }}</div>

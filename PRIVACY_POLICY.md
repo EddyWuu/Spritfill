@@ -87,6 +87,7 @@ By downloading or using Spritfill, you agree to these terms. If you do not agree
 - You may request removal of your submitted artwork at any time by contacting me, but copies already downloaded by other users cannot be recalled
 - The developer (Edmond Wu) is not liable for how other users may use, share, or interact with your submitted artwork
 - You confirm that your submission is your original work and does not infringe on the intellectual property rights of any third party
+- You may optionally include a personal link (e.g. website, portfolio, or Patreon) with your submission. Personal links are reviewed manually and may be removed or cause your submission to be rejected if they are inappropriate, misleading, non-functional, or contain harmful content. The developer reserves the right to remove any personal link at any time without notice
 
 ## 5. User Conduct
 You agree not to submit content that is:
