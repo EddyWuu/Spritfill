@@ -234,6 +234,7 @@ struct SubmitArtView: View {
             Label("Privacy & Data", systemImage: "lock.shield.fill")
                 .font(.headline)
                 .foregroundColor(.green)
+                .frame(maxWidth: .infinity)
             
             VStack(alignment: .leading, spacing: 6) {
                 privacyRow(icon: "person.crop.circle.badge.minus", text: "No account is created. No login is required.")
