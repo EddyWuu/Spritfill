@@ -91,6 +91,33 @@ struct ProjectCanvasView: View {
                 }
             }
             .overlay {
+                // Pencil drawing highlight overlay — white border on touched pixel
+                if let idx = viewModel.currentDrawingIndex {
+                    pencilHighlightOverlay(
+                        index: idx,
+                        gridWidth: gridWidth,
+                        gridHeight: gridHeight,
+                        zoomScale: zoomScale,
+                        canvasOffset: canvasOffset,
+                        geoSize: geo.size
+                    )
+                }
+            }
+            .overlay(alignment: .topLeading) {
+                // Pixel coordinate overlay
+                if let coord = viewModel.currentPixelCoordinate {
+                    Text("(\(coord.col), \(coord.row))")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(5)
+                        .padding(8)
+                        .allowsHitTesting(false)
+                }
+            }
+            .overlay {
                 // Shape tool live preview overlay
                 if !viewModel.shapePreviewPixels.isEmpty {
                     ShapePreviewOverlay(
@@ -155,6 +182,14 @@ struct ProjectCanvasView: View {
                         
                         let tool = toolsVM.selectedTool
                         
+                        // Update pixel coordinate for overlay
+                        if let (row, col) = viewModel.gridRowCol(from: location,
+                                                                   geoSize: geo.size,
+                                                                   canvasOffset: canvasOffset,
+                                                                   zoomScale: zoomScale) {
+                            viewModel.currentPixelCoordinate = (col: col, row: row)
+                        }
+                        
                         // When Apple Pencil Only is enabled, or Apple Pencil was recently used,
                         // finger touches on drawing tools are treated as pan
                         let pencilOnly = SettingsService.shared.applePencilOnly
@@ -201,6 +236,7 @@ struct ProjectCanvasView: View {
                                     eraserPreviewIndex = index
                                     showEraserPreview = true
                                 }
+                                viewModel.currentDrawingIndex = index
                                 dragVisitedIndices.insert(index)
                                 viewModel.applyToolAtIndex(index)
                             }
@@ -210,6 +246,16 @@ struct ProjectCanvasView: View {
                         let tool = toolsVM.selectedTool
                         let pencilOnly = SettingsService.shared.applePencilOnly
                         let fingerOnDrawTool = (pencilOnly || toolsVM.applePencilDetected) && !isPencil && ToolsViewModel.isDrawingTool(tool)
+                        
+                        // Update pixel coordinate for overlay
+                        if let (row, col) = viewModel.gridRowCol(from: location,
+                                                                   geoSize: geo.size,
+                                                                   canvasOffset: canvasOffset,
+                                                                   zoomScale: zoomScale) {
+                            viewModel.currentPixelCoordinate = (col: col, row: row)
+                        } else {
+                            viewModel.currentPixelCoordinate = nil
+                        }
                         
                         if fingerOnDrawTool || tool == .pan {
                             let dx = location.x - panStartLocation.x
@@ -262,6 +308,7 @@ struct ProjectCanvasView: View {
                                     eraserPreviewIndex = index
                                     showEraserPreview = true
                                 }
+                                viewModel.currentDrawingIndex = index
                                 if !dragVisitedIndices.contains(index) {
                                     dragVisitedIndices.insert(index)
                                     viewModel.applyToolAtIndex(index)
@@ -291,9 +338,11 @@ struct ProjectCanvasView: View {
                             showMagnifier = false
                             magnifierColor = nil
                             magnifierIndex = nil
+                            viewModel.currentPixelCoordinate = nil
                         } else if tool.isShapeTool {
                             // Shape tools: commit the preview to the canvas
                             viewModel.commitShapePreview()
+                            viewModel.currentPixelCoordinate = nil
                         } else if tool == .select {
                             // Select tool: if fill mode, flood-fill the interior of the drawn boundary
                             if toolsVM.selectFillMode {
@@ -313,6 +362,8 @@ struct ProjectCanvasView: View {
                             dragVisitedIndices.removeAll()
                             showEraserPreview = false
                             eraserPreviewIndex = nil
+                            viewModel.currentDrawingIndex = nil
+                            viewModel.currentPixelCoordinate = nil
                         }
                     }
                 )
@@ -346,6 +397,40 @@ struct ProjectCanvasView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Pencil drawing highlight
+    
+    private func pencilHighlightOverlay(
+        index: Int,
+        gridWidth: Int,
+        gridHeight: Int,
+        zoomScale: CGFloat,
+        canvasOffset: CGSize,
+        geoSize: CGSize
+    ) -> some View {
+        let row = index / gridWidth
+        let col = index % gridWidth
+        
+        // Canvas origin in screen space
+        let scaledCanvasWidth = CGFloat(gridWidth) * zoomScale
+        let scaledCanvasHeight = CGFloat(gridHeight) * zoomScale
+        let canvasOriginX = geoSize.width / 2 + canvasOffset.width - scaledCanvasWidth / 2
+        let canvasOriginY = geoSize.height / 2 + canvasOffset.height - scaledCanvasHeight / 2
+        
+        // Screen-space rect for the single pixel
+        let rectX = canvasOriginX + CGFloat(col) * zoomScale
+        let rectY = canvasOriginY + CGFloat(row) * zoomScale
+        
+        return Rectangle()
+            .fill(Color.clear)
+            .overlay(
+                Rectangle()
+                    .stroke(Color.white, lineWidth: max(1, zoomScale * 0.1))
+            )
+            .frame(width: zoomScale, height: zoomScale)
+            .position(x: rectX + zoomScale / 2, y: rectY + zoomScale / 2)
+            .allowsHitTesting(false)
     }
     
     // MARK: - Eyedropper magnifier

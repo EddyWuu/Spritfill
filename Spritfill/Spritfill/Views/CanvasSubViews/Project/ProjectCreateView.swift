@@ -198,18 +198,20 @@ struct ProjectCreateView: View {
     
     @ViewBuilder
     private var topNavBar: some View {
-        HStack {
+        HStack(spacing: 0) {
             Button(action: {
                 viewModel.flushSave()
                 dismiss()
             }) {
                 Image(systemName: "chevron.left")
             }
+            .padding(.trailing, 8)
 
-            Spacer()
+            Spacer(minLength: 0)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
+                    // ...existing buttons...
                     Button(role: .destructive) {
                         showDeleteAlert = true
                     } label: {
@@ -289,6 +291,7 @@ struct ProjectCreateView: View {
                     }
                 }
             }
+            .defaultScrollAnchor(.trailing)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
