@@ -117,7 +117,8 @@ class RecreateViewModel: ObservableObject {
                         canvasSize: community.canvasSize,
                         palette: nil,
                         pixelGrid: community.pixelGrid,
-                        colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid)
+                        colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid),
+                        personalLink: community.personalLink
                     ))
                 }
             }
@@ -198,7 +199,8 @@ class RecreateViewModel: ObservableObject {
                     canvasSize: community.canvasSize,
                     palette: nil,
                     pixelGrid: community.pixelGrid,
-                    colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid)
+                    colorNumberMap: RecreateViewModel.buildColorNumberMap(from: community.pixelGrid),
+                    personalLink: community.personalLink
                 )
             }
             

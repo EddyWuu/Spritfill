@@ -16,8 +16,9 @@ struct PremadeSpriteData: Identifiable {
     let group: String?
     let groupOrder: Int
     let paletteColors: [String]?
+    let personalLink: String?
     
-    init(id: String, name: String, canvasSize: CanvasSizes, palette: ColorPalettes? = nil, pixelGrid: [String], group: String? = nil, groupOrder: Int = 0, paletteColors: [String]? = nil) {
+    init(id: String, name: String, canvasSize: CanvasSizes, palette: ColorPalettes? = nil, pixelGrid: [String], group: String? = nil, groupOrder: Int = 0, paletteColors: [String]? = nil, personalLink: String? = nil) {
         self.id = id
         self.name = name
         self.canvasSize = canvasSize
@@ -26,6 +27,7 @@ struct PremadeSpriteData: Identifiable {
         self.group = group
         self.groupOrder = groupOrder
         self.paletteColors = paletteColors
+        self.personalLink = personalLink
     }
     
     var resolvedPaletteColors: [String] {

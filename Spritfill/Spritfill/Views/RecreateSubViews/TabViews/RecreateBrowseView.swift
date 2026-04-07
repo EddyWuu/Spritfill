@@ -220,9 +220,26 @@ struct RecreateBrowseView: View {
                 )
                 .frame(width: 250, height: 250)
                 .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+                .padding(.bottom, 12)
+                
+                // Personal link (community sprites only)
+                if let link = sprite.personalLink, let url = URL(string: link) {
+                    Link(destination: url) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "link")
+                                .font(.caption)
+                            Text(link)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 16)
+                    }
+                }
             }
-            .frame(maxWidth: 300, maxHeight: 350)
+            .frame(maxWidth: 300, maxHeight: 400)
             .background(Color(.systemBackground))
             .cornerRadius(16)
             .shadow(radius: 10)

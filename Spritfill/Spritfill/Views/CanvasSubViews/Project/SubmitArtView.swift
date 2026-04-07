@@ -13,6 +13,7 @@ struct SubmitArtView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var artistName: String = ""
+    @State private var personalLink: String = ""
     @State private var agreeToTerms: Bool = false
     @State private var agreeToPublic: Bool = false
     @State private var agreeToLicense: Bool = false
@@ -75,6 +76,11 @@ struct SubmitArtView: View {
                     
                     // MARK: - Artist name
                     artistNameSection
+                    
+                    Divider()
+                    
+                    // MARK: - Personal link (optional)
+                    personalLinkSection
                     
                     Divider()
                     
@@ -148,6 +154,37 @@ struct SubmitArtView: View {
         }
     }
     
+    // MARK: - Personal Link (Optional)
+    
+    private var personalLinkSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Personal Link (Optional)", systemImage: "link")
+                .font(.headline)
+            
+            Text("Add a link to your website, portfolio, social media account, or Patreon. If approved, this link will be displayed alongside your artwork so users can find you.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            TextField("Enter your website URL", text: $personalLink)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .keyboardType(.URL)
+            
+            HStack(alignment: .top, spacing: 6) {
+                Image(systemName: "info.circle")
+                    .foregroundColor(.blue)
+                    .font(.caption)
+                Text("Links are reviewed manually. Inappropriate, misleading, or non-functional links will be removed and may result in your submission being rejected.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .padding(8)
+            .background(Color.blue.opacity(0.08))
+            .cornerRadius(8)
+        }
+    }
+    
     // MARK: - Agreements
     
     private var agreementsSection: some View {
@@ -201,7 +238,7 @@ struct SubmitArtView: View {
             VStack(alignment: .leading, spacing: 6) {
                 privacyRow(icon: "person.crop.circle.badge.minus", text: "No account is created. No login is required.")
                 privacyRow(icon: "envelope.badge.shield.half.filled", text: "No email, phone number, or personal information is collected.")
-                privacyRow(icon: "externaldrive.badge.icloud", text: "Only your artwork image, pixel data, and the artist name you provide are uploaded.")
+                privacyRow(icon: "externaldrive.badge.icloud", text: "Only your artwork image, pixel data, artist name, and optional personal link are uploaded.")
                 privacyRow(icon: "server.rack", text: "Submitted data is stored securely on Firebase (Google Cloud) for review purposes only.")
                 privacyRow(icon: "trash.circle", text: "You may request deletion of your submission at any time by contacting me at ducksss777@gmail.com.")
                 privacyRow(icon: "dollarsign.circle", text: "Your data will never be sold to third parties.")
@@ -266,7 +303,8 @@ struct SubmitArtView: View {
     private func submitArtwork() {
         guard canSubmit else { return }
         
-        viewModel.submitArtwork(artistName: artistName) { success in
+        let link = personalLink.trimmingCharacters(in: .whitespaces)
+        viewModel.submitArtwork(artistName: artistName, personalLink: link.isEmpty ? nil : link) { success in
             if success {
                 showSuccessAlert = true
             } else {

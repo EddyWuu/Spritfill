@@ -1263,7 +1263,7 @@ class CanvasViewModel: ObservableObject {
     @Published var submissionError: String? = nil
     
     @MainActor
-    func submitArtwork(artistName: String, completion: @escaping (Bool) -> Void) {
+    func submitArtwork(artistName: String, personalLink: String? = nil, completion: @escaping (Bool) -> Void) {
         isSubmitting = true
         submissionError = nil
         
@@ -1274,7 +1274,8 @@ class CanvasViewModel: ObservableObject {
             projectName: projectName,
             canvasWidth: dims.width,
             canvasHeight: dims.height,
-            pixelGrid: compositePixelHexes()
+            pixelGrid: compositePixelHexes(),
+            personalLink: personalLink
         )
         
         guard let image = exportImage() else {

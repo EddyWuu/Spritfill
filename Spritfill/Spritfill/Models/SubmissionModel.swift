@@ -15,15 +15,17 @@ struct ArtSubmission: Codable, Identifiable {
     let canvasWidth: Int
     let canvasHeight: Int
     let pixelGrid: [String]
+    let personalLink: String?
     let submittedAt: Date
     
-    init(artistName: String, projectName: String, canvasWidth: Int, canvasHeight: Int, pixelGrid: [String]) {
+    init(artistName: String, projectName: String, canvasWidth: Int, canvasHeight: Int, pixelGrid: [String], personalLink: String? = nil) {
         self.id = UUID()
         self.artistName = artistName
         self.projectName = projectName
         self.canvasWidth = canvasWidth
         self.canvasHeight = canvasHeight
         self.pixelGrid = pixelGrid
+        self.personalLink = personalLink
         self.submittedAt = Date()
     }
 }

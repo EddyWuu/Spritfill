@@ -83,6 +83,7 @@ class CommunitySpritesService: ObservableObject {
                     }
                     
                     let artist = data["artist"] as? String ?? "Anonymous"
+                    let personalLink = data["personalLink"] as? String
                     
                     // Extract unique colors from the pixel grid for palette display
                     let uniqueColors = Array(Set(pixelGrid.filter { $0 != "clear" }))
@@ -95,7 +96,8 @@ class CommunitySpritesService: ObservableObject {
                         pixelGrid: pixelGrid,
                         group: "Community",
                         groupOrder: 0,
-                        paletteColors: uniqueColors
+                        paletteColors: uniqueColors,
+                        personalLink: personalLink
                     )
                     
                     sprites.append(sprite)

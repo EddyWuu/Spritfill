@@ -79,7 +79,7 @@ class FirebaseSubmissionService {
         
         let imageBase64 = pngData.base64EncodedString()
         
-        let data: [String: Any] = [
+        var data: [String: Any] = [
             "id": submission.id.uuidString,
             "artistName": submission.artistName,
             "projectName": submission.projectName,
@@ -90,6 +90,10 @@ class FirebaseSubmissionService {
             "submittedAt": Timestamp(date: Date()),
             "status": "pending_review"
         ]
+        
+        if let personalLink = submission.personalLink {
+            data["personalLink"] = personalLink
+        }
         
         db.collection("submissions").document(submission.id.uuidString).setData(data) { [weak self] error in
             if let error = error {

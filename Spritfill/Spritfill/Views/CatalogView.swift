@@ -233,6 +233,23 @@ struct CatalogView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 16)
                 
+                // Personal link (community sprites only)
+                if let link = sprite.personalLink, let url = URL(string: link) {
+                    Link(destination: url) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "link")
+                                .font(.caption)
+                            Text(link)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+                    }
+                }
+                
                 Divider()
                 
                 // Save and Export buttons
