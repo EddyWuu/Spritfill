@@ -59,7 +59,6 @@ class StoreService: ObservableObject {
     
     func loadProducts() async {
         guard !isLoading else { return }
-        guard products.isEmpty else { return }
         isLoading = true
         defer { isLoading = false }
         

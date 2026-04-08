@@ -36,97 +36,84 @@ struct StoreView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.top, 8)
                     
-                    // MARK: - Loading / Error State
-                    if viewModel.products.isEmpty {
-                        VStack(spacing: 12) {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .padding(.vertical, 20)
-                                Text("Loading...")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Image(systemName: "exclamationmark.triangle")
-                                    .font(.title2)
-                                    .foregroundColor(.orange)
-                                    .padding(.top, 12)
-                                Text("Unable to load products")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Button("Try Again") {
-                                    Task { await viewModel.loadProducts() }
-                                }
-                                .buttonStyle(.bordered)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 20)
-                    }
-                    
                     // MARK: - Pro Unlock
-                    if let proProduct = viewModel.proProduct {
-                        VStack(spacing: 16) {
-                            // Purchase row
-                            HStack(spacing: 12) {
-                                Image(systemName: "star.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.yellow)
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(proProduct.displayName)
-                                        .font(.body)
-                                        .fontWeight(.semibold)
-                                    Text("One-time purchase")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                if viewModel.isPro {
-                                    Label("Owned", systemImage: "checkmark.circle.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                } else {
-                                    Button {
-                                        Task { await viewModel.purchase(proProduct) }
-                                    } label: {
-                                        Text(proProduct.displayPrice)
-                                            .font(.subheadline)
-                                            .fontWeight(.semibold)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 8)
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.blue)
-                                    .disabled(viewModel.isPurchasing)
-                                }
-                            }
-                            .padding(16)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(14)
+                    VStack(spacing: 16) {
+                        // Purchase row
+                        HStack(spacing: 12) {
+                            Image(systemName: "star.fill")
+                                .font(.title2)
+                                .foregroundColor(.yellow)
                             
-                            // What's included
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("What's Included")
-                                    .font(.subheadline)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(viewModel.proProduct?.displayName ?? "Spritfill Pro")
+                                    .font(.body)
                                     .fontWeight(.semibold)
-                                
-                                proFeatureRow(icon: "square.3.layers.3d", color: .purple, text: "Up to 8 layers (free: 2)")
-                                proFeatureRow(icon: "square.grid.2x2", color: .blue, text: "128×128, 256×256, and 512×512 canvas sizes")
-                                proFeatureRow(icon: "square.stack.3d.forward.dottedline", color: .green, text: "Gradient tool")
-                                proFeatureRow(icon: "checkerboard.rectangle", color: .teal, text: "Dither tool")
-                                proFeatureRow(icon: "lasso", color: .cyan, text: "Select & move pixels tool")
-                                proFeatureRow(icon: "square.and.arrow.down.on.square", color: .indigo, text: "Import projects as layers")
-                                proFeatureRow(icon: "paintpalette.fill", color: .orange, text: "Unlimited extra palette colors (free: 5)")
-                                proFeatureRow(icon: "swatchpalette.fill", color: .pink, text: "Unlimited custom palette colors (free: 64)")
-                                proFeatureRow(icon: "sparkles", color: .yellow, text: "Exclusive Spritfill 128 palette")
+                                Text("One-time purchase")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
-                            .padding(16)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(14)
+                            
+                            Spacer()
+                            
+                            if viewModel.isPro {
+                                Label("Owned", systemImage: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            } else if let proProduct = viewModel.proProduct {
+                                Button {
+                                    Task { await viewModel.purchase(proProduct) }
+                                } label: {
+                                    Text(proProduct.displayPrice)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.blue)
+                                .disabled(viewModel.isPurchasing)
+                            } else if viewModel.isLoading {
+                                ProgressView()
+                                    .frame(width: 44, height: 34)
+                            } else {
+                                // Product not yet available from App Store – show retry button with fallback price
+                                Button {
+                                    Task { await viewModel.loadProductsWithFeedback() }
+                                } label: {
+                                    Text("$3.99")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.blue)
+                            }
                         }
+                        .padding(16)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(14)
+                        
+                        // What's included
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("What's Included")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                            
+                            proFeatureRow(icon: "square.3.layers.3d", color: .purple, text: "Up to 8 layers (free: 2)")
+                            proFeatureRow(icon: "square.grid.2x2", color: .blue, text: "128×128, 256×256, and 512×512 canvas sizes")
+                            proFeatureRow(icon: "square.stack.3d.forward.dottedline", color: .green, text: "Gradient tool")
+                            proFeatureRow(icon: "checkerboard.rectangle", color: .teal, text: "Dither tool")
+                            proFeatureRow(icon: "lasso", color: .cyan, text: "Select & move pixels tool")
+                            proFeatureRow(icon: "square.and.arrow.down.on.square", color: .indigo, text: "Import projects as layers")
+                            proFeatureRow(icon: "paintpalette.fill", color: .orange, text: "Unlimited extra palette colors (free: 5)")
+                            proFeatureRow(icon: "swatchpalette.fill", color: .pink, text: "Unlimited custom palette colors (free: 64)")
+                            proFeatureRow(icon: "sparkles", color: .yellow, text: "Exclusive Spritfill 128 palette")
+                        }
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(14)
                     }
                     
                     // MARK: - Restore Purchases

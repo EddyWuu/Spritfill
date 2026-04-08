@@ -74,8 +74,8 @@ class CommunitySpritesService: ObservableObject {
                     print("Community sprite doc \(doc.documentID): name=\(name ?? "nil"), width=\(canvasWidth ?? -1), height=\(canvasHeight ?? -1), gridCount=\(pixelGrid?.count ?? -1), canvasSize=\(canvasSize?.rawValue ?? "nil")")
                     
                     guard let name = name,
-                          let canvasWidth = canvasWidth,
-                          let canvasHeight = canvasHeight,
+//                          let canvasWidth = canvasWidth,
+//                          let canvasHeight = canvasHeight,
                           let pixelGrid = pixelGrid,
                           let canvasSize = canvasSize else {
                         print("Skipping community sprite \(doc.documentID) — missing required fields")
