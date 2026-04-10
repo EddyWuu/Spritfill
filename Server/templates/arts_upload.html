@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spritfill — Upload Premade Art</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            width: 100%;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header h1 span { color: #7c5CFC; }
+        .header a { color: #8b949e; text-decoration: none; font-size: 14px; }
+        .header a:hover { color: #e6edf3; }
+
+        .upload-area {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 520px;
+            background: #161b22;
+            border: 2px dashed #30363d;
+            border-radius: 16px;
+            padding: 48px 32px;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        .upload-area.dragover { border-color: #7c5CFC; background: #1c2128; }
+        .upload-area .icon { font-size: 48px; margin-bottom: 16px; }
+        .upload-area p { color: #8b949e; font-size: 15px; margin-bottom: 8px; }
+        .upload-area .hint { font-size: 12px; color: #484f58; }
+
+        .preview-container {
+            display: none;
+            margin-top: 24px;
+            text-align: center;
+        }
+        .preview-container img {
+            max-width: 200px; max-height: 200px;
+            border-radius: 8px; border: 1px solid #30363d;
+        }
+        .preview-label { font-size: 12px; color: #484f58; margin-top: 6px; }
+
+        .form-group {
+            margin-top: 24px;
+            width: 100%;
+            max-width: 900px;
+            display: none;
+            padding: 0 20px;
+        }
+        .form-group label {
+            display: block; font-size: 13px; color: #8b949e;
+            margin-bottom: 6px; font-weight: 500;
+        }
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%; padding: 10px 14px;
+            background: #0d1117; border: 1px solid #30363d;
+            border-radius: 8px; color: #e6edf3; font-size: 15px; outline: none;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #7c5CFC; }
+        .form-row { display: flex; gap: 12px; margin-top: 16px; }
+        .form-row > div { flex: 1; }
+
+        /* Refinement method radio cards */
+        .method-section { margin-top: 24px; }
+        .method-section h3 { font-size: 15px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+        .method-cards { display: flex; gap: 10px; flex-wrap: wrap; }
+        .method-card {
+            flex: 1; min-width: 140px;
+            padding: 12px 14px;
+            background: #0d1117;
+            border: 2px solid #30363d;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            text-align: center;
+        }
+        .method-card:hover { border-color: #484f58; background: #161b22; }
+        .method-card.selected { border-color: #7c5CFC; background: #1c2128; }
+        .method-card input { display: none; }
+        .method-card .name { font-size: 14px; font-weight: 600; color: #e6edf3; }
+        .method-card .desc { font-size: 11px; color: #8b949e; margin-top: 4px; line-height: 1.4; }
+
+        /* Preview compare grid */
+        .compare-section {
+            display: none;
+            margin-top: 28px;
+            width: 100%;
+            max-width: 900px;
+            padding: 0 20px;
+        }
+        .compare-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px;
+        }
+        .compare-header h3 { font-size: 15px; font-weight: 600; }
+        .compare-btn {
+            padding: 8px 18px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .compare-btn:hover { border-color: #7c5CFC; background: #1c2128; }
+        .compare-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        @media (max-width: 800px) {
+            .compare-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .compare-item {
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .compare-item:hover { border-color: #484f58; }
+        .compare-item.picked { border-color: #7c5CFC; }
+        .compare-item img {
+            width: 100%; aspect-ratio: 1;
+            image-rendering: pixelated;
+            border-radius: 6px;
+            border: 1px solid #21262d;
+        }
+        .compare-item .label {
+            font-size: 12px; font-weight: 600;
+            color: #e6edf3; margin-top: 8px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid #484f58;
+            border-top-color: #7c5CFC;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .submit-btn {
+            margin-top: 24px;
+            width: 100%;
+            max-width: 520px;
+            padding: 14px;
+            background: #7c5CFC;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: none;
+        }
+        .submit-btn:hover { background: #6a4de0; }
+        .nav-link {
+            margin-top: 20px; margin-bottom: 40px; font-size: 14px;
+        }
+        .nav-link a { color: #7c5CFC; text-decoration: none; }
+        .nav-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖼️ <span>Premade Art</span> Upload</h1>
+        <a href="/arts/review">📋 Review Dashboard →</a>
+    </div>
+
+    <form id="uploadForm" action="/arts/upload" method="POST" enctype="multipart/form-data">
+        <div class="upload-area" id="dropArea" style="margin:40px auto 0;max-width:520px;">
+            <div class="icon">🖼️</div>
+            <p>Drop an image here or click to select</p>
+            <div class="hint">PNG, JPG — will be pixelated to a sprite grid</div>
+            <input type="file" name="image" id="fileInput" accept="image/*" style="display:none;">
+        </div>
+
+        <div class="preview-container" id="previewContainer">
+            <img id="previewImage" src="" alt="Preview">
+            <div class="preview-label">Original</div>
+        </div>
+
+        <div class="form-group" id="formGroup">
+            <div class="form-row">
+                <div>
+                    <label for="artName">Art Name</label>
+                    <input type="text" id="artName" name="name" placeholder="e.g. Lake Louise" required>
+                </div>
+                <div>
+                    <label for="artSize">Grid Size</label>
+                    <select id="artSize" name="size">
+                        <option value="64">64 × 64</option>
+                        <option value="128" selected>128 × 128</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hidden field for selected method (set by JS) -->
+            <input type="hidden" name="method" id="methodInput" value="none">
+
+            <div class="method-section">
+                <h3>Refinement Method</h3>
+                <div class="method-cards">
+                    <label class="method-card selected" data-method="none" onclick="selectMethod('none', this)">
+                        <input type="radio" name="method_radio" value="none" checked>
+                        <div class="name">None</div>
+                        <div class="desc">Simple LANCZOS downscale — fast baseline</div>
+                    </label>
+                    <label class="method-card" data-method="edge_aware" onclick="selectMethod('edge_aware', this)">
+                        <input type="radio" name="method_radio" value="edge_aware">
+                        <div class="name">Edge Detect</div>
+                        <div class="desc">Canny edges + sharpened blending for crisp boundaries</div>
+                    </label>
+                    <label class="method-card" data-method="supersample" onclick="selectMethod('supersample', this)">
+                        <input type="radio" name="method_radio" value="supersample">
+                        <div class="name">Super-sample</div>
+                        <div class="desc">Multi-step downscale with intermediate sharpening passes</div>
+                    </label>
+                    <label class="method-card" data-method="unsharp" onclick="selectMethod('unsharp', this)">
+                        <input type="radio" name="method_radio" value="unsharp">
+                        <div class="name">Unsharp Mask</div>
+                        <div class="desc">Strong unsharp mask + saturation & contrast boost</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Compare preview section (outside the form) -->
+    <div class="compare-section" id="compareSection">
+        <div class="compare-header">
+            <h3>🔍 Compare All Methods</h3>
+            <button class="compare-btn" id="compareBtn" onclick="generatePreviews()">Generate Previews</button>
+        </div>
+        <div class="compare-grid" id="compareGrid"></div>
+        <p id="compareTip" style="font-size:12px;color:#484f58;margin-top:10px;text-align:center;">
+            Click a preview to select that method for upload
+        </p>
+    </div>
+
+    <button type="submit" form="uploadForm" class="submit-btn" id="submitBtn">🚀 Pixelate & Upload</button>
+
+    <div class="nav-link">
+        <a href="/">← Back to Home</a>
+    </div>
+
+    <script>
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const formGroup = document.getElementById('formGroup');
+        const submitBtn = document.getElementById('submitBtn');
+        const compareSection = document.getElementById('compareSection');
+        const compareGrid = document.getElementById('compareGrid');
+        const compareBtn = document.getElementById('compareBtn');
+        const methodInput = document.getElementById('methodInput');
+
+        let currentFile = null;
+
+        dropArea.addEventListener('click', () => fileInput.click());
+        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('dragover'); });
+        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                formGroup.style.display = 'block';
+                submitBtn.style.display = 'block';
+                compareSection.style.display = 'block';
+                // Reset compare grid
+                compareGrid.innerHTML = '';
+                compareBtn.textContent = 'Generate Previews';
+                // Auto-fill name
+                const nameInput = document.getElementById('artName');
+                if (!nameInput.value) {
+                    let name = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+                    nameInput.value = name;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectMethod(method, card) {
+            methodInput.value = method;
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            // Sync compare grid selection
+            document.querySelectorAll('.compare-item').forEach(item => {
+                item.classList.toggle('picked', item.dataset.method === method);
+            });
+        }
+
+        async function generatePreviews() {
+            if (!currentFile) return;
+
+            compareBtn.disabled = true;
+            compareBtn.innerHTML = '<span class="spinner"></span>Generating…';
+            compareGrid.innerHTML = '';
+
+            const formData = new FormData();
+            formData.append('image', currentFile);
+            formData.append('size', document.getElementById('artSize').value);
+
+            try {
+                const resp = await fetch('/arts/preview', { method: 'POST', body: formData });
+                const data = await resp.json();
+
+                if (data.error) {
+                    compareGrid.innerHTML = '<p style="color:#f85149;grid-column:1/-1;">' + data.error + '</p>';
+                    return;
+                }
+
+                const order = ['none', 'edge_aware', 'supersample', 'unsharp'];
+                for (const key of order) {
+                    if (!data[key]) continue;
+                    const item = document.createElement('div');
+                    item.className = 'compare-item' + (key === methodInput.value ? ' picked' : '');
+                    item.dataset.method = key;
+                    item.innerHTML =
+                        '<img src="' + data[key].image + '" alt="' + data[key].label + '">' +
+                        '<div class="label">' + data[key].label + '</div>';
+                    item.addEventListener('click', () => {
+                        methodInput.value = key;
+                        document.querySelectorAll('.compare-item').forEach(i => i.classList.remove('picked'));
+                        item.classList.add('picked');
+                        document.querySelectorAll('.method-card').forEach(c => {
+                            c.classList.toggle('selected', c.dataset.method === key);
+                        });
+                    });
+                    compareGrid.appendChild(item);
+                }
+            } catch (err) {
+                compareGrid.innerHTML = '<p style="color:#f85149;grid-column:1/-1;">Failed: ' + err.message + '</p>';
+            } finally {
+                compareBtn.disabled = false;
+                compareBtn.textContent = 'Regenerate Previews';
+            }
+        }
+    </script>
+</body>
+</html>

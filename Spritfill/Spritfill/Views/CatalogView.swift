@@ -95,7 +95,7 @@ struct CatalogView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "wifi.slash")
                                 .foregroundColor(.orange)
-                            Text("Connect to the internet to see community sprites")
+                            Text("Connect to the internet to see community sprites and landscapes")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }

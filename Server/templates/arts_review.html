@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spritfill — Premade Arts Review</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 20px; font-weight: 600; }
+        .header h1 span { color: #7c5CFC; }
+        .header-links { display: flex; gap: 16px; }
+        .header-links a {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .header-links a:hover { color: #e6edf3; }
+        .tabs {
+            display: flex;
+            gap: 4px;
+            padding: 16px 24px 0;
+            border-bottom: 1px solid #30363d;
+        }
+        .tab {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #8b949e;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #e6edf3; }
+        .tab.active { color: #e6edf3; border-bottom-color: #7c5CFC; }
+        .tab .count {
+            background: #30363d;
+            color: #8b949e;
+            font-size: 12px;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .tab.active .count { background: #7c5CFC; color: #fff; }
+        .content { padding: 24px; }
+        .empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: #8b949e;
+        }
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .card:hover { border-color: #7c5CFC; }
+        .card-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: repeating-conic-gradient(#21262d 0% 25%, #161b22 0% 50%) 0 0 / 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card-image img {
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .card-body { padding: 16px; }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .card-meta { font-size: 12px; color: #484f58; margin-bottom: 12px; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #e6edf3;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-approve { background: #238636; border-color: #2ea043; color: #fff; }
+        .btn-approve:hover { background: #2ea043; }
+        .btn-reject { background: #da3633; border-color: #f85149; color: #fff; }
+        .btn-reject:hover { background: #f85149; }
+        .btn-delete { background: transparent; border-color: #da3633; color: #f85149; }
+        .btn-delete:hover { background: #da363322; }
+        .btn-warn { background: #9e6a03; border-color: #d29922; color: #fff; }
+        .btn-warn:hover { background: #d29922; }
+        .btn-small { padding: 4px 10px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🖼️ <span>Premade Arts</span> Review</h1>
+        <div class="header-links">
+            <a href="/arts">⬆️ Upload New Art</a>
+            <a href="/">← Home</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a class="tab {{ 'active' if tab == 'pending_review' }}" href="?tab=pending_review">
+            ⏳ Pending <span class="count">{{ counts.get('pending_review', 0) }}</span>
+        </a>
+        <a class="tab {{ 'active' if tab == 'approved' }}" href="?tab=approved">
+            ✅ Approved <span class="count">{{ counts.get('approved', 0) }}</span>
+        </a>
+        <a class="tab {{ 'active' if tab == 'rejected' }}" href="?tab=rejected">
+            ❌ Rejected <span class="count">{{ counts.get('rejected', 0) }}</span>
+        </a>
+    </div>
+
+    <div class="content">
+        {% if items|length == 0 %}
+        <div class="empty">
+            <div class="empty-icon">
+                {% if tab == 'pending_review' %}📭{% elif tab == 'approved' %}🎉{% else %}🗑️{% endif %}
+            </div>
+            <p>
+                {% if tab == 'pending_review' %}No pending arts to review.
+                    <a href="/arts" style="color:#7c5CFC; text-decoration:none;">Upload one →</a>
+                {% elif tab == 'approved' %}No approved arts yet
+                {% else %}No rejected arts{% endif %}
+            </p>
+        </div>
+        {% else %}
+        <div class="grid">
+            {% for item in items %}
+            <div class="card">
+                <div class="card-image">
+                    {% if item.imageDataURL %}
+                    <img src="{{ item.imageDataURL }}" alt="{{ item.name }}">
+                    {% else %}
+                    <span style="color: #484f58;">No image</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="card-title">{{ item.name or 'Untitled Art' }}</div>
+                    <div class="card-meta">
+                        {{ item.canvasWidth }}×{{ item.canvasHeight }} · {{ item.dateFormatted }}
+                    </div>
+                    <div class="card-actions">
+                        {% if tab == 'pending_review' %}
+                        <form method="POST" action="/arts/{{ item.id }}/approve" style="margin:0;">
+                            <button class="btn btn-approve btn-small" type="submit">✓ Approve</button>
+                        </form>
+                        <form method="POST" action="/arts/{{ item.id }}/reject" style="margin:0;">
+                            <button class="btn btn-reject btn-small" type="submit">✗ Reject</button>
+                        </form>
+                        {% elif tab == 'approved' %}
+                        <form method="POST" action="/arts/{{ item.id }}/unapprove" style="margin:0;">
+                            <button class="btn btn-warn btn-small" type="submit">↩ Unapprove</button>
+                        </form>
+                        {% elif tab == 'rejected' %}
+                        <form method="POST" action="/arts/{{ item.id }}/approve" style="margin:0;">
+                            <button class="btn btn-approve btn-small" type="submit">✓ Approve</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="/arts/{{ item.id }}/delete?tab={{ tab }}" style="margin:0;">
+                            <button class="btn btn-delete btn-small" type="submit"
+                                    onclick="return confirm('Delete this art permanently?')">🗑 Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

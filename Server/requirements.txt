@@ -1,3 +1,5 @@
 flask
 Pillow
 firebase-admin
+numpy
+opencv-python-headless

@@ -14,6 +14,8 @@ class CatalogViewModel: ObservableObject {
     @Published var savedSpriteName = ""
     
     private let communityService = CommunitySpritesService.shared
+    // TODO: Re-enable premade arts once server pixelation is finalised
+    // private let premadeArtsService = PremadeArtsService.shared
     private var cancellables = Set<AnyCancellable>()
     
     init() {
@@ -30,9 +32,22 @@ class CatalogViewModel: ObservableObject {
                 self?.objectWillChange.send()
             }
             .store(in: &cancellables)
+        // TODO: Re-enable premade arts subscriptions
+        // premadeArtsService.$premadeArts
+        //     .receive(on: DispatchQueue.main)
+        //     .sink { [weak self] _ in
+        //         self?.objectWillChange.send()
+        //     }
+        //     .store(in: &cancellables)
+        // premadeArtsService.$fetchFailed
+        //     .receive(on: DispatchQueue.main)
+        //     .sink { [weak self] _ in
+        //         self?.objectWillChange.send()
+        //     }
+        //     .store(in: &cancellables)
     }
     
-    // All sprites: premade + community
+    // All sprites: premade + community (premade arts disabled for now)
     private var allSprites: [PremadeSpriteData] {
         PremadeSprites.all + communityService.communitySprites
     }
@@ -82,8 +97,18 @@ class CatalogViewModel: ObservableObject {
         communityService.isLoading
     }
     
+    // TODO: Re-enable premade arts
+    // var premadeArtsFetchFailed: Bool {
+    //     premadeArtsService.fetchFailed
+    // }
+    //
+    // var isPremadeArtsLoading: Bool {
+    //     premadeArtsService.isLoading
+    // }
+    
     func loadCommunitySprites() {
         communityService.fetchIfNeeded()
+        // premadeArtsService.fetchIfNeeded()
     }
     
     private static let exportTileSize = 16
