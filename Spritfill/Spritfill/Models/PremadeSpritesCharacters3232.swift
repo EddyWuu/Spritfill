@@ -58,7 +58,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "knight_idle_32", name: "Knight — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Knight", groupOrder: 0)
+        return PremadeSpriteData(id: "knight_idle_32", name: "Knight — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Knight Attack (32x32)
@@ -110,7 +110,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "knight_attack_32", name: "Knight — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Knight", groupOrder: 1)
+        return PremadeSpriteData(id: "knight_attack_32", name: "Knight — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Knight Run (32x32)
@@ -165,7 +165,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "knight_run_32", name: "Knight — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Knight", groupOrder: 2)
+        return PremadeSpriteData(id: "knight_run_32", name: "Knight — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Archer Idle (32x32)
@@ -219,7 +219,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "archer_idle_32", name: "Archer — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Archer", groupOrder: 0)
+        return PremadeSpriteData(id: "archer_idle_32", name: "Archer — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Archer Attack (32x32)
@@ -274,7 +274,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "archer_attack_32", name: "Archer — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Archer", groupOrder: 1)
+        return PremadeSpriteData(id: "archer_attack_32", name: "Archer — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Archer Run (32x32)
@@ -329,7 +329,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "archer_run_32", name: "Archer — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Archer", groupOrder: 2)
+        return PremadeSpriteData(id: "archer_run_32", name: "Archer — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Spearman Idle (32x32)
@@ -390,7 +390,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "spearman_idle_32", name: "Spearman — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 0)
+        return PremadeSpriteData(id: "spearman_idle_32", name: "Spearman — Idle", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Spearman Attack (32x32)
@@ -456,7 +456,7 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "spearman_attack_32", name: "Spearman — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 1)
+        return PremadeSpriteData(id: "spearman_attack_32", name: "Spearman — Attack", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
     
     // MARK: - Spearman Run (32x32)
@@ -523,6 +523,6 @@ extension PremadeSprites {
             c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c, c,
         ]
         
-        return PremadeSpriteData(id: "spearman_run_32", name: "Spearman — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid, group: "Spearman", groupOrder: 2)
+        return PremadeSpriteData(id: "spearman_run_32", name: "Spearman — Run", canvasSize: .mediumSquare, palette: .endesga64, pixelGrid: grid)
     }()
 }
